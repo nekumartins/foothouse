@@ -1,27 +1,109 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostRow from '../../components/PostRow.astro';
+import { getSeriesWithPosts, getUnfiledPosts } from '../../lib/queries';
+
+const seriesWithPosts = await getSeriesWithPosts();
+const unfiledPosts = await getUnfiledPosts();
 ---
 
 <BaseLayout title="Writing | Neku Akpotohwo" skyMode="receded">
-  <div class="page-content">
-    <h1>Writing</h1>
-    <p class="page-placeholder">Coming soon. Series shelves and posts will live here.</p>
+  <div class="writing">
+    <header class="writing__header">
+      <h1>Writing</h1>
+      <p class="writing__intro">
+        Things I think about long enough to write down. Some live here, some on Medium.
+      </p>
+    </header>
+
+    {seriesWithPosts.map((series) => (
+      <section class="writing__shelf">
+        <div class="shelf__header">
+          <a href={`/writing/${series.slug}`} class="shelf__title-link">
+            <h2 class="shelf__title">{series.title}</h2>
+          </a>
+          {series.blurb && <p class="shelf__blurb">{series.blurb}</p>}
+        </div>
+        <div class="shelf__posts">
+          {series.posts.map((post: any) => (
+            <PostRow post={post} seriesSlug={series.slug} />
+          ))}
+        </div>
+      </section>
+    ))}
+
+    {unfiledPosts.length > 0 && (
+      <section class="writing__shelf">
+        <div class="shelf__header">
+          <h2 class="shelf__title">Unfiled</h2>
+          <p class="shelf__blurb">Standalone pieces that haven't found a shelf yet.</p>
+        </div>
+        <div class="shelf__posts">
+          {unfiledPosts.map((post) => (
+            <PostRow post={post} />
+          ))}
+        </div>
+      </section>
+    )}
   </div>
 </BaseLayout>
 
 <style>
-  .page-content {
+  .writing {
     max-width: 720px;
     margin: 0 auto;
     padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
   }
 
-  h1 {
-    font-size: var(--text-4xl);
-    margin-bottom: var(--space-xl);
+  .writing__header {
+    margin-bottom: var(--space-3xl);
   }
 
-  .page-placeholder {
+  .writing__header h1 {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-md);
+  }
+
+  .writing__intro {
     color: var(--muted);
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+
+  .writing__shelf {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .shelf__header {
+    margin-bottom: var(--space-lg);
+  }
+
+  .shelf__title-link {
+    text-decoration: none;
+  }
+
+  .shelf__title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-xs);
+  }
+
+  .shelf__title-link:hover .shelf__title {
+    color: var(--lamp);
+  }
+
+  .shelf__blurb {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 480px) {
+    .writing {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
   }
 </style>
