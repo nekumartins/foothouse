@@ -4,7 +4,7 @@ import LifeMap from '../components/LifeMap.astro';
 import { getPlaces } from '../lib/queries';
 
 const places = await getPlaces();
-const storageUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
+const storageUrl = import.meta.env.SUPABASE_URL ?? '';
 ---
 
 <BaseLayout title="Map | Neku Akpotohwo" skyMode="receded">
