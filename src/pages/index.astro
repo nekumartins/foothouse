@@ -2,8 +2,19 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
 import { getNow } from '../lib/queries';
+import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
 
 const now = await getNow();
+
+const [spotifyText, githubText] = await Promise.all([
+  getSpotifyListening(),
+  getGitHubBuilding(),
+]);
+
+if (now) {
+  if (spotifyText) now.listening_text = spotifyText;
+  if (githubText) now.building_text = githubText;
+}
 ---
 
 <BaseLayout title="Neku Akpotohwo" skyMode="full">
