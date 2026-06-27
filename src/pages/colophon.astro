@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Colophon | Neku Akpotohwo" skyMode="receded">
+  <div class="page-content">
+    <h1>Colophon</h1>
+    <p class="page-placeholder">Coming soon. About, how this site is built, and where to find me.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  .page-placeholder {
+    color: var(--muted);
+  }
+</style>

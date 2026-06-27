@@ -1,0 +1,20 @@
+---
+// The sky gradient renders as plain CSS immediately, no JS needed for first paint.
+// JS later updates the custom properties based on the visitor's local hour.
+---
+
+<div class="sky" id="sky"></div>
+
+<style>
+  .sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      var(--sky-top) 0%,
+      var(--sky-mid) 50%,
+      var(--sky-bottom) 100%
+    );
+    transition: background 3s ease;
+  }
+</style>

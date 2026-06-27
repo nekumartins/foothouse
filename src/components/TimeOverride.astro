@@ -1,0 +1,200 @@
+---
+// Quiet corner control to scrub through the day.
+// A small icon that expands to a slider on tap.
+---
+
+<div class="time-override" id="time-override">
+  <button
+    class="time-override__toggle"
+    id="time-toggle"
+    aria-label="Adjust sky time of day"
+    title="Change time of day"
+  >
+    <svg class="time-override__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" id="time-icon-body" />
+      <g id="time-icon-rays">
+        <line x1="12" y1="2" x2="12" y2="5" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+        <line x1="2" y1="12" x2="5" y2="12" />
+        <line x1="19" y1="12" x2="22" y2="12" />
+        <line x1="4.93" y1="4.93" x2="7.05" y2="7.05" />
+        <line x1="16.95" y1="16.95" x2="19.07" y2="19.07" />
+        <line x1="4.93" y1="19.07" x2="7.05" y2="16.95" />
+        <line x1="16.95" y1="7.05" x2="19.07" y2="4.93" />
+      </g>
+    </svg>
+  </button>
+
+  <div class="time-override__panel" id="time-panel" hidden>
+    <input
+      type="range"
+      id="time-slider"
+      min="0"
+      max="23"
+      step="1"
+      class="time-override__slider"
+      aria-label="Hour of day"
+    />
+    <span class="time-override__label" id="time-label">12:00</span>
+    <button class="time-override__reset" id="time-reset" aria-label="Reset to real time">
+      Reset
+    </button>
+  </div>
+</div>
+
+<script>
+  import { setOverrideHour, getOverrideHour } from '../scripts/sky';
+
+  const toggle = document.getElementById('time-toggle')!;
+  const panel = document.getElementById('time-panel')!;
+  const slider = document.getElementById('time-slider') as HTMLInputElement;
+  const label = document.getElementById('time-label')!;
+  const reset = document.getElementById('time-reset')!;
+  const iconBody = document.getElementById('time-icon-body')!;
+  const iconRays = document.getElementById('time-icon-rays')!;
+
+  function updateIcon(hour: number) {
+    const isNight = hour >= 19 || hour < 5;
+    if (isNight) {
+      iconBody.setAttribute('r', '4');
+      iconBody.setAttribute('cx', '14');
+      iconBody.setAttribute('cy', '10');
+      iconRays.style.display = 'none';
+      iconBody.setAttribute('stroke', 'currentColor');
+      iconBody.style.fill = 'none';
+    } else {
+      iconBody.setAttribute('r', '4');
+      iconBody.setAttribute('cx', '12');
+      iconBody.setAttribute('cy', '12');
+      iconRays.style.display = '';
+      iconBody.style.fill = 'none';
+    }
+  }
+
+  function formatHour(h: number): string {
+    const period = h >= 12 ? 'PM' : 'AM';
+    const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${display}:00 ${period}`;
+  }
+
+  toggle.addEventListener('click', () => {
+    const isHidden = panel.hidden;
+    panel.hidden = !isHidden;
+    if (isHidden) {
+      const current = getOverrideHour() ?? new Date().getHours();
+      slider.value = String(current);
+      label.textContent = formatHour(current);
+      updateIcon(current);
+    }
+  });
+
+  slider.addEventListener('input', () => {
+    const hour = parseInt(slider.value, 10);
+    label.textContent = formatHour(hour);
+    setOverrideHour(hour);
+    updateIcon(hour);
+  });
+
+  reset.addEventListener('click', () => {
+    setOverrideHour(null);
+    const hour = new Date().getHours();
+    slider.value = String(hour);
+    label.textContent = formatHour(hour);
+    updateIcon(hour);
+  });
+
+  const currentHour = getOverrideHour() ?? new Date().getHours();
+  updateIcon(currentHour);
+</script>
+
+<style>
+  .time-override {
+    position: fixed;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-sm);
+  }
+
+  .time-override__toggle {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(30, 24, 19, 0.6);
+    backdrop-filter: blur(8px);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease, border-color 0.3s ease;
+    padding: 0;
+  }
+
+  .time-override__toggle:hover {
+    color: var(--lamp);
+    border-color: var(--lamp);
+  }
+
+  .time-override__icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .time-override__panel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(30, 24, 19, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .time-override__slider {
+    width: 120px;
+    accent-color: var(--lamp);
+    cursor: pointer;
+  }
+
+  .time-override__label {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    min-width: 65px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .time-override__reset {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 4px;
+    transition: color 0.2s ease;
+  }
+
+  .time-override__reset:hover {
+    color: var(--paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .time-override__panel {
+      animation: none;
+    }
+  }
+</style>

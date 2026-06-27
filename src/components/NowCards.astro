@@ -1,0 +1,66 @@
+---
+// Phase 1 placeholder: simple frosted cards.
+// Phase 2 replaces these with real computed-refraction glass.
+const cards = [
+  { label: 'listening to', text: 'whatever\'s on, a bit too loudly' },
+  { label: 'reading', text: 'The Beginning of Infinity, slowly, on purpose' },
+  { label: 'building', text: 'something that bends light, currently fighting Safari' },
+  { label: 'lately', text: 'packing for Europe and pretending I\'m ready' },
+];
+---
+
+<div class="now-cards">
+  {cards.map(card => (
+    <div class="now-card">
+      <span class="now-card__label">{card.label}</span>
+      <span class="now-card__text">{card.text}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .now-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    max-width: 640px;
+    width: 100%;
+  }
+
+  .now-card {
+    padding: var(--space-lg) var(--space-md);
+    background: rgba(30, 24, 19, 0.35);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(236, 227, 214, 0.06);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    transition: border-color 0.4s ease, background 0.4s ease;
+  }
+
+  .now-card:hover {
+    border-color: rgba(224, 164, 88, 0.15);
+    background: rgba(30, 24, 19, 0.45);
+  }
+
+  .now-card__label {
+    font-size: var(--text-xs);
+    color: var(--faint);
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+  }
+
+  .now-card__text {
+    font-size: var(--text-sm);
+    color: var(--paper);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 520px) {
+    .now-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
