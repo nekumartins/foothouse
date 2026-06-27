@@ -1,9 +1,27 @@
 ---
+interface Props {
+  now?: {
+    listening_text?: string;
+    reading_title?: string;
+    reading_author?: string;
+    building_text?: string;
+    status_line?: string;
+  };
+}
+
+const { now } = Astro.props;
+
+const readingText = now?.reading_title
+  ? now.reading_author
+    ? `${now.reading_title} by ${now.reading_author}`
+    : now.reading_title
+  : 'The Beginning of Infinity, slowly, on purpose';
+
 const cards = [
-  { label: 'listening to', text: "whatever's on, a bit too loudly" },
-  { label: 'reading', text: 'The Beginning of Infinity, slowly, on purpose' },
-  { label: 'building', text: 'something that bends light, currently fighting Safari' },
-  { label: 'lately', text: "packing for Europe and pretending I'm ready" },
+  { label: 'listening to', text: now?.listening_text ?? "whatever's on, a bit too loudly" },
+  { label: 'reading', text: readingText },
+  { label: 'building', text: now?.building_text ?? 'something that bends light, currently fighting Safari' },
+  { label: 'lately', text: now?.status_line ?? "packing for Europe and pretending I'm ready" },
 ];
 ---
 

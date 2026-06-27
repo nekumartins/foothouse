@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
+import { getNow } from '../lib/queries';
+
+const now = await getNow();
 ---
 
 <BaseLayout title="Neku Akpotohwo" skyMode="full">
@@ -18,7 +21,7 @@ import NowCards from '../components/NowCards.astro';
 
     <!-- (presence) now-cards -->
     <section class="threshold__presence">
-      <NowCards />
+      <NowCards now={now} />
     </section>
 
     <!-- (quiet proof) community + featured project -->
