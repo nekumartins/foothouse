@@ -6,9 +6,9 @@ interface SkyPalette {
 
 const SKY_STATES: Record<string, SkyPalette> = {
   night: { top: '#0B0D1A', mid: '#141833', bottom: '#1A1530' },
-  dawn: { top: '#1A1530', mid: '#4A2040', bottom: '#D4845A' },
-  day: { top: '#2E5090', mid: '#5A8AC0', bottom: '#8CB4D8' },
-  golden: { top: '#3A2A50', mid: '#C07830', bottom: '#E8A84A' },
+  dawn: { top: '#1A1530', mid: '#3A1830', bottom: '#8A5535' },
+  day: { top: '#1A3358', mid: '#2B5080', bottom: '#3A6898' },
+  golden: { top: '#2A1E3A', mid: '#7A4A20', bottom: '#A06830' },
   dusk: { top: '#1A1530', mid: '#3A2050', bottom: '#8A4060' },
 };
 
