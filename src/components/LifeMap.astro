@@ -1,0 +1,368 @@
+---
+interface PlaceMedia {
+  id: string;
+  storage_path: string;
+  caption?: string;
+  taken_on?: string;
+  sort: number;
+}
+
+interface Place {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  arrived_on?: string;
+  kind: string;
+  pin_type: string;
+  note?: string;
+  sort: number;
+  place_media: PlaceMedia[];
+}
+
+interface Props {
+  places: Place[];
+  storageUrl?: string;
+}
+
+const { places, storageUrl = '' } = Astro.props;
+---
+
+<div class="life-map" id="life-map-container">
+  <div class="life-map__canvas" id="life-map"></div>
+  <div class="life-map__lightbox" id="map-lightbox" role="dialog" aria-hidden="true">
+    <button class="lightbox__close" id="lightbox-close" aria-label="Close">&times;</button>
+    <div class="lightbox__content" id="lightbox-content"></div>
+  </div>
+</div>
+
+<script define:vars={{ places, storageUrl }}>
+  window.__mapPlaces = places;
+  window.__storageUrl = storageUrl;
+</script>
+
+<script>
+  async function initMap() {
+    const maplibregl = await import('maplibre-gl');
+    await import('maplibre-gl/dist/maplibre-gl.css');
+
+    const places = (window as any).__mapPlaces ?? [];
+    const storageUrl = (window as any).__storageUrl ?? '';
+
+    const container = document.getElementById('life-map');
+    if (!container) return;
+
+    const map = new maplibregl.Map({
+      container: 'life-map',
+      style: {
+        version: 8,
+        sources: {
+          'carto': {
+            type: 'raster',
+            tiles: [
+              'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+            ],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+          }
+        },
+        layers: [
+          {
+            id: 'carto-tiles',
+            type: 'raster',
+            source: 'carto',
+            paint: {
+              'raster-saturation': -0.6,
+              'raster-brightness-max': 0.4,
+              'raster-contrast': 0.1
+            }
+          }
+        ]
+      },
+      center: [3.3792, 6.5244],
+      zoom: 3,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+    const kindColors: Record<string, string> = {
+      home: '#E0A458',
+      travel: '#C57B4E',
+      event: '#9A8C7B',
+    };
+
+    const lightbox = document.getElementById('map-lightbox')!;
+    const lightboxContent = document.getElementById('lightbox-content')!;
+    const lightboxClose = document.getElementById('lightbox-close')!;
+
+    function closeLightbox() {
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxContent.innerHTML = '';
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    function openGallery(place: any) {
+      const media = place.place_media ?? [];
+      if (media.length === 0) return;
+
+      let html = `<h3 class="lightbox__title">${place.name}</h3>`;
+      if (place.note) {
+        html += `<p class="lightbox__note">${place.note}</p>`;
+      }
+      html += '<div class="lightbox__gallery">';
+      for (const m of media) {
+        const src = storageUrl ? `${storageUrl}/storage/v1/object/public/${m.storage_path}` : m.storage_path;
+        html += `<figure class="lightbox__figure">
+          <img src="${src}" alt="${m.caption || place.name}" loading="lazy" class="lightbox__img" />
+          ${m.caption ? `<figcaption class="lightbox__caption">${m.caption}</figcaption>` : ''}
+        </figure>`;
+      }
+      html += '</div>';
+      lightboxContent.innerHTML = html;
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function openMoment(place: any) {
+      const media = place.place_media?.[0];
+      let html = `<h3 class="lightbox__title">${place.name}</h3>`;
+      if (place.note) {
+        html += `<p class="lightbox__note">${place.note}</p>`;
+      }
+      if (media) {
+        const src = storageUrl ? `${storageUrl}/storage/v1/object/public/${media.storage_path}` : media.storage_path;
+        html += `<figure class="lightbox__figure lightbox__figure--moment">
+          <img src="${src}" alt="${media.caption || place.name}" loading="lazy" class="lightbox__img" />
+          ${media.caption ? `<figcaption class="lightbox__caption">${media.caption}</figcaption>` : ''}
+        </figure>`;
+      }
+      lightboxContent.innerHTML = html;
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    const travelPins = places
+      .filter((p: any) => p.kind === 'travel' && p.arrived_on)
+      .sort((a: any, b: any) => new Date(a.arrived_on).getTime() - new Date(b.arrived_on).getTime());
+
+    if (travelPins.length >= 2) {
+      map.on('load', () => {
+        const coords = travelPins.map((p: any) => [p.lng, p.lat]);
+        map.addSource('travel-route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: coords },
+          },
+        });
+        map.addLayer({
+          id: 'travel-route-line',
+          type: 'line',
+          source: 'travel-route',
+          paint: {
+            'line-color': '#C57B4E',
+            'line-opacity': 0.3,
+            'line-width': 1.5,
+            'line-dasharray': [4, 4],
+          },
+        });
+      });
+    }
+
+    for (const place of places) {
+      const color = kindColors[place.kind] || '#9A8C7B';
+
+      const el = document.createElement('div');
+      el.className = `map-pin map-pin--${place.kind}`;
+      el.style.cssText = `
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: ${color};
+        border: 2px solid rgba(236, 227, 214, 0.2);
+        cursor: pointer;
+        box-shadow: 0 0 8px ${color}66, 0 0 16px ${color}33;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      `;
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.3)';
+        el.style.boxShadow = `0 0 12px ${color}88, 0 0 24px ${color}55`;
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+        el.style.boxShadow = `0 0 8px ${color}66, 0 0 16px ${color}33`;
+      });
+
+      el.addEventListener('click', () => {
+        if (place.pin_type === 'moment') {
+          openMoment(place);
+        } else {
+          openGallery(place);
+        }
+      });
+
+      const popup = new maplibregl.Popup({
+        offset: 12,
+        closeButton: false,
+        className: 'map-popup',
+      }).setHTML(`<strong>${place.name}</strong>${place.note ? `<br><span style="color:#9A8C7B;font-size:12px">${place.note}</span>` : ''}`);
+
+      new maplibregl.Marker({ element: el })
+        .setLngLat([place.lng, place.lat])
+        .setPopup(popup)
+        .addTo(map);
+    }
+
+    if (places.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      for (const p of places) bounds.extend([p.lng, p.lat]);
+      map.fitBounds(bounds, { padding: 60, maxZoom: 6 });
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          initMap();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    const el = document.getElementById('life-map-container');
+    if (el) observer.observe(el);
+  } else {
+    initMap();
+  }
+</script>
+
+<style>
+  .life-map {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    min-height: 400px;
+  }
+
+  .life-map__canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .life-map__canvas :global(.maplibregl-popup-content) {
+    background: rgba(30, 24, 19, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ECE3D6;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(236, 227, 214, 0.1);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .life-map__canvas :global(.maplibregl-popup-tip) {
+    border-top-color: rgba(30, 24, 19, 0.9);
+  }
+
+  .life-map__lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(21, 17, 13, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .life-map__lightbox[aria-hidden='false'] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lightbox__close {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    background: none;
+    border: none;
+    color: var(--paper);
+    font-size: var(--text-3xl);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+    line-height: 1;
+    z-index: 201;
+  }
+
+  .lightbox__close:hover {
+    opacity: 1;
+  }
+
+  .lightbox__content {
+    max-width: 720px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: var(--space-xl);
+    text-align: center;
+  }
+
+  .lightbox__content :global(.lightbox__title) {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-sm);
+  }
+
+  .lightbox__content :global(.lightbox__note) {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    margin-bottom: var(--space-xl);
+  }
+
+  .lightbox__content :global(.lightbox__gallery) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+
+  .lightbox__content :global(.lightbox__figure) {
+    max-width: 100%;
+  }
+
+  .lightbox__content :global(.lightbox__img) {
+    max-width: 100%;
+    max-height: 50vh;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .lightbox__content :global(.lightbox__caption) {
+    font-size: var(--text-xs);
+    color: var(--faint);
+    margin-top: var(--space-sm);
+  }
+
+  @media (max-width: 480px) {
+    .lightbox__content {
+      padding: var(--space-md);
+    }
+  }
+</style>

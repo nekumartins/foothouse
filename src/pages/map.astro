@@ -1,27 +1,50 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import LifeMap from '../components/LifeMap.astro';
+import { getPlaces } from '../lib/queries';
+
+const places = await getPlaces();
+const storageUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? '';
 ---
 
 <BaseLayout title="Map | Neku Akpotohwo" skyMode="receded">
-  <div class="page-content">
-    <h1>The Map</h1>
-    <p class="page-placeholder">Coming soon. A life-map with places, moments, and journeys.</p>
+  <div class="map-page">
+    <header class="map-page__header">
+      <h1>The Map</h1>
+      <p class="map-page__intro">
+        Places I have lived, travelled through, or just remember well. The pins are not exhaustive. They are the ones that stuck.
+      </p>
+    </header>
+    <LifeMap places={places} storageUrl={storageUrl} />
   </div>
 </BaseLayout>
 
 <style>
-  .page-content {
+  .map-page {
+    padding-top: calc(80px + var(--space-xl));
+  }
+
+  .map-page__header {
     max-width: 720px;
     margin: 0 auto;
-    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+    padding: 0 var(--space-xl) var(--space-xl);
   }
 
-  h1 {
+  .map-page__header h1 {
     font-size: var(--text-4xl);
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-md);
   }
 
-  .page-placeholder {
+  .map-page__intro {
     color: var(--muted);
+    font-size: var(--text-base);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 480px) {
+    .map-page__header {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
   }
 </style>
