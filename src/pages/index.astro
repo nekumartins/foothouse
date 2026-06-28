@@ -125,7 +125,9 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
                   {item.url ? (
                     <a href={item.url} target="_blank" rel="noopener noreferrer" class="involvement-item__link">
                       {item.title}
-                      <span class="involvement-item__arrow">&#8599;</span>
+                      <svg class="involvement-item__arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="M3.5 10.5L10.5 3.5M10.5 3.5H5M10.5 3.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
                     </a>
                   ) : item.title}
                 </h3>
@@ -341,13 +343,17 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
   }
 
   .involvement-item__arrow {
-    font-size: var(--text-sm);
     color: var(--faint);
+    flex-shrink: 0;
+    opacity: 0;
     margin-left: var(--space-xs);
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
   }
 
   .involvement-item__link:hover .involvement-item__arrow {
+    opacity: 1;
     color: var(--lamp);
+    transform: translate(1px, -1px);
   }
 
   .involvement-item__role {
