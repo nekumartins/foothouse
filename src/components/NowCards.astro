@@ -17,8 +17,10 @@ const readingText = now?.reading_title
     : now.reading_title
   : 'The Beginning of Infinity, slowly, on purpose';
 
+const listeningFallback = "whatever's on, a bit too loudly";
+
 const cards = [
-  { label: 'listening to', text: now?.listening_text ?? "whatever's on, a bit too loudly" },
+  { label: 'listening to', text: now?.listening_text ?? listeningFallback, field: 'listening' },
   { label: 'reading', text: readingText },
   { label: 'building', text: now?.building_text ?? 'something that bends light, currently fighting Safari' },
   { label: 'lately', text: now?.status_line ?? "packing for Europe and pretending I'm ready" },
@@ -34,7 +36,7 @@ const cards = [
       <div class="glass-highlight" aria-hidden="true"></div>
       <div class="glass-content">
         <span class="now-card__label">{card.label}</span>
-        <span class="now-card__text">{card.text}</span>
+        <span class="now-card__text" data-now-field={card.field}>{card.text}</span>
       </div>
     </div>
   ))}
@@ -43,6 +45,33 @@ const cards = [
 <script>
   import { initGlass } from '../scripts/glass';
   initGlass();
+
+  // Keep the "listening to" card live: poll the server endpoint that reads
+  // Spotify. The build-time value is the initial paint; this refreshes it.
+  const FALLBACK = "whatever's on, a bit too loudly";
+  const el = document.querySelector<HTMLElement>('[data-now-field="listening"]');
+
+  async function refreshListening() {
+    if (!el) return;
+    try {
+      const res = await fetch('/api/now-playing', { cache: 'no-store' });
+      if (!res.ok) return;
+      const { listening } = await res.json();
+      const next = listening || FALLBACK;
+      if (next !== el.textContent) el.textContent = next;
+    } catch {
+      // keep whatever is on screen
+    }
+  }
+
+  if (el) {
+    refreshListening();
+    setInterval(refreshListening, 20000);
+    // Refresh when the tab regains focus, not just on the timer.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') refreshListening();
+    });
+  }
 </script>
 
 <style>
