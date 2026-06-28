@@ -22,26 +22,46 @@ const listeningText = now?.listening_text || null;
 
 const cards = [
   { label: 'building', text: now?.building_text ?? 'something that bends light, currently fighting Safari' },
-  { label: 'lately', text: now?.status_line ?? 'prepping for grad — July 26, 2026' },
+  { label: 'lately', text: now?.status_line ?? 'prepping for grad' },
 ];
 ---
 
 <div class="now-stack">
-  <!-- Spotify row -->
-  <div class="glass-card glass-card--spotify">
-    <div class="glass-card__content spotify">
-      <svg class="spotify__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-      </svg>
-      <div class="spotify__info">
-        <span class="spotify__label">currently listening to</span>
-        <span class="spotify__track" data-now-field="listening">
-          {listeningText ?? 'Not listening to anything.'}
-        </span>
+  <!-- Spotify widget (Discord-style) -->
+  <div class="glass-card glass-card--spotify" id="spotify-widget">
+    <div class="spotify-widget" data-idle={listeningText ? undefined : 'true'}>
+      <div class="spotify-widget__header">
+        <svg class="spotify-widget__logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
+        <span class="spotify-widget__status">Listening to Spotify</span>
       </div>
-      <span class="spotify__equalizer" aria-hidden="true">
-        <span></span><span></span><span></span><span></span>
-      </span>
+
+      <div class="spotify-widget__body">
+        <div class="spotify-widget__art" id="spotify-art">
+          <svg class="spotify-widget__art-placeholder" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <rect width="48" height="48" rx="4" fill="rgba(255,255,255,0.05)"/>
+            <path d="M24 14a5 5 0 015 5v2a5 5 0 01-10 0v-2a5 5 0 015-5zm-8 14h16v1a8 8 0 01-16 0v-1z" fill="rgba(255,255,255,0.1)"/>
+          </svg>
+        </div>
+        <div class="spotify-widget__info">
+          <span class="spotify-widget__track" id="spotify-track">
+            {listeningText ?? 'Nothing playing'}
+          </span>
+          <span class="spotify-widget__artist" id="spotify-artist"></span>
+          <span class="spotify-widget__album" id="spotify-album"></span>
+        </div>
+      </div>
+
+      <div class="spotify-widget__progress">
+        <div class="spotify-widget__bar">
+          <div class="spotify-widget__bar-fill" id="spotify-bar"></div>
+        </div>
+        <div class="spotify-widget__times">
+          <span id="spotify-elapsed">0:00</span>
+          <span id="spotify-duration">0:00</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -82,34 +102,97 @@ const cards = [
 </div>
 
 <script>
-  const IDLE = 'Not listening to anything.';
-  const el = document.querySelector<HTMLElement>('[data-now-field="listening"]');
-  const card = el?.closest<HTMLElement>('.glass-card--spotify');
+  const widget = document.getElementById('spotify-widget');
+  const artEl = document.getElementById('spotify-art');
+  const trackEl = document.getElementById('spotify-track');
+  const artistEl = document.getElementById('spotify-artist');
+  const albumEl = document.getElementById('spotify-album');
+  const barEl = document.getElementById('spotify-bar');
+  const elapsedEl = document.getElementById('spotify-elapsed');
+  const durationEl = document.getElementById('spotify-duration');
+  const card = widget?.closest<HTMLElement>('.glass-card--spotify');
 
-  async function refreshListening() {
-    if (!el) return;
+  let currentProgress = 0;
+  let currentDuration = 0;
+  let lastFetchTime = 0;
+  let isPlaying = false;
+  let tickFrame: number;
+
+  function formatTime(ms: number): string {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  function tick() {
+    if (!isPlaying) return;
+    const elapsed = Date.now() - lastFetchTime;
+    const progress = Math.min(currentProgress + elapsed, currentDuration);
+    const pct = currentDuration > 0 ? (progress / currentDuration) * 100 : 0;
+
+    if (barEl) barEl.style.width = `${pct}%`;
+    if (elapsedEl) elapsedEl.textContent = formatTime(progress);
+
+    tickFrame = requestAnimationFrame(tick);
+  }
+
+  async function refresh() {
     try {
       const res = await fetch('/api/now-playing', { cache: 'no-store' });
       if (!res.ok) return;
-      const { listening } = await res.json();
-      const next = listening || IDLE;
-      if (next !== el.textContent) el.textContent = next;
-      card?.classList.toggle('is-playing', !!listening);
+      const data = await res.json();
+
+      if (!data || !data.track) {
+        widget?.setAttribute('data-idle', 'true');
+        card?.classList.remove('is-playing');
+        if (trackEl) trackEl.textContent = 'Nothing playing';
+        if (artistEl) artistEl.textContent = '';
+        if (albumEl) albumEl.textContent = '';
+        if (barEl) barEl.style.width = '0%';
+        if (elapsedEl) elapsedEl.textContent = '0:00';
+        if (durationEl) durationEl.textContent = '0:00';
+        isPlaying = false;
+        cancelAnimationFrame(tickFrame);
+        return;
+      }
+
+      widget?.removeAttribute('data-idle');
+      card?.classList.toggle('is-playing', data.isPlaying);
+
+      if (trackEl) trackEl.textContent = data.track;
+      if (artistEl) artistEl.textContent = data.artist || '';
+      if (albumEl) albumEl.textContent = data.album || '';
+      if (durationEl) durationEl.textContent = formatTime(data.durationMs);
+
+      if (artEl) {
+        if (data.albumArt) {
+          artEl.innerHTML = `<img src="${data.albumArt}" alt="" class="spotify-widget__art-img" />`;
+        }
+      }
+
+      currentProgress = data.progressMs || 0;
+      currentDuration = data.durationMs || 0;
+      lastFetchTime = Date.now();
+      isPlaying = data.isPlaying;
+
+      cancelAnimationFrame(tickFrame);
+      if (isPlaying) tick();
+      else {
+        const pct = currentDuration > 0 ? (currentProgress / currentDuration) * 100 : 0;
+        if (barEl) barEl.style.width = `${pct}%`;
+        if (elapsedEl) elapsedEl.textContent = formatTime(currentProgress);
+      }
     } catch {
-      // keep whatever is on screen
+      // keep current state
     }
   }
 
-  if (el) {
-    if (el.textContent && el.textContent.trim() !== IDLE) {
-      card?.classList.add('is-playing');
-    }
-    refreshListening();
-    setInterval(refreshListening, 20000);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') refreshListening();
-    });
-  }
+  refresh();
+  setInterval(refresh, 15000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refresh();
+  });
 </script>
 
 <style>
@@ -173,85 +256,142 @@ const cards = [
     z-index: 2;
   }
 
-  /* ── Spotify row ── */
+  /* ── Spotify widget (Discord-style) ── */
 
-  .glass-card__content.spotify {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
+  .spotify-widget {
+    position: relative;
+    z-index: 2;
     padding: var(--space-md) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
   }
 
-  .spotify__icon {
-    width: 30px;
-    height: 30px;
-    flex-shrink: 0;
+  .spotify-widget__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .spotify-widget__logo {
+    width: 16px;
+    height: 16px;
     color: var(--muted);
     transition: color 0.4s ease;
   }
 
-  .glass-card--spotify.is-playing .spotify__icon {
+  .glass-card--spotify.is-playing .spotify-widget__logo {
     color: #1DB954;
   }
 
-  .spotify__info {
+  .spotify-widget__status {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .spotify-widget__body {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .spotify-widget__art {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .spotify-widget__art :global(.spotify-widget__art-img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .spotify-widget__art-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  .spotify-widget__info {
     display: flex;
     flex-direction: column;
-    gap: 1px;
     min-width: 0;
     flex: 1;
   }
 
-  .spotify__label {
-    font-size: var(--text-xs);
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .spotify__track {
+  .spotify-widget__track {
     font-size: var(--text-sm);
-    color: var(--muted);
-    line-height: 1.4;
+    color: var(--paper);
+    font-weight: 500;
+    line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .glass-card--spotify.is-playing .spotify__track {
-    color: var(--paper);
+  .spotify-widget[data-idle] .spotify-widget__track {
+    color: var(--muted);
   }
 
-  .spotify__equalizer {
+  .spotify-widget__artist {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .spotify-widget__album {
+    font-size: var(--text-xs);
+    color: var(--faint);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .spotify-widget__progress {
     display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 16px;
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity 0.4s ease;
+    flex-direction: column;
+    gap: 3px;
   }
 
-  .glass-card--spotify.is-playing .spotify__equalizer {
-    opacity: 1;
+  .spotify-widget[data-idle] .spotify-widget__progress {
+    opacity: 0.3;
   }
 
-  .spotify__equalizer span {
-    width: 3px;
-    height: 100%;
-    background: #1DB954;
+  .spotify-widget__bar {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 2px;
-    transform-origin: bottom;
-    animation: eq 0.9s ease-in-out infinite;
+    overflow: hidden;
   }
 
-  .spotify__equalizer span:nth-child(2) { animation-delay: 0.2s; }
-  .spotify__equalizer span:nth-child(3) { animation-delay: 0.4s; }
-  .spotify__equalizer span:nth-child(4) { animation-delay: 0.1s; }
+  .spotify-widget__bar-fill {
+    height: 100%;
+    background: var(--paper);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s linear;
+  }
 
-  @keyframes eq {
-    0%, 100% { transform: scaleY(0.3); }
-    50% { transform: scaleY(1); }
+  .glass-card--spotify.is-playing .spotify-widget__bar-fill {
+    background: #1DB954;
+  }
+
+  .spotify-widget__times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--faint);
+    letter-spacing: 0.02em;
   }
 
   /* ── Reading card with cover ── */
@@ -336,9 +476,8 @@ const cards = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .spotify__equalizer span {
-      animation: none;
-      transform: scaleY(0.5);
+    .spotify-widget__bar-fill {
+      transition: none;
     }
   }
 

@@ -29,7 +29,23 @@ async function getSpotifyAccessToken(): Promise<string | null> {
   }
 }
 
+export interface SpotifyData {
+  isPlaying: boolean;
+  track: string;
+  artist: string;
+  album: string;
+  albumArt: string | null;
+  progressMs: number;
+  durationMs: number;
+}
+
 export async function getSpotifyListening(): Promise<string | null> {
+  const data = await getSpotifyData();
+  if (!data) return null;
+  return data.artist ? `${data.track} by ${data.artist}` : data.track;
+}
+
+export async function getSpotifyData(): Promise<SpotifyData | null> {
   const token = await getSpotifyAccessToken();
   if (!token) return null;
 
@@ -41,9 +57,15 @@ export async function getSpotifyListening(): Promise<string | null> {
     if (nowRes.status === 200) {
       const data = await nowRes.json();
       if (data.item) {
-        const track = data.item.name;
-        const artist = data.item.artists?.[0]?.name;
-        return artist ? `${track} by ${artist}` : track;
+        return {
+          isPlaying: data.is_playing ?? true,
+          track: data.item.name,
+          artist: data.item.artists?.map((a: any) => a.name).join(', ') ?? '',
+          album: data.item.album?.name ?? '',
+          albumArt: data.item.album?.images?.[1]?.url ?? data.item.album?.images?.[0]?.url ?? null,
+          progressMs: data.progress_ms ?? 0,
+          durationMs: data.item.duration_ms ?? 0,
+        };
       }
     }
 
@@ -55,9 +77,15 @@ export async function getSpotifyListening(): Promise<string | null> {
       const data = await recentRes.json();
       const item = data.items?.[0]?.track;
       if (item) {
-        const track = item.name;
-        const artist = item.artists?.[0]?.name;
-        return artist ? `${track} by ${artist}` : track;
+        return {
+          isPlaying: false,
+          track: item.name,
+          artist: item.artists?.map((a: any) => a.name).join(', ') ?? '',
+          album: item.album?.name ?? '',
+          albumArt: item.album?.images?.[1]?.url ?? item.album?.images?.[0]?.url ?? null,
+          progressMs: 0,
+          durationMs: item.duration_ms ?? 0,
+        };
       }
     }
   } catch {
