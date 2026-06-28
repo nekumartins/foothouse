@@ -331,13 +331,45 @@ export async function getAllSeriesPostPaths() {
   return data ?? [];
 }
 
-// ── Map (stays on Supabase) ──
+// ── Map: places (Sanity-first, Supabase fallback) ──
+// Both sources are normalized to one shape the map consumes:
+//   { id, name, lat, lng, arrived_on, kind, pin_type, note, sort,
+//     place_media: [{ url, caption }] }   // url is already resolved
 
 export async function getPlaces() {
+  if (sanityConfigured && sanityClient) {
+    const places = await sanityClient.fetch(`*[_type == "place"] | order(sort asc) {
+      "id": _id,
+      name,
+      lat,
+      lng,
+      arrived_on,
+      kind,
+      pin_type,
+      note,
+      sort,
+      "place_media": media[]{
+        "url": image.asset->url + "?w=1200&auto=format",
+        caption
+      }
+    }`);
+    return (places ?? []).map((p: any) => ({
+      ...p,
+      place_media: (p.place_media ?? []).filter((m: any) => m.url),
+    }));
+  }
+
   if (!supabase) return [];
+  const base = (import.meta.env.SUPABASE_URL ?? '').replace(/\/$/, '');
   const { data: places } = await supabase
     .from('places')
     .select('*, place_media(*)')
     .order('sort');
-  return places ?? [];
+  return (places ?? []).map((p: any) => ({
+    ...p,
+    place_media: (p.place_media ?? []).map((m: any) => ({
+      url: base ? `${base}/storage/v1/object/public/${m.storage_path}` : m.storage_path,
+      caption: m.caption,
+    })),
+  }));
 }

@@ -5,7 +5,6 @@ import Footer from '../components/Footer.astro';
 import { getPlaces } from '../lib/queries';
 
 const places = await getPlaces();
-const storageUrl = import.meta.env.SUPABASE_URL ?? '';
 ---
 
 <BaseLayout title="Map | Neku Akpotohwo" skyMode="receded">
@@ -16,7 +15,7 @@ const storageUrl = import.meta.env.SUPABASE_URL ?? '';
         Places I have lived, travelled through, or just remember well. The pins are not exhaustive. They are the ones that stuck.
       </p>
     </header>
-    <LifeMap places={places} storageUrl={storageUrl} />
+    <LifeMap places={places} />
   </div>
 
   <Footer />

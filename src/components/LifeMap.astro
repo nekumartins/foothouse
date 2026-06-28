@@ -1,10 +1,7 @@
 ---
 interface PlaceMedia {
-  id: string;
-  storage_path: string;
+  url: string;
   caption?: string;
-  taken_on?: string;
-  sort: number;
 }
 
 interface Place {
@@ -22,23 +19,24 @@ interface Place {
 
 interface Props {
   places: Place[];
-  storageUrl?: string;
 }
 
-const { places, storageUrl = '' } = Astro.props;
+const { places } = Astro.props;
 ---
 
 <div class="life-map" id="life-map-container">
   <div class="life-map__canvas" id="life-map"></div>
+  {places.length === 0 && (
+    <p class="life-map__empty">No places yet. Pins will appear here as the map fills in.</p>
+  )}
   <div class="life-map__lightbox" id="map-lightbox" role="dialog" aria-hidden="true">
     <button class="lightbox__close" id="lightbox-close" aria-label="Close">&times;</button>
     <div class="lightbox__content" id="lightbox-content"></div>
   </div>
 </div>
 
-<script define:vars={{ places, storageUrl }}>
+<script define:vars={{ places }}>
   window.__mapPlaces = places;
-  window.__storageUrl = storageUrl;
 </script>
 
 <script>
@@ -47,7 +45,6 @@ const { places, storageUrl = '' } = Astro.props;
     await import('maplibre-gl/dist/maplibre-gl.css');
 
     const places = (window as any).__mapPlaces ?? [];
-    const storageUrl = (window as any).__storageUrl ?? '';
 
     const container = document.getElementById('life-map');
     if (!container) return;
@@ -111,21 +108,21 @@ const { places, storageUrl = '' } = Astro.props;
 
     function openGallery(place: any) {
       const media = place.place_media ?? [];
-      if (media.length === 0) return;
 
       let html = `<h3 class="lightbox__title">${place.name}</h3>`;
       if (place.note) {
         html += `<p class="lightbox__note">${place.note}</p>`;
       }
-      html += '<div class="lightbox__gallery">';
-      for (const m of media) {
-        const src = storageUrl ? `${storageUrl}/storage/v1/object/public/${m.storage_path}` : m.storage_path;
-        html += `<figure class="lightbox__figure">
-          <img src="${src}" alt="${m.caption || place.name}" loading="lazy" class="lightbox__img" />
-          ${m.caption ? `<figcaption class="lightbox__caption">${m.caption}</figcaption>` : ''}
-        </figure>`;
+      if (media.length > 0) {
+        html += '<div class="lightbox__gallery">';
+        for (const m of media) {
+          html += `<figure class="lightbox__figure">
+            <img src="${m.url}" alt="${m.caption || place.name}" loading="lazy" class="lightbox__img" />
+            ${m.caption ? `<figcaption class="lightbox__caption">${m.caption}</figcaption>` : ''}
+          </figure>`;
+        }
+        html += '</div>';
       }
-      html += '</div>';
       lightboxContent.innerHTML = html;
       lightbox.setAttribute('aria-hidden', 'false');
     }
@@ -137,9 +134,8 @@ const { places, storageUrl = '' } = Astro.props;
         html += `<p class="lightbox__note">${place.note}</p>`;
       }
       if (media) {
-        const src = storageUrl ? `${storageUrl}/storage/v1/object/public/${media.storage_path}` : media.storage_path;
         html += `<figure class="lightbox__figure lightbox__figure--moment">
-          <img src="${src}" alt="${media.caption || place.name}" loading="lazy" class="lightbox__img" />
+          <img src="${media.url}" alt="${media.caption || place.name}" loading="lazy" class="lightbox__img" />
           ${media.caption ? `<figcaption class="lightbox__caption">${media.caption}</figcaption>` : ''}
         </figure>`;
       }
@@ -256,6 +252,19 @@ const { places, storageUrl = '' } = Astro.props;
     width: 100%;
     height: 100%;
     border-radius: 0;
+  }
+
+  .life-map__empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--muted);
+    font-size: var(--text-sm);
+    pointer-events: none;
   }
 
   .life-map__canvas :global(.maplibregl-popup-content) {
