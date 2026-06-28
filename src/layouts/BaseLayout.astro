@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Sky from '../components/Sky.astro';
 import Clouds from '../components/Clouds.astro';
 import Starfield from '../components/Starfield.astro';
+import TimeOverride from '../components/TimeOverride.astro';
 import Nav from '../components/Nav.astro';
 
 interface Props {
@@ -31,6 +32,7 @@ const { title, skyMode = 'full' } = Astro.props;
       <Starfield />
     </div>
 
+    <TimeOverride />
     <Nav />
 
     <main>
