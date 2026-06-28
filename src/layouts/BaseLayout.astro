@@ -3,12 +3,10 @@ import '../styles/global.css';
 import Sky from '../components/Sky.astro';
 import Clouds from '../components/Clouds.astro';
 import Starfield from '../components/Starfield.astro';
-import TimeOverride from '../components/TimeOverride.astro';
 import Nav from '../components/Nav.astro';
 
 interface Props {
   title: string;
-  /** Full presence on /, dimmed on inner pages */
   skyMode?: 'full' | 'receded';
 }
 
@@ -33,7 +31,6 @@ const { title, skyMode = 'full' } = Astro.props;
       <Starfield />
     </div>
 
-    <TimeOverride />
     <Nav />
 
     <main>
@@ -56,8 +53,8 @@ const { title, skyMode = 'full' } = Astro.props;
   }
 
   [data-sky-mode='receded'] .sky-container {
-    filter: blur(6px) brightness(0.4) saturate(0.6);
-    opacity: 0.5;
+    filter: blur(3px) brightness(0.55) saturate(0.7);
+    opacity: 0.65;
   }
 
   main {

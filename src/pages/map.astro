@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LifeMap from '../components/LifeMap.astro';
+import Footer from '../components/Footer.astro';
 import { getPlaces } from '../lib/queries';
 
 const places = await getPlaces();
@@ -17,6 +18,8 @@ const storageUrl = import.meta.env.SUPABASE_URL ?? '';
     </header>
     <LifeMap places={places} storageUrl={storageUrl} />
   </div>
+
+  <Footer />
 </BaseLayout>
 
 <style>

@@ -1,12 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/PostRow.astro';
-import { getSeriesBySlug, getPostsBySeries } from '../../lib/queries';
-import { supabase } from '../../lib/supabase';
+import Footer from '../../components/Footer.astro';
+import { getSeriesBySlug, getPostsBySeries, getAllSeriesSlugs } from '../../lib/queries';
 
 export async function getStaticPaths() {
-  const { data: series } = await supabase.from('series').select('slug');
-  return (series ?? []).map((s) => ({ params: { series: s.slug } }));
+  const series = await getAllSeriesSlugs();
+  return series.map((s: any) => ({ params: { series: s.slug } }));
 }
 
 const { series: seriesSlug } = Astro.params;
@@ -28,7 +28,7 @@ const posts = await getPostsBySeries(series.id);
     </header>
 
     <div class="series-page__posts">
-      {posts.map((post) => (
+      {posts.map((post: any) => (
         <PostRow post={post} seriesSlug={seriesSlug!} />
       ))}
     </div>
@@ -37,6 +37,8 @@ const posts = await getPostsBySeries(series.id);
       <p class="series-page__empty">Nothing published here yet.</p>
     )}
   </div>
+
+  <Footer />
 </BaseLayout>
 
 <style>
@@ -59,9 +61,7 @@ const posts = await getPostsBySeries(series.id);
     transition: color 0.3s ease;
   }
 
-  .series-page__back:hover {
-    color: var(--paper);
-  }
+  .series-page__back:hover { color: var(--paper); }
 
   .series-page__header h1 {
     font-size: var(--text-4xl);

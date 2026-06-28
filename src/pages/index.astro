@@ -1,10 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
-import { getNow } from '../lib/queries';
+import ProjectCard from '../components/ProjectCard.astro';
+import Footer from '../components/Footer.astro';
+import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
 
-const now = await getNow();
+const [now, projects, settings, involvements] = await Promise.all([
+  getNow(),
+  getProjects(),
+  getSiteSettings(),
+  getInvolvements(),
+]);
 
 const [spotifyText, githubText] = await Promise.all([
   getSpotifyListening(),
@@ -15,39 +22,138 @@ if (now) {
   if (spotifyText) now.listening_text = spotifyText;
   if (githubText) now.building_text = githubText;
 }
+
+const projectsWithStars = await Promise.all(
+  projects.map(async (project: any) => {
+    if (!project.github_sync || !project.repo_url) return project;
+    try {
+      const match = project.repo_url.match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (!match) return project;
+      const res = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}`, {
+        headers: import.meta.env.GITHUB_TOKEN
+          ? { Authorization: `token ${import.meta.env.GITHUB_TOKEN}` }
+          : {},
+      });
+      if (!res.ok) return project;
+      const data = await res.json();
+      return { ...project, stars: data.stargazers_count };
+    } catch {
+      return project;
+    }
+  })
+);
+
+const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
+
+const socialLinks = [
+  { label: 'LinkedIn', href: settings?.linkedin || 'https://linkedin.com/in/nekumartins' },
+  { label: 'GitHub', href: settings?.github || 'https://github.com/nekumartins' },
+  { label: 'Resume', href: settings?.resume_url },
+  { label: 'Twitter', href: settings?.twitter || 'https://twitter.com/nekumartins' },
+  { label: 'Instagram', href: settings?.instagram },
+].filter(l => l.href);
+
+function youtubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let videoId: string | null = null;
+    if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
+    else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
+    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : url;
+  } catch { return null; }
+}
+
+const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featured_video_url) : null;
 ---
 
 <BaseLayout title="Neku Akpotohwo" skyMode="full">
   <div class="threshold">
-    <!-- (mood) the sky alone for a beat at top -->
     <section class="threshold__mood" aria-hidden="true"></section>
 
-    <!-- (person) -->
+    <!-- Person -->
     <section class="threshold__person">
       <h1 class="threshold__name">Neku Akpotohwo</h1>
-      <p class="threshold__tagline">
-        I'm Neku, somewhere between an engineer and someone who won't stop asking why.
-      </p>
+      <p class="threshold__tagline">{bio}</p>
+
+      {(settings?.contact_email || socialLinks.length > 0) && (
+        <div class="threshold__contact">
+          {settings?.contact_email && (
+            <a href={`mailto:${settings.contact_email}`} class="contact__email">
+              {settings.contact_email}
+            </a>
+          )}
+          {socialLinks.length > 0 && (
+            <div class="contact__links">
+              {socialLinks.map((link, i) => (
+                <>
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
+                  {i < socialLinks.length - 1 && <span class="contact__dot" aria-hidden="true">&middot;</span>}
+                </>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
 
-    <!-- (presence) now-cards -->
+    <!-- Presence: now-cards -->
     <section class="threshold__presence">
       <NowCards now={now} />
     </section>
 
-    <!-- (quiet proof) community + featured project -->
-    <section class="threshold__proof">
-      <p class="threshold__community">
-        Some of what I'm proudest of isn't code. I help run GDG Babcock, a thousand-something people learning to build together. We've thrown summits, started a publication, made things that outlast us.
-      </p>
-      <div class="threshold__featured">
-        <p class="threshold__project-description">
-          A sparring partner you argue with out loud, to get better at thinking on your feet.
-        </p>
-      </div>
-    </section>
+    <!-- Projects -->
+    {projectsWithStars.length > 0 && (
+      <section class="threshold__projects">
+        <h2 class="section-label">Projects</h2>
+        <div class="projects-grid">
+          {projectsWithStars.map((project: any) => (
+            <ProjectCard project={project} />
+          ))}
+        </div>
+      </section>
+    )}
 
-    <!-- (invitation) the doors -->
+    <!-- Community & involvement -->
+    {involvements.length > 0 && (
+      <section class="threshold__community">
+        <h2 class="section-label">Community</h2>
+        <div class="involvement-list">
+          {involvements.map((item: any) => (
+            <div class="involvement-item">
+              <div class="involvement-item__content">
+                <h3 class="involvement-item__title">
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" class="involvement-item__link">
+                      {item.title}
+                      <span class="involvement-item__arrow">&#8599;</span>
+                    </a>
+                  ) : item.title}
+                </h3>
+                {item.role && <span class="involvement-item__role">{item.role}</span>}
+                {item.blurb && <p class="involvement-item__blurb">{item.blurb}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Featured video -->
+    {videoEmbed && (
+      <section class="threshold__video">
+        <div class="video-embed">
+          <iframe
+            src={videoEmbed}
+            title="Featured video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+    )}
+
+    <!-- Doors -->
     <section class="threshold__doors">
       <p class="threshold__invitation">
         Have a look around. There's <a href="/writing">writing</a>,
@@ -57,12 +163,7 @@ if (now) {
     </section>
   </div>
 
-  <!-- footer -->
-  <footer class="threshold__footer">
-    <p>
-      Built this myself, late at night, mostly. The sky up there follows your time, not mine, so if it's dark where you are, that's just us in the same evening.
-    </p>
-  </footer>
+  <Footer />
 </BaseLayout>
 
 <style>
@@ -75,10 +176,12 @@ if (now) {
   }
 
   .threshold__mood {
-    height: 35vh;
-    min-height: 200px;
+    height: 30vh;
+    min-height: 180px;
     flex-shrink: 0;
   }
+
+  /* ── Person ── */
 
   .threshold__person {
     text-align: center;
@@ -104,6 +207,51 @@ if (now) {
     line-height: 1.6;
   }
 
+  .threshold__contact {
+    margin-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .contact__email {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .contact__email:hover {
+    color: var(--lamp);
+  }
+
+  .contact__links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .contact__links a {
+    font-size: var(--text-sm);
+    color: var(--faint);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .contact__links a:hover {
+    color: var(--paper);
+  }
+
+  .contact__dot {
+    color: var(--faint);
+    font-size: var(--text-xs);
+  }
+
+  /* ── Presence ── */
+
   .threshold__presence {
     display: flex;
     justify-content: center;
@@ -113,42 +261,135 @@ if (now) {
     width: 100%;
   }
 
-  .threshold__proof {
+  /* ── Section label ── */
+
+  .section-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-lg);
+  }
+
+  /* ── Projects ── */
+
+  .threshold__projects {
     max-width: 560px;
-    text-align: center;
+    width: 100%;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.8s;
   }
 
+  .projects-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Community ── */
+
   .threshold__community {
-    font-size: var(--text-base);
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: var(--space-xl);
+    max-width: 560px;
+    width: 100%;
+    margin-bottom: var(--space-3xl);
+    animation: fadeUp 1.2s ease both;
+    animation-delay: 1s;
   }
 
-  .threshold__featured {
-    padding: var(--space-lg) var(--space-xl);
-    background: rgba(30, 24, 19, 0.3);
-    border: 1px solid var(--line);
-    border-radius: 12px;
+  .involvement-list {
+    display: flex;
+    flex-direction: column;
   }
 
-  .threshold__project-description {
-    font-size: var(--text-sm);
-    color: var(--paper);
-    line-height: 1.6;
-    font-style: italic;
+  .involvement-item {
+    padding: var(--space-lg) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .involvement-item:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .involvement-item__title {
     font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-xs);
+    line-height: 1.3;
   }
+
+  .involvement-item__link {
+    color: var(--paper);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .involvement-item__link:hover {
+    color: var(--lamp);
+  }
+
+  .involvement-item__arrow {
+    font-size: var(--text-sm);
+    color: var(--faint);
+    margin-left: var(--space-xs);
+  }
+
+  .involvement-item__link:hover .involvement-item__arrow {
+    color: var(--lamp);
+  }
+
+  .involvement-item__role {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-xs);
+  }
+
+  .involvement-item__blurb {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── Video ── */
+
+  .threshold__video {
+    max-width: 560px;
+    width: 100%;
+    margin-bottom: var(--space-3xl);
+    animation: fadeUp 1.2s ease both;
+    animation-delay: 1.1s;
+  }
+
+  .video-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--raised);
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── Doors ── */
 
   .threshold__doors {
     max-width: 480px;
     text-align: center;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
-    animation-delay: 1.1s;
+    animation-delay: 1.2s;
   }
 
   .threshold__invitation {
@@ -169,20 +410,6 @@ if (now) {
     text-decoration-color: var(--lamp);
   }
 
-  .threshold__footer {
-    text-align: center;
-    padding: var(--space-3xl) var(--space-xl) var(--space-xl);
-    border-top: 1px solid var(--line);
-    max-width: 520px;
-    margin: 0 auto;
-  }
-
-  .threshold__footer p {
-    font-size: var(--text-sm);
-    color: var(--faint);
-    line-height: 1.7;
-  }
-
   @keyframes fadeUp {
     from {
       opacity: 0;
@@ -197,7 +424,9 @@ if (now) {
   @media (prefers-reduced-motion: reduce) {
     .threshold__person,
     .threshold__presence,
-    .threshold__proof,
+    .threshold__projects,
+    .threshold__community,
+    .threshold__video,
     .threshold__doors {
       animation: none;
     }
