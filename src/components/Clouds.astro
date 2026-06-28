@@ -1,0 +1,145 @@
+---
+// Soft drifting clouds. They give the daytime sky real texture — which is
+// what the glass refraction needs behind it to actually show a bend — and
+// fade out toward night. Opacity/tint is driven by the sky-update event.
+---
+
+<canvas id="clouds-canvas" class="clouds" aria-hidden="true"></canvas>
+
+<script>
+  const canvas = document.getElementById('clouds-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    interface Cloud {
+      x: number;
+      y: number;
+      scale: number;
+      speed: number;
+      puffs: Array<{ dx: number; dy: number; r: number }>;
+    }
+
+    let clouds: Cloud[] = [];
+    let width = 0;
+    let height = 0;
+    let targetOpacity = 0;
+    let currentOpacity = 0;
+    let tint = '236, 232, 224';
+
+    function makeCloud(startX?: number): Cloud {
+      const scale = 0.6 + Math.random() * 1.1;
+      const puffCount = 4 + Math.floor(Math.random() * 4);
+      const puffs: Cloud['puffs'] = [];
+      let spread = 0;
+      for (let i = 0; i < puffCount; i++) {
+        const dx = spread;
+        const dy = (Math.random() - 0.5) * 30;
+        const r = (30 + Math.random() * 40);
+        puffs.push({ dx, dy, r });
+        spread += r * 0.7;
+      }
+      // centre the cluster
+      const mid = spread / 2;
+      for (const p of puffs) p.dx -= mid;
+
+      return {
+        x: startX ?? Math.random() * width,
+        y: Math.random() * height * 0.55,
+        scale,
+        speed: (0.08 + Math.random() * 0.12) * scale,
+        puffs,
+      };
+    }
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * devicePixelRatio;
+      canvas.height = height * devicePixelRatio;
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      ctx!.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+      const count = Math.max(4, Math.round(width / 320));
+      clouds = [];
+      for (let i = 0; i < count; i++) clouds.push(makeCloud());
+    }
+
+    function drawCloud(c: Cloud) {
+      for (const p of c.puffs) {
+        const r = p.r * c.scale;
+        const cx = c.x + p.dx * c.scale;
+        const cy = c.y + p.dy * c.scale;
+        const grad = ctx!.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, `rgba(${tint}, ${0.5 * currentOpacity})`);
+        grad.addColorStop(0.6, `rgba(${tint}, ${0.22 * currentOpacity})`);
+        grad.addColorStop(1, `rgba(${tint}, 0)`);
+        ctx!.fillStyle = grad;
+        ctx!.beginPath();
+        ctx!.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+    }
+
+    function draw() {
+      if (!ctx) return;
+      currentOpacity += (targetOpacity - currentOpacity) * 0.02;
+      ctx.clearRect(0, 0, width, height);
+
+      if (currentOpacity > 0.01) {
+        for (const c of clouds) {
+          if (!prefersReducedMotion) {
+            c.x += c.speed;
+            const widest = Math.max(...c.puffs.map((p) => Math.abs(p.dx))) * c.scale + 100;
+            if (c.x - widest > width) {
+              Object.assign(c, makeCloud(-widest));
+            }
+          }
+          drawCloud(c);
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    // Daytime presence curve + tint from the sky state.
+    function opacityForHour(hour: number): number {
+      if (hour >= 9 && hour < 16) return 1;
+      if (hour >= 7 && hour < 9) return (hour - 7) / 2;
+      if (hour >= 16 && hour < 19) return 1 - (hour - 16) / 3;
+      if (hour >= 6 && hour < 7) return 0.3;
+      if (hour >= 19 && hour < 20) return 0.15;
+      return 0.06; // faint night clouds
+    }
+
+    window.addEventListener('sky-update', ((e: CustomEvent) => {
+      const { hour, state } = e.detail;
+      targetOpacity = opacityForHour(hour);
+      // Warm tint at golden/dawn, cool-white by day, dim grey at night
+      if (state === 'golden' || state === 'dawn') tint = '240, 210, 170';
+      else if (state === 'day') tint = '244, 240, 232';
+      else tint = '180, 185, 205';
+    }) as EventListener);
+
+    // Seed from the current hour so clouds fade in immediately, before the
+    // first sky-update event arrives.
+    const h0 = new Date().getHours();
+    targetOpacity = opacityForHour(h0);
+    if (h0 >= 7 && h0 < 17) tint = '244, 240, 232';
+    else if ((h0 >= 5 && h0 < 7) || (h0 >= 17 && h0 < 19)) tint = '240, 210, 170';
+    else tint = '180, 185, 205';
+
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(draw);
+  }
+</script>
+
+<style>
+  .clouds {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+</style>

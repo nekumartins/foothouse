@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Sky from '../components/Sky.astro';
+import Clouds from '../components/Clouds.astro';
 import Starfield from '../components/Starfield.astro';
 import TimeOverride from '../components/TimeOverride.astro';
 import Nav from '../components/Nav.astro';
@@ -28,6 +29,7 @@ const { title, skyMode = 'full' } = Astro.props;
   <body data-sky-mode={skyMode}>
     <div class="sky-container" aria-hidden="true">
       <Sky />
+      <Clouds />
       <Starfield />
     </div>
 

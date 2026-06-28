@@ -189,6 +189,19 @@ body::after {
   }
 }
 
+/* ── Sky readability ──
+   Text that floats directly over the living sky needs a dark halo so it stays
+   legible against bright daytime states. Harmless over the darker night/inner
+   states, and invisible on text that already sits on a glass surface. */
+
+.nav,
+.threshold__person,
+.threshold__proof,
+.threshold__doors,
+.threshold__footer {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
+}
+
 /* ── Utility classes ── */
 
 .visually-hidden {

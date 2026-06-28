@@ -6,10 +6,10 @@ interface SkyPalette {
 
 const SKY_STATES: Record<string, SkyPalette> = {
   night: { top: '#0B0D1A', mid: '#141833', bottom: '#1A1530' },
-  dawn: { top: '#1A1530', mid: '#3A1830', bottom: '#8A5535' },
-  day: { top: '#1A3358', mid: '#2B5080', bottom: '#3A6898' },
-  golden: { top: '#2A1E3A', mid: '#7A4A20', bottom: '#A06830' },
-  dusk: { top: '#1A1530', mid: '#3A2050', bottom: '#8A4060' },
+  dawn: { top: '#202B4E', mid: '#5E3349', bottom: '#A56A44' },
+  day: { top: '#234571', mid: '#365F8C', bottom: '#5184B0' },
+  golden: { top: '#33254A', mid: '#8A5326', bottom: '#BC7C39' },
+  dusk: { top: '#1F1838', mid: '#4A2A60', bottom: '#9A4A6A' },
 };
 
 type SkyState = keyof typeof SKY_STATES;
