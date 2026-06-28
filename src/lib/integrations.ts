@@ -1,5 +1,4 @@
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
-const SPOTIFY_RECENTLY_PLAYED_URL = 'https://api.spotify.com/v1/me/player/recently-played?limit=1';
 const SPOTIFY_NOW_PLAYING_URL = 'https://api.spotify.com/v1/me/player/currently-playing';
 
 async function getSpotifyAccessToken(): Promise<string | null> {
@@ -54,37 +53,19 @@ export async function getSpotifyData(): Promise<SpotifyData | null> {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    // Only treat the card as "listening" when a track is actively playing.
+    // A paused track or an idle player (204) reads as not listening.
     if (nowRes.status === 200) {
       const data = await nowRes.json();
-      if (data.item) {
+      if (data.item && data.is_playing === true) {
         return {
-          isPlaying: data.is_playing ?? true,
+          isPlaying: true,
           track: data.item.name,
           artist: data.item.artists?.map((a: any) => a.name).join(', ') ?? '',
           album: data.item.album?.name ?? '',
           albumArt: data.item.album?.images?.[1]?.url ?? data.item.album?.images?.[0]?.url ?? null,
           progressMs: data.progress_ms ?? 0,
           durationMs: data.item.duration_ms ?? 0,
-        };
-      }
-    }
-
-    const recentRes = await fetch(SPOTIFY_RECENTLY_PLAYED_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (recentRes.ok) {
-      const data = await recentRes.json();
-      const item = data.items?.[0]?.track;
-      if (item) {
-        return {
-          isPlaying: false,
-          track: item.name,
-          artist: item.artists?.map((a: any) => a.name).join(', ') ?? '',
-          album: item.album?.name ?? '',
-          albumArt: item.album?.images?.[1]?.url ?? item.album?.images?.[0]?.url ?? null,
-          progressMs: 0,
-          durationMs: item.duration_ms ?? 0,
         };
       }
     }
@@ -116,4 +97,58 @@ export async function getGitHubBuilding(repo?: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// Best-effort, unofficial fetch of the latest tweet via the public syndication
+// (embed-timeline) endpoint. No auth, no paid API. The shape can change without
+// notice, so every failure path returns null and the caller falls back to the
+// hand-edited Sanity "lately" line.
+function cleanTweet(text: string): string {
+  return text
+    .replace(/https?:\/\/t\.co\/\S+/g, '') // drop t.co link shorteners
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export async function getLatestTweet(username?: string): Promise<string | null> {
+  const handle = (username || import.meta.env.TWITTER_USERNAME || 'nekumartins')
+    .replace(/^@/, '')
+    .trim();
+  if (!handle) return null;
+
+  const url = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${handle}?showReplies=false`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        // A browser-ish UA keeps the endpoint from returning an empty shell.
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+        Accept: 'text/html',
+      },
+    });
+    if (!res.ok) return null;
+
+    const html = await res.text();
+    const match = html.match(
+      /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/,
+    );
+    if (!match) return null;
+
+    const json = JSON.parse(match[1]);
+    const entries = json?.props?.pageProps?.timeline?.entries ?? [];
+
+    for (const entry of entries) {
+      const tweet = entry?.content?.tweet;
+      if (!tweet) continue;
+      // Skip retweets; replies are already excluded by showReplies=false.
+      if (tweet.retweeted_status || tweet.in_reply_to_screen_name) continue;
+      const text = cleanTweet(tweet.full_text ?? tweet.text ?? '');
+      if (text) return text;
+    }
+  } catch {
+    // fall through
+  }
+
+  return null;
 }
