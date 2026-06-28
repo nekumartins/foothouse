@@ -46,7 +46,7 @@ const cards = [
         </div>
         <div class="spotify-widget__info">
           <span class="spotify-widget__track" id="spotify-track">
-            {listeningText ?? 'Nothing playing'}
+            {listeningText ?? 'Not listening to anything.'}
           </span>
           <span class="spotify-widget__artist" id="spotify-artist"></span>
           <span class="spotify-widget__album" id="spotify-album"></span>
@@ -146,7 +146,7 @@ const cards = [
       if (!data || !data.track) {
         widget?.setAttribute('data-idle', 'true');
         card?.classList.remove('is-playing');
-        if (trackEl) trackEl.textContent = 'Nothing playing';
+        if (trackEl) trackEl.textContent = 'Not listening to anything.';
         if (artistEl) artistEl.textContent = '';
         if (albumEl) albumEl.textContent = '';
         if (barEl) barEl.style.width = '0%';
@@ -364,7 +364,16 @@ const cards = [
   }
 
   .spotify-widget[data-idle] .spotify-widget__progress {
-    opacity: 0.3;
+    display: none;
+  }
+
+  .spotify-widget[data-idle] .spotify-widget__art {
+    display: none;
+  }
+
+  .spotify-widget[data-idle] .spotify-widget__artist,
+  .spotify-widget[data-idle] .spotify-widget__album {
+    display: none;
   }
 
   .spotify-widget__bar {
