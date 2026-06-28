@@ -9,6 +9,6 @@ export default {
     { name: 'reading_cover', title: 'Reading — Cover Image', type: 'image' },
     { name: 'reading_note', title: 'Reading — Note', type: 'string', description: 'e.g. "slowly, on purpose"' },
     { name: 'building_text', title: 'Building (fallback)', type: 'string', description: 'Shown when GitHub is offline' },
-    { name: 'status_line', title: 'Lately', type: 'string', description: 'What you're up to right now' },
+    { name: 'status_line', title: 'Lately', type: 'string', description: 'What you are up to right now' },
   ],
 };
