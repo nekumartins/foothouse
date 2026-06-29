@@ -47,7 +47,7 @@
         x: startX ?? Math.random() * width,
         y: Math.random() * height * 0.55,
         scale,
-        speed: (0.08 + Math.random() * 0.12) * scale,
+        speed: (0.04 + Math.random() * 0.06) * scale,
         puffs,
       };
     }
@@ -61,7 +61,7 @@
       canvas.style.height = height + 'px';
       ctx!.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
 
-      const count = Math.max(4, Math.round(width / 320));
+      const count = Math.max(3, Math.round(width / 460));
       clouds = [];
       for (let i = 0; i < count; i++) clouds.push(makeCloud());
     }
@@ -72,8 +72,8 @@
         const cx = c.x + p.dx * c.scale;
         const cy = c.y + p.dy * c.scale;
         const grad = ctx!.createRadialGradient(cx, cy, 0, cx, cy, r);
-        grad.addColorStop(0, `rgba(${tint}, ${0.5 * currentOpacity})`);
-        grad.addColorStop(0.6, `rgba(${tint}, ${0.22 * currentOpacity})`);
+        grad.addColorStop(0, `rgba(${tint}, ${0.3 * currentOpacity})`);
+        grad.addColorStop(0.6, `rgba(${tint}, ${0.12 * currentOpacity})`);
         grad.addColorStop(1, `rgba(${tint}, 0)`);
         ctx!.fillStyle = grad;
         ctx!.beginPath();
@@ -104,12 +104,12 @@
 
     // Daytime presence curve + tint from the sky state.
     function opacityForHour(hour: number): number {
-      if (hour >= 9 && hour < 16) return 1;
-      if (hour >= 7 && hour < 9) return (hour - 7) / 2;
-      if (hour >= 16 && hour < 19) return 1 - (hour - 16) / 3;
-      if (hour >= 6 && hour < 7) return 0.3;
-      if (hour >= 19 && hour < 20) return 0.15;
-      return 0.06; // faint night clouds
+      if (hour >= 9 && hour < 16) return 0.5;
+      if (hour >= 7 && hour < 9) return ((hour - 7) / 2) * 0.5;
+      if (hour >= 16 && hour < 19) return (1 - (hour - 16) / 3) * 0.5;
+      if (hour >= 6 && hour < 7) return 0.15;
+      if (hour >= 19 && hour < 20) return 0.08;
+      return 0.04; // faint night clouds
     }
 
     window.addEventListener('sky-update', ((e: CustomEvent) => {

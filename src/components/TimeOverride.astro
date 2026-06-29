@@ -108,7 +108,7 @@
       panel.hidden = true;
       sessionStorage.setItem(minimizedKey, '1');
     } else {
-      sessionStorage.removeItem(minimizedKey);
+      sessionStorage.setItem(minimizedKey, '0');
     }
   }
 
@@ -157,7 +157,8 @@
 
   const currentHour = getOverrideHour() ?? new Date().getHours();
   updateIcon(currentHour);
-  setMinimized(sessionStorage.getItem(minimizedKey) === '1');
+  // Default to the collapsed nub; only stay expanded if the user explicitly opened it.
+  setMinimized(sessionStorage.getItem(minimizedKey) !== '0');
 
   // Keep the icon in sync as the sky updates every minute
   window.addEventListener('sky-update', (e: any) => {
@@ -283,17 +284,31 @@
     z-index: 100;
     width: 32px;
     height: 32px;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
     border-radius: 50%;
-    background: rgba(30, 24, 19, 0.4);
-    color: var(--faint);
+    background: rgba(30, 24, 19, 0.55);
+    color: var(--lamp);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    opacity: 0.5;
-    transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    opacity: 0.85;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--lamp) 40%, transparent),
+                0 0 22px color-mix(in srgb, var(--lamp) 18%, transparent);
+    animation: nub-pulse 3s ease-in-out infinite;
+    transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  @keyframes nub-pulse {
+    0%, 100% {
+      box-shadow: 0 0 8px color-mix(in srgb, var(--lamp) 30%, transparent),
+                  0 0 16px color-mix(in srgb, var(--lamp) 12%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 14px color-mix(in srgb, var(--lamp) 55%, transparent),
+                  0 0 30px color-mix(in srgb, var(--lamp) 28%, transparent);
+    }
   }
 
   .time-override__restore[hidden] {
@@ -304,6 +319,12 @@
     opacity: 1;
     color: var(--lamp);
     border-color: var(--lamp);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .time-override__restore {
+      animation: none;
+    }
   }
 
   .time-override__restore svg {

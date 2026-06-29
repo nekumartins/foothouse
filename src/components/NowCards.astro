@@ -117,6 +117,11 @@ const latelyText = now?.status_line ?? 'prepping for grad';
   let lastFetchTime = 0;
   let isPlaying = false;
   let tickFrame: number;
+  // What's currently painted, so we only touch the DOM when it actually changes
+  // (avoids the periodic album-art reload that made the card flicker).
+  let renderedKey = '';
+  let renderedArt = '';
+  let endRequested = false;
 
   function formatTime(ms: number): string {
     const s = Math.floor(ms / 1000);
@@ -134,7 +139,25 @@ const latelyText = now?.status_line ?? 'prepping for grad';
     if (barEl) barEl.style.width = `${pct}%`;
     if (elapsedEl) elapsedEl.textContent = formatTime(progress);
 
+    // Track finished — pull the next song promptly instead of waiting for the poll.
+    if (currentDuration > 0 && progress >= currentDuration && !endRequested) {
+      endRequested = true;
+      refresh();
+    }
+
     tickFrame = requestAnimationFrame(tick);
+  }
+
+  function setArt(url: string | null) {
+    if (!artEl || url === renderedArt) return;
+    renderedArt = url || '';
+    if (!url) return;
+    const img = new Image();
+    img.alt = '';
+    img.className = 'spotify-widget__art-img';
+    img.onload = () => img.classList.add('is-loaded');
+    img.src = url;
+    artEl.replaceChildren(img);
   }
 
   async function refresh() {
@@ -149,32 +172,39 @@ const latelyText = now?.status_line ?? 'prepping for grad';
         if (trackEl) trackEl.textContent = 'Not listening to anything.';
         if (artistEl) artistEl.textContent = '';
         if (albumEl) albumEl.textContent = '';
-        if (barEl) barEl.style.width = '0%';
+        if (barEl) {
+          barEl.classList.add('is-resetting');
+          barEl.style.width = '0%';
+        }
         if (elapsedEl) elapsedEl.textContent = '0:00';
         if (durationEl) durationEl.textContent = '0:00';
         isPlaying = false;
+        renderedKey = '';
+        renderedArt = '';
         cancelAnimationFrame(tickFrame);
         return;
       }
 
       widget?.removeAttribute('data-idle');
       card?.classList.toggle('is-playing', data.isPlaying);
+      if (barEl) barEl.classList.remove('is-resetting');
 
-      if (trackEl) trackEl.textContent = data.track;
-      if (artistEl) artistEl.textContent = data.artist || '';
-      if (albumEl) albumEl.textContent = data.album || '';
-      if (durationEl) durationEl.textContent = formatTime(data.durationMs);
-
-      if (artEl) {
-        if (data.albumArt) {
-          artEl.innerHTML = `<img src="${data.albumArt}" alt="" class="spotify-widget__art-img" />`;
-        }
+      // Only rewrite text/art when the track changes — keeps the card still.
+      const key = `${data.track}|${data.albumArt || ''}`;
+      if (key !== renderedKey) {
+        renderedKey = key;
+        if (trackEl) trackEl.textContent = data.track;
+        if (artistEl) artistEl.textContent = data.artist || '';
+        if (albumEl) albumEl.textContent = data.album || '';
+        setArt(data.albumArt || null);
       }
+      if (durationEl) durationEl.textContent = formatTime(data.durationMs);
 
       currentProgress = data.progressMs || 0;
       currentDuration = data.durationMs || 0;
       lastFetchTime = Date.now();
       isPlaying = data.isPlaying;
+      endRequested = false;
 
       cancelAnimationFrame(tickFrame);
       if (isPlaying) tick();
@@ -327,6 +357,12 @@ const latelyText = now?.status_line ?? 'prepping for grad';
     height: 100%;
     object-fit: cover;
     border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .spotify-widget__art :global(.spotify-widget__art-img.is-loaded) {
+    opacity: 1;
   }
 
   .spotify-widget__art-placeholder {
@@ -404,7 +440,11 @@ const latelyText = now?.status_line ?? 'prepping for grad';
     background: var(--paper);
     border-radius: 2px;
     width: 0%;
-    transition: width 0.3s linear;
+  }
+
+  /* Smooth idle reset only; while playing the rAF tick drives width at 60fps. */
+  .spotify-widget__bar-fill.is-resetting {
+    transition: width 0.3s ease;
   }
 
   .glass-card--spotify.is-playing .spotify-widget__bar-fill {
