@@ -64,8 +64,21 @@
   aria-label="Restore time control"
   title="Time of day"
 >
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-    <circle cx="12" cy="12" r="3.5" />
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" id="restore-icon">
+    <!-- Sun (day) -->
+    <g id="restore-sun">
+      <circle cx="12" cy="12" r="3.5" />
+      <line x1="12" y1="3" x2="12" y2="5.5" />
+      <line x1="12" y1="18.5" x2="12" y2="21" />
+      <line x1="3" y1="12" x2="5.5" y2="12" />
+      <line x1="18.5" y1="12" x2="21" y2="12" />
+      <line x1="5.64" y1="5.64" x2="7.4" y2="7.4" />
+      <line x1="16.6" y1="16.6" x2="18.36" y2="18.36" />
+      <line x1="5.64" y1="18.36" x2="7.4" y2="16.6" />
+      <line x1="16.6" y1="7.4" x2="18.36" y2="5.64" />
+    </g>
+    <!-- Moon (night) -->
+    <path id="restore-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" style="display:none" />
   </svg>
 </button>
 
@@ -82,6 +95,8 @@
   const restore = document.getElementById('time-restore')!;
   const iconBody = document.getElementById('time-icon-body')!;
   const iconRays = document.getElementById('time-icon-rays')!;
+  const restoreSun = document.getElementById('restore-sun')!;
+  const restoreMoon = document.getElementById('restore-moon')!;
 
   const minimizedKey = 'foothouse-time-minimized';
 
@@ -108,6 +123,13 @@
       iconRays.style.display = '';
     }
     iconBody.style.fill = 'none';
+    updateRestoreIcon(hour);
+  }
+
+  function updateRestoreIcon(hour: number) {
+    const isNight = hour >= 19 || hour < 5;
+    restoreSun.style.display = isNight ? 'none' : '';
+    restoreMoon.style.display = isNight ? '' : 'none';
   }
 
   function formatHour(h: number): string {
@@ -148,6 +170,11 @@
   const currentHour = getOverrideHour() ?? new Date().getHours();
   updateIcon(currentHour);
   setMinimized(sessionStorage.getItem(minimizedKey) === '1');
+
+  // Keep the icon in sync as the sky updates every minute
+  window.addEventListener('sky-update', (e: any) => {
+    updateRestoreIcon(e.detail.hour);
+  });
 </script>
 
 <style>
@@ -266,8 +293,8 @@
     bottom: var(--space-lg);
     right: var(--space-lg);
     z-index: 100;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border: 1px solid var(--line);
     border-radius: 50%;
     background: rgba(30, 24, 19, 0.4);
@@ -292,8 +319,8 @@
   }
 
   .time-override__restore svg {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
   }
 
   @media (prefers-reduced-motion: reduce) {
