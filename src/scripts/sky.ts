@@ -90,9 +90,12 @@ interface Celestial {
 
 function getCelestial(fractionalHour: number): Celestial {
   const arc = (p: number) => {
-    const x = p * 100;
-    // sin curve: horizon at the ends, peak (~10%) near the middle
-    const y = 78 - 66 * Math.sin(p * Math.PI);
+    // Wide, shallow dome so the disc clearly travels ACROSS the sky rather than
+    // bobbing up the middle — the vertical swing is kept small (top % is of the
+    // tall viewport height, so a little goes a long way on a portrait phone).
+    // Stay inset from the edges so the disc never clips half off-screen.
+    const x = 8 + p * 84;                    // 8% → 92% across
+    const y = 56 - 30 * Math.sin(p * Math.PI); // 56% horizon → 26% peak
     return { x, y };
   };
   // Soft fade near the horizons so the disc eases in/out instead of popping.
