@@ -98,8 +98,10 @@ function getCelestial(fractionalHour: number): Celestial {
     const y = 56 - 30 * Math.sin(p * Math.PI); // 56% horizon → 26% peak
     return { x, y };
   };
-  // Soft fade near the horizons so the disc eases in/out instead of popping.
-  const horizonFade = (p: number) => Math.max(0, Math.min(1, Math.sin(p * Math.PI) * 6));
+  // Brightness follows a dome: dim near the horizons, full across the middle.
+  // This hides the sun→moon handoff — the sun dims as it "sets" on one side
+  // and a dim moon "rises" on the other, instead of a bright disc teleporting.
+  const horizonFade = (p: number) => Math.max(0, Math.min(1, Math.sin(p * Math.PI) * 1.6));
 
   if (fractionalHour >= SUN_RISE && fractionalHour <= SUN_SET) {
     const p = (fractionalHour - SUN_RISE) / (SUN_SET - SUN_RISE);
