@@ -45,14 +45,6 @@ const projectsWithStars = await Promise.all(
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
 
-const socialLinks = [
-  { label: 'LinkedIn', href: settings?.linkedin || 'https://linkedin.com/in/nekumartins' },
-  { label: 'GitHub', href: settings?.github || 'https://github.com/nekumartins' },
-  { label: 'Resume', href: settings?.resume_url },
-  { label: 'Twitter', href: settings?.twitter || 'https://twitter.com/nekumartins' },
-  { label: 'Instagram', href: settings?.instagram },
-].filter(l => l.href);
-
 function youtubeEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
@@ -74,26 +66,6 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     <section class="threshold__person">
       <h1 class="threshold__name">Neku Akpotohwo</h1>
       <p class="threshold__tagline">{bio}</p>
-
-      {(settings?.contact_email || socialLinks.length > 0) && (
-        <div class="threshold__contact">
-          {settings?.contact_email && (
-            <a href={`mailto:${settings.contact_email}`} class="contact__email">
-              {settings.contact_email}
-            </a>
-          )}
-          {socialLinks.length > 0 && (
-            <div class="contact__links">
-              {socialLinks.map((link, i) => (
-                <>
-                  <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
-                  {i < socialLinks.length - 1 && <span class="contact__dot" aria-hidden="true">&middot;</span>}
-                </>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </section>
 
     <!-- Presence: now-cards -->
@@ -216,49 +188,6 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     max-width: 480px;
     margin: 0 auto;
     line-height: 1.6;
-  }
-
-  .threshold__contact {
-    margin-top: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  .contact__email {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .contact__email:hover {
-    color: var(--lamp);
-  }
-
-  .contact__links {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-sm);
-  }
-
-  .contact__links a {
-    font-size: var(--text-sm);
-    color: var(--faint);
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .contact__links a:hover {
-    color: var(--paper);
-  }
-
-  .contact__dot {
-    color: var(--faint);
-    font-size: var(--text-xs);
   }
 
   /* ── Presence ── */

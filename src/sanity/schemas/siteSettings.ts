@@ -10,6 +10,7 @@ export default {
     { name: 'twitter', title: 'Twitter / X URL', type: 'url' },
     { name: 'instagram', title: 'Instagram URL', type: 'url' },
     { name: 'resume', title: 'Resume (PDF)', type: 'file' },
-    { name: 'featured_video_url', title: 'Featured video URL', type: 'url', description: 'YouTube embed URL' },
+    { name: 'featured_video_url', title: 'Featured video URL', type: 'url', description: 'YouTube video shown on the homepage' },
+    { name: 'about_video_url', title: 'About page video URL', type: 'url', description: 'YouTube video shown on the About page' },
   ],
 };

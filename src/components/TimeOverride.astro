@@ -13,8 +13,8 @@
       title="Change time of day"
     >
       <svg class="time-override__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" id="time-icon-body" />
-        <g id="time-icon-rays">
+        <g id="time-icon-sun">
+          <circle cx="12" cy="12" r="4" />
           <line x1="12" y1="2" x2="12" y2="5" />
           <line x1="12" y1="19" x2="12" y2="22" />
           <line x1="2" y1="12" x2="5" y2="12" />
@@ -24,6 +24,7 @@
           <line x1="4.93" y1="19.07" x2="7.05" y2="16.95" />
           <line x1="16.95" y1="7.05" x2="19.07" y2="4.93" />
         </g>
+        <path id="time-icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" style="display:none" />
       </svg>
     </button>
 
@@ -93,8 +94,8 @@
   const reset = document.getElementById('time-reset')!;
   const minimize = document.getElementById('time-minimize')!;
   const restore = document.getElementById('time-restore')!;
-  const iconBody = document.getElementById('time-icon-body')!;
-  const iconRays = document.getElementById('time-icon-rays')!;
+  const iconSun = document.getElementById('time-icon-sun')!;
+  const iconMoon = document.getElementById('time-icon-moon')!;
   const restoreSun = document.getElementById('restore-sun')!;
   const restoreMoon = document.getElementById('restore-moon')!;
 
@@ -113,21 +114,8 @@
 
   function updateIcon(hour: number) {
     const isNight = hour >= 19 || hour < 5;
-    if (isNight) {
-      iconBody.setAttribute('cx', '14');
-      iconBody.setAttribute('cy', '10');
-      iconRays.style.display = 'none';
-    } else {
-      iconBody.setAttribute('cx', '12');
-      iconBody.setAttribute('cy', '12');
-      iconRays.style.display = '';
-    }
-    iconBody.style.fill = 'none';
-    updateRestoreIcon(hour);
-  }
-
-  function updateRestoreIcon(hour: number) {
-    const isNight = hour >= 19 || hour < 5;
+    iconSun.style.display = isNight ? '' : 'none';
+    iconMoon.style.display = isNight ? 'none' : '';
     restoreSun.style.display = isNight ? '' : 'none';
     restoreMoon.style.display = isNight ? 'none' : '';
   }
@@ -173,7 +161,7 @@
 
   // Keep the icon in sync as the sky updates every minute
   window.addEventListener('sky-update', (e: any) => {
-    updateRestoreIcon(e.detail.hour);
+    updateIcon(e.detail.hour);
   });
 </script>
 

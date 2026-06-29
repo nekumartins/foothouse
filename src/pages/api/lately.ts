@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
     headers: {
       'Content-Type': 'application/json',
       // Tweets change slowly; cache at the edge to avoid hammering the endpoint.
-      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'Cache-Control': 'public, max-age=60, s-maxage=60',
     },
   });
 };
