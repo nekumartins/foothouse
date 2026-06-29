@@ -90,15 +90,26 @@ const cards = [
     </div>
   </div>
 
-  <!-- Info rows -->
-  {cards.map(card => (
-    <div class="glass-card">
-      <div class="glass-card__content row">
-        <span class="row__label">{card.label}</span>
-        <span class="row__text" id={card.label === 'lately' ? 'lately-text' : undefined}>{card.text}</span>
-      </div>
+  <!-- Building row -->
+  <div class="glass-card">
+    <div class="glass-card__content row">
+      <span class="row__label">building</span>
+      <span class="row__text">{cards[0].text}</span>
     </div>
-  ))}
+  </div>
+
+  <!-- Lately card (X/Twitter-branded) -->
+  <div class="glass-card glass-card--lately">
+    <div class="lately-widget">
+      <div class="lately-widget__header">
+        <svg class="lately-widget__logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span class="lately-widget__status">Latest on X</span>
+      </div>
+      <span class="lately-widget__text" id="lately-text">{cards[1].text}</span>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -417,6 +428,43 @@ const cards = [
     font-size: 10px;
     color: var(--faint);
     letter-spacing: 0.02em;
+  }
+
+  /* ── Lately widget (X/Twitter-branded) ── */
+
+  .lately-widget {
+    position: relative;
+    z-index: 2;
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .lately-widget__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .lately-widget__logo {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+  }
+
+  .lately-widget__status {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .lately-widget__text {
+    font-size: var(--text-sm);
+    color: var(--paper);
+    line-height: 1.5;
   }
 
   /* ── Reading card with cover ── */
