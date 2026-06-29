@@ -59,6 +59,7 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
 ---
 
 <BaseLayout title="Neku Akpotohwo" skyMode="full">
+  <div class="home">
   <div class="threshold">
     <section class="threshold__mood" aria-hidden="true"></section>
 
@@ -138,24 +139,28 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
   </div>
 
   <Footer />
+  </div>
 </BaseLayout>
 
 <style>
+  /* The sky shows behind the hero up top; by the time you scroll past it the page
+     rests on solid warm-dark — one continuous interior through the footer, no seam. */
+  .home {
+    background: linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 60vh,
+      var(--bg) 95vh,
+      var(--bg) 100%
+    );
+  }
+
   .threshold {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0 var(--space-xl);
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 20%,
-      rgba(0, 0, 0, 0.25) 40%,
-      rgba(0, 0, 0, 0.45) 60%,
-      rgba(0, 0, 0, 0.55) 80%,
-      rgba(0, 0, 0, 0.6) 100%
-    );
   }
 
   .threshold__mood {

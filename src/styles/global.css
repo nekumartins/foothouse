@@ -66,6 +66,30 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* ── Animatable sky colors ──
+   Registering these as <color> properties lets the gradient interpolate when JS
+   swaps them (a plain custom property can't be transitioned). */
+
+@property --sky-top {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0B0D1A;
+}
+@property --sky-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #141833;
+}
+@property --sky-bottom {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1A1530;
+}
+
+html {
+  transition: --sky-top 2s ease, --sky-mid 2s ease, --sky-bottom 2s ease;
+}
+
 /* ── Palette tokens ── */
 
 :root {
@@ -186,6 +210,9 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  html {
+    transition: none;
   }
 }
 

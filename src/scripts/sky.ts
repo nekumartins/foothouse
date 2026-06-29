@@ -76,6 +76,43 @@ function getStarfieldOpacity(hour: number): number {
   return 0;
 }
 
+// Sun/moon arc. The sun is up from RISE→SET, arcing east(left)→west(right) and
+// rising to its peak at solar noon; the moon mirrors it across the night.
+const SUN_RISE = 5.5;
+const SUN_SET = 18.75;
+
+interface Celestial {
+  x: number; // % across
+  y: number; // % from top (lower number = higher in sky)
+  sun: number; // opacity
+  moon: number; // opacity
+}
+
+function getCelestial(fractionalHour: number): Celestial {
+  const arc = (p: number) => {
+    const x = p * 100;
+    // sin curve: horizon at the ends, peak (~10%) near the middle
+    const y = 78 - 66 * Math.sin(p * Math.PI);
+    return { x, y };
+  };
+  // Soft fade near the horizons so the disc eases in/out instead of popping.
+  const horizonFade = (p: number) => Math.max(0, Math.min(1, Math.sin(p * Math.PI) * 6));
+
+  if (fractionalHour >= SUN_RISE && fractionalHour <= SUN_SET) {
+    const p = (fractionalHour - SUN_RISE) / (SUN_SET - SUN_RISE);
+    const { x, y } = arc(p);
+    return { x, y, sun: horizonFade(p), moon: 0 };
+  }
+
+  // Night: map onto a continuous window SET → RISE+24
+  const nightStart = SUN_SET;
+  const nightEnd = SUN_RISE + 24;
+  const fh = fractionalHour < SUN_RISE ? fractionalHour + 24 : fractionalHour;
+  const p = (fh - nightStart) / (nightEnd - nightStart);
+  const { x, y } = arc(p);
+  return { x, y, sun: 0, moon: horizonFade(p) };
+}
+
 let overrideHour: number | null = null;
 
 export function setOverrideHour(hour: number | null) {
@@ -108,6 +145,14 @@ function update() {
     const opacity = getStarfieldOpacity(hour);
     starfield.style.opacity = String(opacity);
   }
+
+  // Sun/moon arc position + fade
+  const celestial = getCelestial(hour + minute / 60);
+  const root = document.documentElement;
+  root.style.setProperty('--celestial-x', `${celestial.x}%`);
+  root.style.setProperty('--celestial-y', `${celestial.y}%`);
+  root.style.setProperty('--sun-opacity', String(celestial.sun));
+  root.style.setProperty('--moon-opacity', String(celestial.moon));
 
   window.dispatchEvent(new CustomEvent('sky-update', { detail: { hour, state, palette } }));
 }
