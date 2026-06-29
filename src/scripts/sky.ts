@@ -101,7 +101,7 @@ function getCelestial(fractionalHour: number): Celestial {
   if (fractionalHour >= SUN_RISE && fractionalHour <= SUN_SET) {
     const p = (fractionalHour - SUN_RISE) / (SUN_SET - SUN_RISE);
     const { x, y } = arc(p);
-    return { x, y, sun: horizonFade(p), moon: 0 };
+    return { x, y, sun: horizonFade(p) * 0.8, moon: 0 };
   }
 
   // Night: map onto a continuous window SET → RISE+24
@@ -110,7 +110,7 @@ function getCelestial(fractionalHour: number): Celestial {
   const fh = fractionalHour < SUN_RISE ? fractionalHour + 24 : fractionalHour;
   const p = (fh - nightStart) / (nightEnd - nightStart);
   const { x, y } = arc(p);
-  return { x, y, sun: 0, moon: horizonFade(p) };
+  return { x, y, sun: 0, moon: horizonFade(p) * 0.7 };
 }
 
 let overrideHour: number | null = null;
@@ -146,9 +146,11 @@ function update() {
     starfield.style.opacity = String(opacity);
   }
 
-  // Sun/moon arc position + fade
+  // Sun/moon arc position + fade. While the user is scrubbing the slider
+  // (override active), track it crisply; when live, drift slowly.
   const celestial = getCelestial(hour + minute / 60);
   const root = document.documentElement;
+  root.style.setProperty('--sky-ease', overrideHour !== null ? '0.12s' : '2s');
   root.style.setProperty('--celestial-x', `${celestial.x}%`);
   root.style.setProperty('--celestial-y', `${celestial.y}%`);
   root.style.setProperty('--sun-opacity', String(celestial.sun));

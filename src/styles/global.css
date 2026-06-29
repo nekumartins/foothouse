@@ -87,7 +87,9 @@
 }
 
 html {
-  transition: --sky-top 2s ease, --sky-mid 2s ease, --sky-bottom 2s ease;
+  transition: --sky-top var(--sky-ease, 2s) ease,
+              --sky-mid var(--sky-ease, 2s) ease,
+              --sky-bottom var(--sky-ease, 2s) ease;
 }
 
 /* ── Palette tokens ── */
