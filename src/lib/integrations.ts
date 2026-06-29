@@ -99,53 +99,56 @@ export async function getGitHubBuilding(repo?: string): Promise<string | null> {
   }
 }
 
-// Best-effort, unofficial fetch of the latest tweet via the public syndication
-// (embed-timeline) endpoint. No auth, no paid API. The shape can change without
-// notice, so every failure path returns null and the caller falls back to the
-// hand-edited Sanity "lately" line.
+// Latest post for the "lately" card, read from an RSS bridge. X killed its free
+// public syndication endpoints (they all 403 now), so the no-cost path is a
+// third-party feed: create one from your profile at rss.app (or point at any
+// RSS 2.0 feed / Nitter instance) and set LATELY_RSS_URL. The parser is
+// provider-agnostic. Every failure path returns null and the caller falls back
+// to the hand-edited Sanity "lately" line.
 function cleanTweet(text: string): string {
   return text
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') // unwrap CDATA
+    .replace(/<[^>]+>/g, '') // strip HTML tags
     .replace(/https?:\/\/t\.co\/\S+/g, '') // drop t.co link shorteners
+    .replace(/https?:\/\/\S+/g, '') // drop other trailing URLs
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-export async function getLatestTweet(username?: string): Promise<string | null> {
-  const handle = (username || import.meta.env.TWITTER_USERNAME || 'nekumartins')
-    .replace(/^@/, '')
-    .trim();
-  if (!handle) return null;
-
-  const url = `https://syndication.twitter.com/srv/timeline-profile/screen-name/${handle}?showReplies=false`;
+export async function getLatestTweet(): Promise<string | null> {
+  const feedUrl = import.meta.env.LATELY_RSS_URL;
+  if (!feedUrl) return null;
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(feedUrl, {
       headers: {
-        // A browser-ish UA keeps the endpoint from returning an empty shell.
         'User-Agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
-        Accept: 'text/html',
+        Accept: 'application/rss+xml, application/xml, text/xml',
       },
     });
     if (!res.ok) return null;
 
-    const html = await res.text();
-    const match = html.match(
-      /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/,
-    );
-    if (!match) return null;
+    const xml = await res.text();
 
-    const json = JSON.parse(match[1]);
-    const entries = json?.props?.pageProps?.timeline?.entries ?? [];
+    // First <item> in the feed is the newest post.
+    const item = xml.match(/<item[\s\S]*?<\/item>/i)?.[0];
+    if (!item) return null;
 
-    for (const entry of entries) {
-      const tweet = entry?.content?.tweet;
-      if (!tweet) continue;
-      // Skip retweets; replies are already excluded by showReplies=false.
-      if (tweet.retweeted_status || tweet.in_reply_to_screen_name) continue;
-      const text = cleanTweet(tweet.full_text ?? tweet.text ?? '');
-      if (text) return text;
-    }
+    const pick = (tag: string) => {
+      const m = item.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i'));
+      return m ? m[1] : '';
+    };
+
+    // Prefer the title (rss.app puts the post text here); fall back to the body.
+    const text = cleanTweet(pick('title') || pick('description'));
+    return text || null;
   } catch {
     // fall through
   }
