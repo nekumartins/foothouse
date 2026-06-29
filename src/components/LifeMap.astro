@@ -93,9 +93,13 @@ const { places } = Astro.props;
     const lightboxContent = document.getElementById('lightbox-content')!;
     const lightboxClose = document.getElementById('lightbox-close')!;
 
+    // Navigation handler for the open carousel; null when the lightbox is closed.
+    let activeNav: ((dir: number) => void) | null = null;
+
     function closeLightbox() {
       lightbox.setAttribute('aria-hidden', 'true');
       lightboxContent.innerHTML = '';
+      activeNav = null;
     }
 
     lightboxClose.addEventListener('click', closeLightbox);
@@ -103,44 +107,83 @@ const { places } = Astro.props;
       if (e.target === lightbox) closeLightbox();
     });
     document.addEventListener('keydown', (e) => {
+      if (lightbox.getAttribute('aria-hidden') === 'true') return;
       if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') activeNav?.(-1);
+      else if (e.key === 'ArrowRight') activeNav?.(1);
     });
 
-    function openGallery(place: any) {
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    function openPlace(place: any) {
       const media = place.place_media ?? [];
+      const name = escapeHtml(place.name ?? '');
 
-      let html = `<h3 class="lightbox__title">${place.name}</h3>`;
-      if (place.note) {
-        html += `<p class="lightbox__note">${place.note}</p>`;
-      }
+      let html = `<h3 class="lightbox__title">${name}</h3>`;
+      if (place.note) html += `<p class="lightbox__note">${escapeHtml(place.note)}</p>`;
+
       if (media.length > 0) {
-        html += '<div class="lightbox__gallery">';
-        for (const m of media) {
-          html += `<figure class="lightbox__figure">
-            <img src="${m.url}" alt="${m.caption || place.name}" loading="lazy" class="lightbox__img" />
-            ${m.caption ? `<figcaption class="lightbox__caption">${m.caption}</figcaption>` : ''}
-          </figure>`;
-        }
-        html += '</div>';
-      }
-      lightboxContent.innerHTML = html;
-      lightbox.setAttribute('aria-hidden', 'false');
-    }
+        const slides = media.map((m: any) => `
+          <div class="lightbox__slide">
+            <img src="${m.url}" alt="${escapeHtml(m.caption || place.name || '')}" loading="lazy" class="lightbox__img" />
+            ${m.caption ? `<figcaption class="lightbox__caption">${escapeHtml(m.caption)}</figcaption>` : ''}
+          </div>`).join('');
 
-    function openMoment(place: any) {
-      const media = place.place_media?.[0];
-      let html = `<h3 class="lightbox__title">${place.name}</h3>`;
-      if (place.note) {
-        html += `<p class="lightbox__note">${place.note}</p>`;
+        const multi = media.length > 1;
+        const dots = multi
+          ? `<div class="lightbox__dots">${media.map((_: any, i: number) =>
+              `<span class="lightbox__dot${i === 0 ? ' is-active' : ''}"></span>`).join('')}</div>`
+          : '';
+        const arrows = multi
+          ? `<button class="lightbox__arrow lightbox__arrow--prev" aria-label="Previous">&#8249;</button>
+             <button class="lightbox__arrow lightbox__arrow--next" aria-label="Next">&#8250;</button>`
+          : '';
+        const counter = multi ? `<div class="lightbox__counter">1 / ${media.length}</div>` : '';
+
+        html += `<div class="lightbox__carousel"${multi ? '' : ' data-single'}>
+          <div class="lightbox__viewport">
+            <div class="lightbox__track">${slides}</div>
+          </div>
+          ${arrows}
+          ${counter}
+          ${dots}
+        </div>`;
       }
-      if (media) {
-        html += `<figure class="lightbox__figure lightbox__figure--moment">
-          <img src="${media.url}" alt="${media.caption || place.name}" loading="lazy" class="lightbox__img" />
-          ${media.caption ? `<figcaption class="lightbox__caption">${media.caption}</figcaption>` : ''}
-        </figure>`;
-      }
+
       lightboxContent.innerHTML = html;
       lightbox.setAttribute('aria-hidden', 'false');
+
+      const track = lightboxContent.querySelector<HTMLElement>('.lightbox__track');
+      if (!track || media.length <= 1) {
+        activeNav = null;
+        return;
+      }
+
+      const counterEl = lightboxContent.querySelector<HTMLElement>('.lightbox__counter');
+      const dotEls = Array.from(lightboxContent.querySelectorAll<HTMLElement>('.lightbox__dot'));
+      let index = 0;
+
+      const go = (dir: number) => {
+        index = (index + dir + media.length) % media.length;
+        track.style.transform = `translateX(-${index * 100}%)`;
+        if (counterEl) counterEl.textContent = `${index + 1} / ${media.length}`;
+        dotEls.forEach((d, i) => d.classList.toggle('is-active', i === index));
+      };
+      activeNav = go;
+
+      lightboxContent.querySelector('.lightbox__arrow--prev')?.addEventListener('click', () => go(-1));
+      lightboxContent.querySelector('.lightbox__arrow--next')?.addEventListener('click', () => go(1));
+      dotEls.forEach((d, i) => d.addEventListener('click', () => go(i - index)));
+
+      // Touch swipe
+      let startX = 0;
+      const viewport = lightboxContent.querySelector<HTMLElement>('.lightbox__viewport');
+      viewport?.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+      viewport?.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+      }, { passive: true });
     }
 
     const travelPins = places
@@ -174,45 +217,43 @@ const { places } = Astro.props;
 
     for (const place of places) {
       const color = kindColors[place.kind] || '#9A8C7B';
+      const media = place.place_media ?? [];
+      const hasMedia = media.length > 0;
 
+      // Marker root: MapLibre owns its transform — never touch it (that caused the
+      // "runaway" jump). All visuals live in the inner bubble, scaled via CSS hover.
       const el = document.createElement('div');
-      el.className = `map-pin map-pin--${place.kind}`;
-      el.style.cssText = `
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: ${color};
-        border: 2px solid rgba(236, 227, 214, 0.2);
-        cursor: pointer;
-        box-shadow: 0 0 8px ${color}66, 0 0 16px ${color}33;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      `;
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.3)';
-        el.style.boxShadow = `0 0 12px ${color}88, 0 0 24px ${color}55`;
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-        el.style.boxShadow = `0 0 8px ${color}66, 0 0 16px ${color}33`;
-      });
+      el.className = 'map-pin';
 
-      el.addEventListener('click', () => {
-        if (place.pin_type === 'moment') {
-          openMoment(place);
-        } else {
-          openGallery(place);
+      const bubble = document.createElement('div');
+      bubble.title = place.name ?? '';
+
+      if (hasMedia) {
+        bubble.className = 'map-pin__bubble';
+        bubble.style.setProperty('--pin-color', color);
+        // Request a small thumbnail variant for the bubble to keep it light.
+        const thumb = String(media[0].url).replace('w=1200', 'w=160');
+        bubble.style.backgroundImage = `url("${thumb}")`;
+        if (media.length > 1) {
+          const badge = document.createElement('span');
+          badge.className = 'map-pin__count';
+          badge.textContent = String(media.length);
+          bubble.appendChild(badge);
         }
-      });
+      } else {
+        bubble.className = 'map-pin__dot';
+        bubble.style.setProperty('--pin-color', color);
+      }
 
-      const popup = new maplibregl.Popup({
-        offset: 12,
-        closeButton: false,
-        className: 'map-popup',
-      }).setHTML(`<strong>${place.name}</strong>${place.note ? `<br><span style="color:#9A8C7B;font-size:12px">${place.note}</span>` : ''}`);
+      el.appendChild(bubble);
 
-      new maplibregl.Marker({ element: el })
+      // Lift a hovered pin above its neighbors without touching the root transform.
+      el.addEventListener('mouseenter', () => { el.style.zIndex = '10'; });
+      el.addEventListener('mouseleave', () => { el.style.zIndex = ''; });
+      el.addEventListener('click', () => openPlace(place));
+
+      new maplibregl.Marker({ element: el, anchor: hasMedia ? 'bottom' : 'center' })
         .setLngLat([place.lng, place.lat])
-        .setPopup(popup)
         .addTo(map);
     }
 
@@ -265,6 +306,79 @@ const { places } = Astro.props;
     color: var(--muted);
     font-size: var(--text-sm);
     pointer-events: none;
+  }
+
+  /* ── Snap-style pins ── */
+
+  .life-map__canvas :global(.map-pin) {
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .life-map__canvas :global(.map-pin__bubble) {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(30, 24, 19, 0.6);
+    border: 2px solid var(--pin-color, #9A8C7B);
+    box-shadow: 0 0 0 2px rgba(21, 17, 13, 0.5), 0 2px 10px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Downward tail that points at the coordinate (marker is bottom-anchored). */
+  .life-map__canvas :global(.map-pin__bubble::after) {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    width: 10px;
+    height: 10px;
+    background: var(--pin-color, #9A8C7B);
+    transform: translateX(-50%) rotate(45deg);
+    border-radius: 0 0 2px 0;
+  }
+
+  .life-map__canvas :global(.map-pin__bubble:hover) {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px rgba(21, 17, 13, 0.5), 0 0 16px var(--pin-color, #9A8C7B), 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  .life-map__canvas :global(.map-pin__count) {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: rgba(21, 17, 13, 0.92);
+    border: 1px solid var(--pin-color, #9A8C7B);
+    color: #ECE3D6;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .life-map__canvas :global(.map-pin__dot) {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--pin-color, #9A8C7B);
+    border: 2px solid rgba(236, 227, 214, 0.2);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--pin-color, #9A8C7B) 40%, transparent),
+                0 0 16px color-mix(in srgb, var(--pin-color, #9A8C7B) 20%, transparent);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .life-map__canvas :global(.map-pin__dot:hover) {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--pin-color, #9A8C7B) 55%, transparent),
+                0 0 24px color-mix(in srgb, var(--pin-color, #9A8C7B) 35%, transparent);
   }
 
   .life-map__canvas :global(.maplibregl-popup-content) {
@@ -325,8 +439,8 @@ const { places } = Astro.props;
 
   .lightbox__content {
     max-width: 720px;
-    max-height: 80vh;
-    overflow-y: auto;
+    width: 100%;
+    max-height: 85vh;
     padding: var(--space-xl);
     text-align: center;
   }
@@ -345,20 +459,41 @@ const { places } = Astro.props;
     margin-bottom: var(--space-xl);
   }
 
-  .lightbox__content :global(.lightbox__gallery) {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    align-items: center;
+  /* ── Carousel ── */
+
+  .lightbox__content :global(.lightbox__carousel) {
+    position: relative;
+    width: 100%;
   }
 
-  .lightbox__content :global(.lightbox__figure) {
-    max-width: 100%;
+  .lightbox__content :global(.lightbox__viewport) {
+    overflow: hidden;
+    border-radius: 8px;
+  }
+
+  .lightbox__content :global(.lightbox__track) {
+    display: flex;
+    transition: transform 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox__content :global(.lightbox__track) {
+      transition: none;
+    }
+  }
+
+  .lightbox__content :global(.lightbox__slide) {
+    flex: 0 0 100%;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .lightbox__content :global(.lightbox__img) {
     max-width: 100%;
-    max-height: 50vh;
+    max-height: 64vh;
     border-radius: 8px;
     object-fit: contain;
   }
@@ -367,6 +502,68 @@ const { places } = Astro.props;
     font-size: var(--text-xs);
     color: var(--faint);
     margin-top: var(--space-sm);
+  }
+
+  .lightbox__content :global(.lightbox__arrow) {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(21, 17, 13, 0.6);
+    border: 1px solid rgba(236, 227, 214, 0.15);
+    border-radius: 50%;
+    color: var(--paper);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  .lightbox__content :global(.lightbox__arrow:hover) {
+    opacity: 1;
+    background: rgba(21, 17, 13, 0.85);
+  }
+
+  .lightbox__content :global(.lightbox__arrow--prev) { left: -8px; }
+  .lightbox__content :global(.lightbox__arrow--next) { right: -8px; }
+
+  .lightbox__content :global(.lightbox__counter) {
+    margin-top: var(--space-md);
+    font-size: var(--text-xs);
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lightbox__content :global(.lightbox__dots) {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: var(--space-sm);
+  }
+
+  .lightbox__content :global(.lightbox__dot) {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(236, 227, 214, 0.25);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .lightbox__content :global(.lightbox__dot.is-active) {
+    background: var(--lamp);
+    transform: scale(1.3);
+  }
+
+  @media (max-width: 480px) {
+    .lightbox__content :global(.lightbox__arrow--prev) { left: 4px; }
+    .lightbox__content :global(.lightbox__arrow--next) { right: 4px; }
   }
 
   @media (max-width: 480px) {
