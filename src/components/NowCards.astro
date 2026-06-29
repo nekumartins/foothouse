@@ -20,10 +20,7 @@ const readingNote = now?.reading_note || null;
 
 const listeningText = now?.listening_text || null;
 
-const cards = [
-  { label: 'building', text: now?.building_text ?? 'something that bends light, currently fighting Safari' },
-  { label: 'lately', text: now?.status_line ?? 'prepping for grad' },
-];
+const latelyText = now?.status_line ?? 'prepping for grad';
 ---
 
 <div class="now-stack">
@@ -90,14 +87,6 @@ const cards = [
     </div>
   </div>
 
-  <!-- Building row -->
-  <div class="glass-card">
-    <div class="glass-card__content row">
-      <span class="row__label">building</span>
-      <span class="row__text">{cards[0].text}</span>
-    </div>
-  </div>
-
   <!-- Lately card (X/Twitter-branded) -->
   <div class="glass-card glass-card--lately">
     <div class="lately-widget">
@@ -107,7 +96,7 @@ const cards = [
         </svg>
         <span class="lately-widget__status">Latest on X</span>
       </div>
-      <span class="lately-widget__text" id="lately-text">{cards[1].text}</span>
+      <span class="lately-widget__text" id="lately-text">{latelyText}</span>
     </div>
   </div>
 </div>
