@@ -10,7 +10,7 @@ const links = [
 
 <nav class="nav" aria-label="Main navigation">
   <a href="/" class="nav__home" aria-label="Home">
-    <span class="nav__name">Neku</span>
+    <img src="/avatar.png" alt="Neku" class="nav__avatar" width="32" height="32" />
   </a>
   <ul class="nav__links" role="list">
     {links.map(link => (
@@ -43,16 +43,22 @@ const links = [
   }
 
   .nav__home {
-    text-decoration: none;
-    color: var(--paper);
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
+    display: flex;
+    align-items: center;
     opacity: 0.7;
     transition: opacity 0.3s ease;
   }
 
   .nav__home:hover {
     opacity: 1;
+  }
+
+  .nav__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
   }
 
   .nav__links {
