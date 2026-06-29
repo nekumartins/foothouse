@@ -128,8 +128,8 @@
 
   function updateRestoreIcon(hour: number) {
     const isNight = hour >= 19 || hour < 5;
-    restoreSun.style.display = isNight ? 'none' : '';
-    restoreMoon.style.display = isNight ? '' : 'none';
+    restoreSun.style.display = isNight ? '' : 'none';
+    restoreMoon.style.display = isNight ? 'none' : '';
   }
 
   function formatHour(h: number): string {
