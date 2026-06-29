@@ -89,33 +89,25 @@ interface Celestial {
 }
 
 function getCelestial(fractionalHour: number): Celestial {
-  const arc = (p: number) => {
-    // Wide, shallow dome so the disc clearly travels ACROSS the sky rather than
-    // bobbing up the middle — the vertical swing is kept small (top % is of the
-    // tall viewport height, so a little goes a long way on a portrait phone).
-    // Stay inset from the edges so the disc never clips half off-screen.
-    const x = 8 + p * 84;                    // 8% → 92% across
-    const y = 56 - 30 * Math.sin(p * Math.PI); // 56% horizon → 26% peak
-    return { x, y };
-  };
-  // Brightness follows a dome: dim near the horizons, full across the middle.
-  // This hides the sun→moon handoff — the sun dims as it "sets" on one side
-  // and a dim moon "rises" on the other, instead of a bright disc teleporting.
-  const horizonFade = (p: number) => Math.max(0, Math.min(1, Math.sin(p * Math.PI) * 1.6));
+  // Wide, shallow dome (vertical swing kept small — `top` is a % of the tall
+  // viewport, so a little goes a long way on a portrait phone).
+  const dome = (p: number) => 56 - 30 * Math.sin(p * Math.PI); // 56% horizon → 26% peak
+  // Brightness fades toward the horizons so each set/rise dissolves gently.
+  const fade = (p: number) => Math.max(0, Math.min(1, Math.sin(p * Math.PI) * 1.6));
 
   if (fractionalHour >= SUN_RISE && fractionalHour <= SUN_SET) {
+    // Day: sun sweeps left → right.
     const p = (fractionalHour - SUN_RISE) / (SUN_SET - SUN_RISE);
-    const { x, y } = arc(p);
-    return { x, y, sun: horizonFade(p) * 0.8, moon: 0 };
+    return { x: 8 + p * 84, y: dome(p), sun: fade(p) * 0.8, moon: 0 };
   }
 
-  // Night: map onto a continuous window SET → RISE+24
-  const nightStart = SUN_SET;
-  const nightEnd = SUN_RISE + 24;
+  // Night: moon sweeps RIGHT → LEFT, back the way the sun came. This keeps the
+  // path continuous — at sunset the sun sets on the right and the moon rises
+  // from that same right edge; at sunrise both meet on the left. The disc never
+  // teleports across the screen; it just crossfades sun↔moon in place.
   const fh = fractionalHour < SUN_RISE ? fractionalHour + 24 : fractionalHour;
-  const p = (fh - nightStart) / (nightEnd - nightStart);
-  const { x, y } = arc(p);
-  return { x, y, sun: 0, moon: horizonFade(p) * 0.7 };
+  const p = (fh - SUN_SET) / (SUN_RISE + 24 - SUN_SET);
+  return { x: 92 - p * 84, y: dome(p), sun: 0, moon: fade(p) * 0.7 };
 }
 
 let overrideHour: number | null = null;
