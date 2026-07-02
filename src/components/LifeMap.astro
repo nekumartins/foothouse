@@ -49,10 +49,11 @@ const { places } = Astro.props;
     const container = document.getElementById('life-map');
     if (!container) return;
 
-    // Frame the pins before the map ever draws, so the first painted frame is
-    // already the life-map view and no world-spanning tiles are fetched.
-    const bounds = places.length > 0 ? new maplibregl.LngLatBounds() : null;
-    if (bounds) for (const p of places) bounds.extend([p.lng, p.lat]);
+    // Open on home, the way Snapchat opens on you, not on the whole world.
+    // The map never reframes itself after this; a visitor reaches other
+    // continents by panning and zooming out, not by an auto-fit.
+    const byDate = [...places].sort((a: any, b: any) => String(b.arrived_on ?? '').localeCompare(String(a.arrived_on ?? '')));
+    const home = places.find((p: any) => p.kind === 'home') ?? byDate[0] ?? null;
 
     // Retina tiles only where the screen can show them.
     const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
@@ -84,9 +85,8 @@ const { places } = Astro.props;
           }
         ]
       },
-      ...(bounds
-        ? { bounds, fitBoundsOptions: { padding: 60, maxZoom: 6 } }
-        : { center: [3.3792, 6.5244] as [number, number], zoom: 10.5 }),
+      center: (home ? [home.lng, home.lat] : [3.3792, 6.5244]) as [number, number],
+      zoom: 10,
       minZoom: 2,
       maxZoom: 15,
       attributionControl: false,
