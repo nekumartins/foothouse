@@ -1,0 +1,3 @@
+# The sky drifts continuously with a 5s tick plus 6s chained linear CSS transitions; no rAF loop needed.
+
+Confirmed approach (2026-07-02): sun/moon move sub-pixel per second, so a `setInterval(update, 5000)` writing CSS vars, with transitions set to `6s linear`, chains into an even glide (each tick starts a new transition toward a target only fractionally ahead). Two details matter: (1) the easing must be `linear` in live mode or you get pulse-glide-pulse; TimeOverride scrub mode swaps to `0.12s ease` via the `--sky-ease` / `--sky-ease-fn` vars. (2) On `visibilitychange` back to visible, do one update with ease `0s` (the `snapNext` flag in sky.ts) or a returning tab slides across hours of arc.

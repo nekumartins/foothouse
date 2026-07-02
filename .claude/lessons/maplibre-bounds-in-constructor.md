@@ -1,0 +1,3 @@
+# Pass bounds + fitBoundsOptions to the MapLibre constructor; a post-load fitBounds fetches world tiles first and visibly snaps.
+
+Confirmed on /map (2026-07-02): constructing with `zoom: 3` then calling `map.fitBounds(...)` after markers loaded caused a whole-world raster tile burst and a jarring reframe. Computing `LngLatBounds` from the pins before `new maplibregl.Map(...)` and passing `bounds` (or a city-scale center/zoom fallback when there are no pins) means the first painted frame is already correct; verified via request interception that only z12 tiles were fetched. Also: request @2x tiles only when `devicePixelRatio > 1.5`.
