@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://foothouse-nu.vercel.app/sitemap-index.xml

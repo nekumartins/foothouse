@@ -9,7 +9,11 @@ const settings = await getSiteSettings();
 const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
 ---
 
-<BaseLayout title="About | Neku Akpotohwo" skyMode="receded">
+<BaseLayout
+  title="About | Neku Akpotohwo"
+  description="Who Chukwuneku 'Neku' Akpotohwo is: AI-focused software engineer, organizer of GDG on Campus Babcock, writer."
+  skyMode="receded"
+>
   <div class="about">
     <header class="about__header">
       <h1>About</h1>

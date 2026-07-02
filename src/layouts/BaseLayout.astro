@@ -8,10 +8,15 @@ import Nav from '../components/Nav.astro';
 
 interface Props {
   title: string;
+  description?: string;
   skyMode?: 'full' | 'receded';
 }
 
-const { title, skyMode = 'full' } = Astro.props;
+const DEFAULT_DESCRIPTION =
+  "Chukwuneku 'Neku' Akpotohwo is an AI-focused software engineer at Babcock University. He builds intelligent systems and organizes GDG on Campus Babcock.";
+
+const { title, description = DEFAULT_DESCRIPTION, skyMode = 'full' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -19,7 +24,14 @@ const { title, skyMode = 'full' } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Neku Akpotohwo. Somewhere between an engineer and someone who won't stop asking why." />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={new URL('/avatar.png', Astro.site)} />
+    <meta name="twitter:card" content="summary" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

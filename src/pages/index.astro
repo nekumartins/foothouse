@@ -33,9 +33,27 @@ const featured =
 const otherInvolvements = featured
   ? involvements.filter((i: any) => i.id !== featured.id)
   : [];
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Chukwuneku Akpotohwo',
+  alternateName: ['Neku Akpotohwo', 'Neku'],
+  jobTitle: 'Software Engineer',
+  description: "AI-focused software engineer and organizer of GDG on Campus Babcock.",
+  affiliation: { '@type': 'CollegeOrUniversity', name: 'Babcock University' },
+  url: 'https://foothouse-nu.vercel.app',
+  email: `mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`,
+  sameAs: [
+    settings?.github || 'https://github.com/nekumartins',
+    settings?.linkedin || 'https://linkedin.com/in/nekumartins',
+    settings?.twitter,
+  ].filter(Boolean),
+};
 ---
 
-<BaseLayout title="Neku Akpotohwo" skyMode="full">
+<BaseLayout title="Neku Akpotohwo, software engineer" skyMode="full">
+  <script type="application/ld+json" set:html={JSON.stringify(personLd)} is:inline />
   <div class="home">
   <div class="threshold">
     <section class="threshold__mood" aria-hidden="true"></section>
