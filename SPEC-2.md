@@ -1,5 +1,7 @@
 # SPEC-2: Foothouse corrective rebuild
 
+Validated by dry-run (Phase 1 executed literally against the repo and passed build + guards) and line-by-line trace (Phases 2-8) on 2026-07-02; corrections v2.1 applied (drag-target gating, cloud seam wraps, JSON-LD is:inline, builder preflight).
+
 This is the current build specification, approved by the owner (Neku) on 2026-07-02. It was designed in full ahead of time; the builder executes it phase by phase and does not design. **Where anything here conflicts with `foothouse-build-spec.md`, SPEC-2 wins.** Run one phase per session with the prompt: "Read SPEC-2.md and execute Phase N exactly. Do not deviate."
 
 Background for each phase's WHY: the homepage community section was duplicated by a hardcoded fallback; copy signposted visitors around the site; the About page overexplained; recruiters could not see hireability at a glance; the sky's clouds and moon did not land; the map opened on the whole world because it fit bounds to world-spanning pins; Sanity photo uploads were one-at-a-time. Every fix below is exact.
@@ -15,6 +17,15 @@ Background for each phase's WHY: the homepage community section was duplicated b
 - Build phases IN ORDER. After each phase: `npm run build` must pass; start the dev server with `astro dev --background` (see CLAUDE.md) and run that phase's acceptance checks; then commit to `main` with author `nekumartins <akpotohwoo@gmail.com>`, unsigned, no Co-Authored-By trailer, message given at the end of the phase; `git push -u origin main`.
 - This environment cannot reach the live site, the Sanity API, or external image CDNs. Never add a runtime dependency on an external asset host.
 - Existing utilities to reuse (do not re-implement): `youtubeEmbedUrl` in `src/lib/video.ts`; `withGithubStars` in `src/lib/github.ts`; `lerpColor`, `getCelestial`, `setOverrideHour`, `getOverrideHour` in `src/scripts/sky.ts`; queries in `src/lib/queries.ts`.
+
+---
+
+## PHASE 0: Builder preflight (run at the start of EVERY phase session)
+
+1. Start from a fresh checkout of `origin/main`: `git fetch origin main && git checkout main && git merge --ff-only origin/main`.
+2. Confirm the tip is the SPEC-2 docs commit or later (`git log --oneline -1`; if the tip predates SPEC-2, STOP: your clone is stale).
+3. NEVER base work on branch `claude/foothouse-phases-3-6-mt70vs`. It is a stale June-29 clone; its only content already exists on main.
+4. Confirm `git status` is clean before editing. All commits go directly to `main`.
 
 ---
 
@@ -147,7 +158,7 @@ Keep the `/colophon` → `/about` redirect in `astro.config.mjs`.
 
 ## PHASE 3: SEO and identity. Crawlers must know who Chukwuneku Akpotohwo is.
 
-1. `astro.config.mjs`: add `site: 'https://foothouse-nu.vercel.app',` (comment: `// TODO: change to the custom domain when there is one`). Install and add the sitemap integration: `npm i @astrojs/sitemap`, `integrations: [sitemap()]`.
+1. `astro.config.mjs`: add `site: 'https://foothouse-nu.vercel.app',` (comment: `// TODO: change to the custom domain when there is one`). Install and add the sitemap integration: `npm i @astrojs/sitemap`, then `import sitemap from '@astrojs/sitemap';` at the top of the config and `integrations: [sitemap()]` in `defineConfig`.
 2. `src/layouts/BaseLayout.astro`:
    - Props become `{ title: string; description?: string; skyMode?: 'full' | 'receded' }` with default description VERBATIM: `Chukwuneku 'Neku' Akpotohwo is an AI-focused software engineer at Babcock University. He builds intelligent systems and organizes GDG on Campus Babcock.`
    - In `<head>`, replace the hardcoded meta description with `{description}` and add: canonical `<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />`; `og:title` = title, `og:description` = description, `og:type` = website, `og:url` = canonical, `og:image` = `new URL('/avatar.png', Astro.site)`; `twitter:card` = `summary`.
@@ -157,7 +168,7 @@ Keep the `/colophon` → `/about` redirect in `astro.config.mjs`.
    - `/work` (index) description: `Selected software by Neku Akpotohwo: AI systems, tools, and the stories behind them.`
    - `/writing` description: `Essays by Neku Akpotohwo on engineering, philosophy, and how minds grow.`
    - `/map` description: `Places Neku Akpotohwo has lived, travelled through, and remembers well.`
-4. JSON-LD on `/` only, in `index.astro` (use `<script type="application/ld+json" set:html={JSON.stringify(personLd)} />`):
+4. JSON-LD on `/` only, in `index.astro`. The script tag MUST carry `is:inline` or Astro will try to process/bundle it: `<script type="application/ld+json" set:html={JSON.stringify(personLd)} is:inline />`. The object:
 ```ts
 const personLd = {
   '@context': 'https://schema.org',
@@ -243,10 +254,10 @@ Each `cloudbed__layer` contains the SAME inline SVG TWICE, side by side (this ma
 
 The cloud bank inside each SVG is a filled silhouette: one `<rect>` base plus a row of `<circle>`s sharing ONE fill (`fill="url(#grad)"` where the layer's `<linearGradient id>` is unique per layer: `cb-back`, `cb-mid`, `cb-front`; gradient `x1=0 y1=0 x2=0 y2=1` with two stops: offset 0 `style="stop-color: var(--cloud-hi)"`, offset 1 `style="stop-color: var(--cloud-lo)"`). Because both copies of a layer share ids, put the `<defs>` only in the FIRST copy of each layer (ids are document-global).
 
-EXACT geometry (cx, cy, r), do not randomize:
-- BACK layer: rect x=0 y=118 width=800 height=82; circles: (40,120,34) (120,112,48) (210,120,30) (300,108,56) (395,118,38) (470,104,60) (570,116,42) (650,108,52) (740,118,36) (790,112,44)
-- MID layer: rect x=0 y=116 width=800 height=84; circles: (30,124,40) (130,110,58) (240,120,36) (330,102,64) (430,116,44) (520,100,66) (620,114,46) (710,104,58) (780,120,38)
-- FRONT layer: rect x=0 y=114 width=800 height=86; circles: (20,126,44) (140,108,66) (270,118,40) (380,98,72) (500,112,50) (610,96,70) (720,110,54) (790,122,42)
+EXACT geometry (cx, cy, r), do not randomize. Circles that overhang x=0 or x=800 have a wrap partner at cx±800 so the drift loop is seamless (the sliced part of an edge lump continues on the adjacent copy); include every circle listed, wrap partners too:
+- BACK layer: rect x=0 y=118 width=800 height=82; circles: (40,120,34) (120,112,48) (210,120,30) (300,108,56) (395,118,38) (470,104,60) (570,116,42) (650,108,52) (740,118,36) (790,112,44) (-10,112,44)
+- MID layer: rect x=0 y=116 width=800 height=84; circles: (30,124,40) (830,124,40) (130,110,58) (240,120,36) (330,102,64) (430,116,44) (520,100,66) (620,114,46) (710,104,58) (780,120,38) (-20,120,38)
+- FRONT layer: rect x=0 y=114 width=800 height=86; circles: (20,126,44) (820,126,44) (140,108,66) (270,118,40) (380,98,72) (500,112,50) (610,96,70) (720,110,54) (790,122,42) (-10,122,42)
 
 Floater clouds (small, high in the sky): `viewBox="0 0 140 60"`, silhouette = rect x=8 y=36 width=118 height=12 rx=6 + circles (24,36,18) (52,26,24) (84,32,20) (110,38,14), fill uses its own gradient with the same two var stops (ids `cb-f1`, `cb-f2`).
 
@@ -307,10 +318,24 @@ export function hourFromX(xPercent: number, isNight: boolean): number {
   return (SUN_SET + p * (SUN_RISE + 24 - SUN_SET)) % 24;
 }
 ```
-2. `Sky.astro`: the `.celestial` container keeps `pointer-events: none`, but add `pointer-events: auto; cursor: grab;` to `.celestial__body`, and while dragging (class `is-dragging`) `cursor: grabbing`. Give each body a bigger touch target: `.celestial__body::before { content: ''; position: absolute; inset: -12px; }`.
+2. `Sky.astro`: the `.celestial` container keeps `pointer-events: none`. Add `cursor: grab;` to `.celestial__body` and, while dragging (class `is-dragging`), `cursor: grabbing`. Give each body a bigger touch target: `.celestial__body::before { content: ''; position: absolute; inset: -12px; }`.
+   CRITICAL, do not skip: the sun and moon occupy IDENTICAL coordinates at all times (they crossfade in place), and the moon is the later sibling, so it sits on top. If both had `pointer-events: auto`, a daytime visitor grabbing the sun would actually grab the invisible moon and get the night hour mapping (dragging right would move time backwards through the night). Therefore do NOT put `pointer-events: auto` in the CSS. Instead, the script (step 3) toggles pointer-events per body so only the VISIBLE body is grabbable.
 3. Add a `<script>` to `Sky.astro`:
 ```ts
-import { setOverrideHour, getOverrideHour, hourFromX } from '../scripts/sky';
+import { setOverrideHour, hourFromX } from '../scripts/sky';
+
+// Only the visible body may be grabbed (see step 2 for why).
+const sun = document.querySelector<HTMLElement>('.celestial__sun');
+const moon = document.querySelector<HTMLElement>('.celestial__moon');
+function syncGrabTargets() {
+  const root = getComputedStyle(document.documentElement);
+  const sunVisible = parseFloat(root.getPropertyValue('--sun-opacity') || '0') > 0;
+  if (sun) sun.style.pointerEvents = sunVisible ? 'auto' : 'none';
+  if (moon) moon.style.pointerEvents = sunVisible ? 'none' : 'auto';
+}
+window.addEventListener('sky-update', syncGrabTargets);
+syncGrabTargets();
+
 const bodies = document.querySelectorAll<HTMLElement>('.celestial__body');
 let lastTap = 0;
 for (const body of bodies) {
@@ -348,7 +373,7 @@ let lastWish = 0;
 document.addEventListener('click', (e) => {
   if (prefersReducedMotion || !visible()) return; // night only
   const t = e.target as HTMLElement;
-  if (t.closest('a, button, input, textarea, select, iframe, [role], .now-cards, nav')) return;
+  if (t.closest('a, button, input, textarea, select, iframe, [role], .now-cards, nav, .celestial__body')) return;
   const now = Date.now();
   if (now - lastWish < 1500) return;
   lastWish = now;
@@ -360,6 +385,7 @@ No copy anywhere announces this. It is found, not explained.
 
 ### Phase 6 acceptance
 - Dev server: hover the sun → grab cursor; drag it right → sky moves toward evening live and crisply (override ease 0.12s already handles this); release → stays; double-click the sun → returns to real time; slider (when open) tracks the dragged hour. On a touch viewport (devtools emulation) the same works by finger.
+- Grab-target gating: scrub to 12:00 and drag the sun RIGHT; time must advance toward golden hour, never jump into the night range (if it does, the invisible moon is intercepting the drag; re-check step 2/3). Scrub to 23:00 and confirm the moon drags with the night mapping. Ending a moon drag must NOT spawn a shooting star.
 - At 23:00, clicking empty sky spawns a shooting star from the click point; clicking a project card does not; two fast clicks spawn only one; roughly 1 in 7 stars is lamp-gold. In daytime clicks do nothing.
 - Reduced motion: no dragging harm (drag still allowed, transitions instant), no click-stars.
 - Commit: `feat: drag the sun to move time, wish on the night sky`
@@ -375,8 +401,8 @@ No copy anywhere announces this. It is found, not explained.
 const byDate = [...places].sort((a, b) => String(b.arrived_on ?? '').localeCompare(String(a.arrived_on ?? '')));
 const home = places.find((p) => p.kind === 'home') ?? byDate[0] ?? null;
 ```
-Constructor options: `center: home ? [home.lng, home.lat] : [3.3792, 6.5244], zoom: 10,` keeping `minZoom: 2, maxZoom: 15`, the DPR-aware `tileUrl`, `attributionControl: false`, and the IntersectionObserver lazy-init exactly as they are.
-3. There must be NO `fitBounds` call anywhere in the file.
+Constructor options: `center: (home ? [home.lng, home.lat] : [3.3792, 6.5244]) as [number, number], zoom: 10,` keeping `minZoom: 2, maxZoom: 15`, the DPR-aware `tileUrl`, `attributionControl: false`, and the IntersectionObserver lazy-init exactly as they are. (Keep the `as [number, number]` cast; without it the editor flags LngLatLike and a literal reading may invite an unwanted "fix".)
+3. There must be NO `fitBounds` call anywhere in the file. Intended behavior, not a bug: the map never reframes itself; a visitor reaches the other continents by panning and zooming out, exactly like Snapchat opens on you and lets you wander.
 
 ### Phase 7 acceptance
 - With multi-continent test places injected in dev (temporarily hardcode 3 places incl. one `kind:'home'` in Lagos, one in Prague, one in Nairobi), the first rendered frame is Lagos at city scale; the world is never shown on load; panning/zooming out reaches the other pins; network tab shows no tiles below z8 on load. Revert the hardcode.
