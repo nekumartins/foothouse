@@ -384,7 +384,7 @@ export async function getPlaces() {
       note,
       sort,
       "place_media": media[]{
-        "url": image.asset->url + "?w=1200&auto=format",
+        "url": coalesce(asset->url, image.asset->url) + "?w=1200&auto=format",
         caption
       }
     }`);

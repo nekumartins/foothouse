@@ -45,18 +45,16 @@ export default {
     {
       name: 'media',
       title: 'Photos',
+      description: 'Drag several photos in at once; captions can be added after.',
       type: 'array',
       of: [
         {
-          type: 'object',
+          type: 'image',
+          options: { hotspot: true },
           fields: [
-            { name: 'image', title: 'Image', type: 'image', options: { hotspot: true } },
             { name: 'caption', title: 'Caption', type: 'string' },
             { name: 'taken_on', title: 'Taken on', type: 'date' },
           ],
-          preview: {
-            select: { title: 'caption', media: 'image' },
-          },
         },
       ],
     },
