@@ -16,59 +16,35 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
     </header>
 
     <section class="about__section">
-      <p>
-        I'm Neku Akpotohwo. I study at Babcock University, I build software, and I'm somewhere between an engineer and someone who won't stop asking why. Most of what I do comes down to one idea: intelligence is built, not found. You can build it into software. You can build it into a room full of people. You can build it into yourself, slowly, on purpose.
-      </p>
-      <p>
-        This page is the longer version of that.
-      </p>
+      <p>I'm Chukwuneku Akpotohwo. Most people call me Neku. I'm a software engineer focused on AI, studying at Babcock University, and most of what I believe fits in one line: intelligence is built, not found.</p>
+      <p>Since 2024 I've organized GDG on Campus Babcock, one of Nigeria's premier tech communities and the largest developer community on campus. We run summits, a publication, and a room where a thousand-something people teach each other things nobody assigned them.</p>
     </section>
 
-    <section class="about__section" id="gdg">
-      <h2>GDG Babcock</h2>
-      <p>
-        For the past year I've helped build GDG Babcock, the Google developer community on my campus. It exists because the people around me wanted to build things together, and it grows because they teach each other.
-      </p>
-      <p>
-        Today it's the largest developer community Babcock has. We've thrown summits, started a publication so people can think in public, and watched a thousand-something people learn things nobody assigned them.
-      </p>
-      <p>
-        The part I care about most is that it runs on structure, not on me. Teams own their tracks, writers own the publication, and the community keeps producing people who go off and start things of their own. That was the point.
-      </p>
-
-      {aboutVideo && (
+    {aboutVideo && (
+      <section class="about__video">
         <div class="video-embed">
           <iframe
             src={aboutVideo}
-            title="A conversation about GDG Babcock"
+            title="Neku on GDG Babcock"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
             loading="lazy"
           ></iframe>
         </div>
-      )}
-    </section>
+      </section>
+    )}
 
     <section class="about__section">
-      <h2>What I think about</h2>
-      <p>
-        Away from a keyboard I read cognitive psychology and try to take ideas apart until I hit something that doesn't reduce any further. I care about intellectual culture, the habits that make a group of people smarter than any one of its members. And I think a lot about development in Africa, which to me is the same problem at its largest scale: nurturing minds, deliberately, in numbers.
-      </p>
+      <p>Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.</p>
     </section>
 
-    <section class="about__section">
-      <h2>How I work on myself</h2>
-      <p>
-        I treat myself as one of the systems I work on. I keep disciplines the way other people keep tools: writing to find out what I actually think, training attention like a muscle, and being honest about ambition instead of embarrassed by it.
-      </p>
-    </section>
-
-    <section class="about__section about__colophon">
-      <h2>How this house is built</h2>
-      <p>
-        This site is Astro with a small Sanity studio behind it, hand-built late at night, mostly. The sky up there follows your clock, not mine. The sun and moon are really moving, just slower than you can notice, which felt right for a site about building things patiently.
-      </p>
-    </section>
+    <nav class="about__reach" aria-label="Profiles and contact">
+      <a href={`mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`}>Email</a>
+      <a href={settings?.github || 'https://github.com/nekumartins'} target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      {settings?.twitter && <a href={settings.twitter} target="_blank" rel="noopener noreferrer">X</a>}
+      {settings?.resume_url && <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Resume</a>}
+    </nav>
   </div>
 
   <Footer />
@@ -117,15 +93,28 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
     text-decoration-color: var(--lamp);
   }
 
-  .about__colophon h2 {
-    font-size: var(--text-sm);
-    color: var(--faint);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .about__video {
+    margin-bottom: var(--space-2xl);
   }
 
-  .about__colophon p {
+  .about__reach {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-2xl);
+  }
+
+  .about__reach a {
     font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease, color 0.3s ease;
+  }
+
+  .about__reach a:hover {
+    color: var(--lamp);
+    text-decoration-color: var(--lamp);
   }
 
   .video-embed {
