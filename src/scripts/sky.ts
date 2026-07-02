@@ -2,14 +2,16 @@ interface SkyPalette {
   top: string;
   mid: string;
   bottom: string;
+  cloudHi: string;
+  cloudLo: string;
 }
 
 const SKY_STATES: Record<string, SkyPalette> = {
-  night: { top: '#0B0D1A', mid: '#141833', bottom: '#1A1530' },
-  dawn: { top: '#202B4E', mid: '#5E3349', bottom: '#A56A44' },
-  day: { top: '#234571', mid: '#365F8C', bottom: '#5184B0' },
-  golden: { top: '#33254A', mid: '#8A5326', bottom: '#BC7C39' },
-  dusk: { top: '#1F1838', mid: '#4A2A60', bottom: '#9A4A6A' },
+  night: { top: '#0B0D1A', mid: '#141833', bottom: '#1A1530', cloudHi: '#3A4066', cloudLo: '#232849' },
+  dawn: { top: '#202B4E', mid: '#5E3349', bottom: '#A56A44', cloudHi: '#E8B78C', cloudLo: '#7A5A6E' },
+  day: { top: '#234571', mid: '#365F8C', bottom: '#5184B0', cloudHi: '#FFFFFF', cloudLo: '#A8C4DC' },
+  golden: { top: '#33254A', mid: '#8A5326', bottom: '#BC7C39', cloudHi: '#F5C98A', cloudLo: '#9A6A52' },
+  dusk: { top: '#1F1838', mid: '#4A2A60', bottom: '#9A4A6A', cloudHi: '#B48AA6', cloudLo: '#4E3A66' },
 };
 
 type SkyState = keyof typeof SKY_STATES;
@@ -53,6 +55,8 @@ function getBlendedPalette(fractionalHour: number): SkyPalette {
         top: lerpColor(from.top, to.top, t),
         mid: lerpColor(from.mid, to.mid, t),
         bottom: lerpColor(from.bottom, to.bottom, t),
+        cloudHi: lerpColor(from.cloudHi, to.cloudHi, t),
+        cloudLo: lerpColor(from.cloudLo, to.cloudLo, t),
       };
     }
   }
@@ -65,6 +69,8 @@ function applySky(palette: SkyPalette) {
   root.style.setProperty('--sky-top', palette.top);
   root.style.setProperty('--sky-mid', palette.mid);
   root.style.setProperty('--sky-bottom', palette.bottom);
+  root.style.setProperty('--cloud-hi', palette.cloudHi);
+  root.style.setProperty('--cloud-lo', palette.cloudLo);
 }
 
 function getStarfieldOpacity(hour: number): number {

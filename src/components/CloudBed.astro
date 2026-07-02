@@ -1,0 +1,231 @@
+---
+// Illustrated cloud bank anchored to the bottom of the viewport, plus two
+// small floaters drifting high in the sky. Colored entirely by the
+// --cloud-hi/--cloud-lo custom properties, which sky.ts already crossfades
+// continuously with the rest of the sky. No JS in this component.
+---
+
+<div class="cloudbed" aria-hidden="true">
+  <div class="cloudbed__layer cloudbed__layer--back">
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <defs>
+        <linearGradient id="cb-back" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style="stop-color: var(--cloud-hi)" />
+          <stop offset="1" style="stop-color: var(--cloud-lo)" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="118" width="800" height="82" fill="url(#cb-back)" />
+      <circle cx="40" cy="120" r="34" fill="url(#cb-back)" />
+      <circle cx="120" cy="112" r="48" fill="url(#cb-back)" />
+      <circle cx="210" cy="120" r="30" fill="url(#cb-back)" />
+      <circle cx="300" cy="108" r="56" fill="url(#cb-back)" />
+      <circle cx="395" cy="118" r="38" fill="url(#cb-back)" />
+      <circle cx="470" cy="104" r="60" fill="url(#cb-back)" />
+      <circle cx="570" cy="116" r="42" fill="url(#cb-back)" />
+      <circle cx="650" cy="108" r="52" fill="url(#cb-back)" />
+      <circle cx="740" cy="118" r="36" fill="url(#cb-back)" />
+      <circle cx="790" cy="112" r="44" fill="url(#cb-back)" />
+      <circle cx="-10" cy="112" r="44" fill="url(#cb-back)" />
+    </svg>
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <rect x="0" y="118" width="800" height="82" fill="url(#cb-back)" />
+      <circle cx="40" cy="120" r="34" fill="url(#cb-back)" />
+      <circle cx="120" cy="112" r="48" fill="url(#cb-back)" />
+      <circle cx="210" cy="120" r="30" fill="url(#cb-back)" />
+      <circle cx="300" cy="108" r="56" fill="url(#cb-back)" />
+      <circle cx="395" cy="118" r="38" fill="url(#cb-back)" />
+      <circle cx="470" cy="104" r="60" fill="url(#cb-back)" />
+      <circle cx="570" cy="116" r="42" fill="url(#cb-back)" />
+      <circle cx="650" cy="108" r="52" fill="url(#cb-back)" />
+      <circle cx="740" cy="118" r="36" fill="url(#cb-back)" />
+      <circle cx="790" cy="112" r="44" fill="url(#cb-back)" />
+      <circle cx="-10" cy="112" r="44" fill="url(#cb-back)" />
+    </svg>
+    <!-- second copy intentionally omits <defs>: SVG ids are document-global -->
+  </div>
+
+  <div class="cloudbed__layer cloudbed__layer--mid">
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <defs>
+        <linearGradient id="cb-mid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style="stop-color: var(--cloud-hi)" />
+          <stop offset="1" style="stop-color: var(--cloud-lo)" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="116" width="800" height="84" fill="url(#cb-mid)" />
+      <circle cx="30" cy="124" r="40" fill="url(#cb-mid)" />
+      <circle cx="830" cy="124" r="40" fill="url(#cb-mid)" />
+      <circle cx="130" cy="110" r="58" fill="url(#cb-mid)" />
+      <circle cx="240" cy="120" r="36" fill="url(#cb-mid)" />
+      <circle cx="330" cy="102" r="64" fill="url(#cb-mid)" />
+      <circle cx="430" cy="116" r="44" fill="url(#cb-mid)" />
+      <circle cx="520" cy="100" r="66" fill="url(#cb-mid)" />
+      <circle cx="620" cy="114" r="46" fill="url(#cb-mid)" />
+      <circle cx="710" cy="104" r="58" fill="url(#cb-mid)" />
+      <circle cx="780" cy="120" r="38" fill="url(#cb-mid)" />
+      <circle cx="-20" cy="120" r="38" fill="url(#cb-mid)" />
+    </svg>
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <rect x="0" y="116" width="800" height="84" fill="url(#cb-mid)" />
+      <circle cx="30" cy="124" r="40" fill="url(#cb-mid)" />
+      <circle cx="830" cy="124" r="40" fill="url(#cb-mid)" />
+      <circle cx="130" cy="110" r="58" fill="url(#cb-mid)" />
+      <circle cx="240" cy="120" r="36" fill="url(#cb-mid)" />
+      <circle cx="330" cy="102" r="64" fill="url(#cb-mid)" />
+      <circle cx="430" cy="116" r="44" fill="url(#cb-mid)" />
+      <circle cx="520" cy="100" r="66" fill="url(#cb-mid)" />
+      <circle cx="620" cy="114" r="46" fill="url(#cb-mid)" />
+      <circle cx="710" cy="104" r="58" fill="url(#cb-mid)" />
+      <circle cx="780" cy="120" r="38" fill="url(#cb-mid)" />
+      <circle cx="-20" cy="120" r="38" fill="url(#cb-mid)" />
+    </svg>
+  </div>
+
+  <div class="cloudbed__layer cloudbed__layer--front">
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <defs>
+        <linearGradient id="cb-front" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style="stop-color: var(--cloud-hi)" />
+          <stop offset="1" style="stop-color: var(--cloud-lo)" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="114" width="800" height="86" fill="url(#cb-front)" />
+      <circle cx="20" cy="126" r="44" fill="url(#cb-front)" />
+      <circle cx="820" cy="126" r="44" fill="url(#cb-front)" />
+      <circle cx="140" cy="108" r="66" fill="url(#cb-front)" />
+      <circle cx="270" cy="118" r="40" fill="url(#cb-front)" />
+      <circle cx="380" cy="98" r="72" fill="url(#cb-front)" />
+      <circle cx="500" cy="112" r="50" fill="url(#cb-front)" />
+      <circle cx="610" cy="96" r="70" fill="url(#cb-front)" />
+      <circle cx="720" cy="110" r="54" fill="url(#cb-front)" />
+      <circle cx="790" cy="122" r="42" fill="url(#cb-front)" />
+      <circle cx="-10" cy="122" r="42" fill="url(#cb-front)" />
+    </svg>
+    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
+      <rect x="0" y="114" width="800" height="86" fill="url(#cb-front)" />
+      <circle cx="20" cy="126" r="44" fill="url(#cb-front)" />
+      <circle cx="820" cy="126" r="44" fill="url(#cb-front)" />
+      <circle cx="140" cy="108" r="66" fill="url(#cb-front)" />
+      <circle cx="270" cy="118" r="40" fill="url(#cb-front)" />
+      <circle cx="380" cy="98" r="72" fill="url(#cb-front)" />
+      <circle cx="500" cy="112" r="50" fill="url(#cb-front)" />
+      <circle cx="610" cy="96" r="70" fill="url(#cb-front)" />
+      <circle cx="720" cy="110" r="54" fill="url(#cb-front)" />
+      <circle cx="790" cy="122" r="42" fill="url(#cb-front)" />
+      <circle cx="-10" cy="122" r="42" fill="url(#cb-front)" />
+    </svg>
+  </div>
+
+  <svg class="cloudbed__floater cloudbed__floater--one" viewBox="0 0 140 60">
+    <defs>
+      <linearGradient id="cb-f1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--cloud-hi)" />
+        <stop offset="1" style="stop-color: var(--cloud-lo)" />
+      </linearGradient>
+    </defs>
+    <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f1)" />
+    <circle cx="24" cy="36" r="18" fill="url(#cb-f1)" />
+    <circle cx="52" cy="26" r="24" fill="url(#cb-f1)" />
+    <circle cx="84" cy="32" r="20" fill="url(#cb-f1)" />
+    <circle cx="110" cy="38" r="14" fill="url(#cb-f1)" />
+  </svg>
+
+  <svg class="cloudbed__floater cloudbed__floater--two" viewBox="0 0 140 60">
+    <defs>
+      <linearGradient id="cb-f2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--cloud-hi)" />
+        <stop offset="1" style="stop-color: var(--cloud-lo)" />
+      </linearGradient>
+    </defs>
+    <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f2)" />
+    <circle cx="24" cy="36" r="18" fill="url(#cb-f2)" />
+    <circle cx="52" cy="26" r="24" fill="url(#cb-f2)" />
+    <circle cx="84" cy="32" r="20" fill="url(#cb-f2)" />
+    <circle cx="110" cy="38" r="14" fill="url(#cb-f2)" />
+  </svg>
+</div>
+
+<style>
+  .cloudbed {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: clamp(140px, 22vh, 260px);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .cloudbed__layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    width: 200%;
+    height: 100%;
+  }
+
+  .cloudbed__layer svg {
+    flex: 0 0 50%;
+  }
+
+  .cloudbed__layer--back {
+    opacity: 0.5;
+    filter: blur(2px);
+    animation: cb-drift 140s linear infinite;
+  }
+
+  .cloudbed__layer--mid {
+    opacity: 0.75;
+    filter: blur(1px);
+    animation: cb-drift 100s linear infinite reverse;
+  }
+
+  .cloudbed__layer--front {
+    opacity: 0.95;
+    animation: cb-drift 70s linear infinite;
+  }
+
+  @keyframes cb-drift {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .cloudbed__floater {
+    position: fixed;
+    width: 140px;
+    height: 60px;
+    opacity: 0.5;
+    animation: cb-float linear infinite;
+  }
+
+  .cloudbed__floater--one {
+    top: 16%;
+    animation-duration: 160s;
+    animation-delay: -40s;
+  }
+
+  .cloudbed__floater--two {
+    top: 27%;
+    width: 100px;
+    height: 43px;
+    opacity: 0.35;
+    animation-duration: 220s;
+    animation-delay: -130s;
+  }
+
+  @keyframes cb-float {
+    from { transform: translateX(-20vw); }
+    to { transform: translateX(120vw); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cloudbed__layer,
+    .cloudbed__floater {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cloudbed {
+      height: clamp(110px, 16vh, 180px);
+    }
+  }
+</style>

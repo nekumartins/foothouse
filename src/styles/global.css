@@ -85,11 +85,23 @@
   inherits: true;
   initial-value: #1A1530;
 }
+@property --cloud-hi {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #3A4066;
+}
+@property --cloud-lo {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #232849;
+}
 
 html {
   transition: --sky-top var(--sky-ease, 6s) var(--sky-ease-fn, linear),
               --sky-mid var(--sky-ease, 6s) var(--sky-ease-fn, linear),
-              --sky-bottom var(--sky-ease, 6s) var(--sky-ease-fn, linear);
+              --sky-bottom var(--sky-ease, 6s) var(--sky-ease-fn, linear),
+              --cloud-hi var(--sky-ease, 6s) var(--sky-ease-fn, linear),
+              --cloud-lo var(--sky-ease, 6s) var(--sky-ease-fn, linear);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -115,6 +127,8 @@ html {
   --sky-top: #0B0D1A;
   --sky-mid: #141833;
   --sky-bottom: #1A1530;
+  --cloud-hi: #3A4066;
+  --cloud-lo: #232849;
 
   /* Type scale */
   --font-display: 'Fraunces', Georgia, serif;
