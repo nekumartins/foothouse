@@ -4,7 +4,6 @@ export default {
   type: 'document',
   fields: [
     { name: 'bio', title: 'Bio', type: 'text', rows: 3, description: 'One-liner shown under your name' },
-    { name: 'thesis', title: 'Thesis line', type: 'string', description: 'One quiet sentence under the one-liner' },
     { name: 'contact_email', title: 'Contact email', type: 'string' },
     { name: 'linkedin', title: 'LinkedIn URL', type: 'url' },
     { name: 'github', title: 'GitHub URL', type: 'url' },
