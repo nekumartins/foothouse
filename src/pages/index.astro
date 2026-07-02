@@ -6,7 +6,6 @@ import Footer from '../components/Footer.astro';
 import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
-import { youtubeEmbedUrl } from '../lib/video';
 
 const [now, projects, settings, involvements] = await Promise.all([
   getNow(),
@@ -28,8 +27,22 @@ if (now) {
 const projectsWithStars = await withGithubStars(projects);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
+const thesis = settings?.thesis || 'I build minds. In software, in rooms full of people, and in myself.';
 
-const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featured_video_url) : null;
+// The community section leads with one featured story. Editors mark an
+// involvement as featured in Studio; until then this fallback keeps the
+// section alive.
+const fallbackFeatured = {
+  id: 'gdg-fallback',
+  title: 'GDG Babcock',
+  role: 'Community I help run',
+  story:
+    "Some of what I'm proudest of isn't code. GDG Babcock started as a handful of us who wanted a place to build together, and in a year it became the largest developer community on campus. We've thrown summits, started a publication, and watched a thousand-something people teach each other things nobody assigned them.",
+};
+const featuredInvolvement = involvements.find((i: any) => i.featured && i.story) ?? fallbackFeatured;
+const otherInvolvements = involvements.filter(
+  (i: any) => i.id !== featuredInvolvement.id && i.title !== featuredInvolvement.title
+);
 ---
 
 <BaseLayout title="Neku Akpotohwo" skyMode="full">
@@ -41,6 +54,7 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     <section class="threshold__person">
       <h1 class="threshold__name">Neku Akpotohwo</h1>
       <p class="threshold__tagline">{bio}</p>
+      <p class="threshold__thesis">{thesis}</p>
     </section>
 
     <!-- Presence: now-cards -->
@@ -61,11 +75,21 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     )}
 
     <!-- Community & involvement -->
-    {involvements.length > 0 && (
-      <section class="threshold__community">
-        <h2 class="section-label">Community</h2>
+    <section class="threshold__community">
+      <h2 class="section-label">Community</h2>
+      <div class="community-feature">
+        <h3 class="community-feature__title">{featuredInvolvement.title}</h3>
+        {featuredInvolvement.role && (
+          <span class="community-feature__role">{featuredInvolvement.role}</span>
+        )}
+        {featuredInvolvement.story && (
+          <p class="community-feature__story">{featuredInvolvement.story}</p>
+        )}
+        <a class="community-feature__more" href="/about#gdg">The longer story is on the About page.</a>
+      </div>
+      {otherInvolvements.length > 0 && (
         <div class="involvement-list">
-          {involvements.map((item: any) => (
+          {otherInvolvements.map((item: any) => (
             <div class="involvement-item">
               <div class="involvement-item__content">
                 <h3 class="involvement-item__title">
@@ -84,23 +108,8 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
             </div>
           ))}
         </div>
-      </section>
-    )}
-
-    <!-- Featured video -->
-    {videoEmbed && (
-      <section class="threshold__video">
-        <div class="video-embed">
-          <iframe
-            src={videoEmbed}
-            title="Featured video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
-        </div>
-      </section>
-    )}
+      )}
+    </section>
 
     <!-- Doors -->
     <section class="threshold__doors">
@@ -168,6 +177,16 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     line-height: 1.6;
   }
 
+  .threshold__thesis {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-base);
+    color: var(--faint);
+    max-width: 480px;
+    margin: var(--space-md) auto 0;
+    line-height: 1.6;
+  }
+
   /* ── Presence ── */
 
   .threshold__presence {
@@ -214,6 +233,52 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
     animation-delay: 1s;
+  }
+
+  .community-feature {
+    padding: var(--space-xl);
+    background: rgba(30, 24, 19, 0.25);
+    border: 1px solid rgba(236, 227, 214, 0.06);
+    border-radius: 12px;
+    margin-bottom: var(--space-lg);
+  }
+
+  .community-feature__title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-xs);
+    line-height: 1.3;
+  }
+
+  .community-feature__role {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-md);
+  }
+
+  .community-feature__story {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: var(--space-md);
+  }
+
+  .community-feature__more {
+    font-size: var(--text-sm);
+    color: var(--lamp);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .community-feature__more:hover {
+    text-decoration-color: var(--lamp);
   }
 
   .involvement-list {
@@ -278,32 +343,6 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     line-height: 1.5;
   }
 
-  /* ── Video ── */
-
-  .threshold__video {
-    max-width: 560px;
-    width: 100%;
-    margin-bottom: var(--space-3xl);
-    animation: fadeUp 1.2s ease both;
-    animation-delay: 1.1s;
-  }
-
-  .video-embed {
-    position: relative;
-    padding-bottom: 56.25%;
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--raised);
-  }
-
-  .video-embed iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
   /* ── Doors ── */
 
   .threshold__doors {
@@ -311,7 +350,7 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     text-align: center;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
-    animation-delay: 1.2s;
+    animation-delay: 1.1s;
   }
 
   .threshold__invitation {
@@ -348,7 +387,6 @@ const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featu
     .threshold__presence,
     .threshold__projects,
     .threshold__community,
-    .threshold__video,
     .threshold__doors {
       animation: none;
     }

@@ -27,13 +27,13 @@ export async function getSiteSettings() {
   if (!sanityConfigured || !sanityClient) return null;
   return sanityClient.fetch(`*[_type == "siteSettings"][0]{
     bio,
+    thesis,
     contact_email,
     linkedin,
     github,
     twitter,
     instagram,
     "resume_url": resume.asset->url,
-    featured_video_url,
     about_video_url
   }`);
 }
@@ -74,6 +74,8 @@ export async function getInvolvements() {
     role,
     blurb,
     url,
+    featured,
+    story,
     sort
   }`) ?? [];
 }
