@@ -1,0 +1,3 @@
+# Never hardcode fallback content that can render alongside CMS content; it duplicates the moment the CMS has a real entry.
+
+Confirmed failure (2026-07-02): the homepage community section hardcoded a fallback "GDG Babcock" story card for when no involvement was marked featured. The owner's real Sanity entry is titled "Google Developer Group on Campus, Babcock University", so title-based dedup could not match, and both rendered as two community blocks on the live site. Rule: sections render only from CMS data (pick `featured` else first entry, exclude the chosen one by id from the rest); if the CMS is empty the section is absent, never replaced with invented copy.
