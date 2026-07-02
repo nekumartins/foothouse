@@ -73,8 +73,21 @@
 
   let lastTime = 0;
 
+  // The sky sets this canvas's opacity; there is nothing worth animating
+  // while it's invisible (daytime) or the tab is hidden.
+  let running = false;
+
+  function visible() {
+    return parseFloat(canvas.style.opacity || '0') > 0;
+  }
+
   function draw(time: number) {
-    if (!ctx) return;
+    if (!ctx || !running) return;
+    if (document.hidden || !visible()) {
+      running = false;
+      return;
+    }
+
     const dt = time - lastTime;
     lastTime = time;
 
@@ -123,12 +136,44 @@
       }
     }
 
+    if (prefersReducedMotion) {
+      // one static frame is all a still sky needs
+      running = false;
+      return;
+    }
+
     requestAnimationFrame(draw);
   }
 
+  function start() {
+    if (running || document.hidden || !visible()) return;
+    running = true;
+    lastTime = performance.now();
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('sky-update', () => start());
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) start();
+  });
+
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      resize();
+      if (prefersReducedMotion) {
+        // redraw the static frame at the new size
+        running = true;
+        draw(performance.now());
+      } else {
+        start();
+      }
+    }, 150);
+  });
+
   resize();
-  window.addEventListener('resize', resize);
-  requestAnimationFrame(draw);
+  start();
 </script>
 
 <style>
