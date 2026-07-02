@@ -3,6 +3,8 @@ interface Props {
   project: {
     name: string;
     tagline: string;
+    slug?: string;
+    has_story?: boolean;
     repo_url?: string;
     live_url?: string;
     github_sync?: boolean;
@@ -11,11 +13,19 @@ interface Props {
 }
 
 const { project } = Astro.props;
-const href = project.live_url || project.repo_url;
+// Projects with a written case study open their own room; the rest link out.
+const hasStory = Boolean(project.has_story && project.slug);
+const href = hasStory ? `/work/${project.slug}` : project.live_url || project.repo_url;
+const external = Boolean(href) && !hasStory;
 ---
 
 {href ? (
-  <a href={href} target="_blank" rel="noopener noreferrer" class="project-card">
+  <a
+    href={href}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener noreferrer' : undefined}
+    class="project-card"
+  >
     <div class="project-card__inner">
       <h3 class="project-card__name">
         {project.name}
@@ -24,6 +34,7 @@ const href = project.live_url || project.repo_url;
         </svg>
       </h3>
       <p class="project-card__tagline">{project.tagline}</p>
+      {hasStory && <span class="project-card__story">case study</span>}
     </div>
     {project.github_sync && project.stars != null && (
       <span class="project-card__stars">
@@ -102,6 +113,14 @@ const href = project.live_url || project.repo_url;
     font-size: var(--text-sm);
     color: var(--muted);
     line-height: 1.5;
+  }
+
+  .project-card__story {
+    display: inline-block;
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--faint);
+    letter-spacing: 0.06em;
   }
 
   .project-card__stars {

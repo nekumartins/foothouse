@@ -45,13 +45,15 @@ export async function getProjects() {
     return sanityClient.fetch(`*[_type == "project" && status == "active" && featured == true] | order(sort asc) {
       "id": _id,
       name,
+      "slug": slug.current,
       tagline,
       repo_url,
       live_url,
       github_sync,
       featured,
       sort,
-      status
+      status,
+      "has_story": defined(problem) || defined(approach) || defined(outcome) || defined(body)
     }`) ?? [];
   }
   if (!supabase) return [];
@@ -62,6 +64,36 @@ export async function getProjects() {
     .eq('featured', true)
     .order('sort');
   return data ?? [];
+}
+
+export async function getProjectBySlug(slug: string) {
+  if (!sanityConfigured || !sanityClient) return null;
+  return sanityClient.fetch(
+    `*[_type == "project" && slug.current == $slug][0]{
+      "id": _id,
+      name,
+      "slug": slug.current,
+      tagline,
+      problem,
+      approach,
+      outcome,
+      body,
+      repo_url,
+      live_url,
+      github_sync,
+      status
+    }`,
+    { slug },
+  );
+}
+
+export async function getAllProjectStorySlugs() {
+  if (!sanityConfigured || !sanityClient) return [];
+  return sanityClient.fetch(
+    `*[_type == "project" && defined(slug.current) && (defined(problem) || defined(approach) || defined(outcome) || defined(body))]{
+      "slug": slug.current
+    }`,
+  ) ?? [];
 }
 
 // ── Involvements (Sanity only) ──

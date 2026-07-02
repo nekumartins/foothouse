@@ -1,0 +1,194 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Footer from '../../components/Footer.astro';
+import { getProjectBySlug, getAllProjectStorySlugs } from '../../lib/queries';
+
+export async function getStaticPaths() {
+  const projects = await getAllProjectStorySlugs();
+  return projects.map((p: any) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const project = await getProjectBySlug(slug!);
+
+if (!project) {
+  return Astro.redirect('/work');
+}
+
+let rendered: string | null = null;
+if (project.body) {
+  const { default: markdownit } = await import('markdown-it');
+  const md = markdownit({ html: true, typographer: false });
+  rendered = md.render(project.body);
+}
+
+const sections = [
+  { label: 'The problem', text: project.problem },
+  { label: 'The approach', text: project.approach },
+  { label: 'What came of it', text: project.outcome },
+].filter((s) => s.text);
+---
+
+<BaseLayout title={`${project.name} | Neku Akpotohwo`} skyMode="receded">
+  <article class="case">
+    <header class="case__header">
+      <a href="/work" class="case__back">&larr; Work</a>
+      <h1 class="case__title">{project.name}</h1>
+      {project.tagline && <p class="case__tagline">{project.tagline}</p>}
+      {(project.live_url || project.repo_url) && (
+        <div class="case__links">
+          {project.live_url && (
+            <a href={project.live_url} target="_blank" rel="noopener noreferrer">See it live &#8599;</a>
+          )}
+          {project.repo_url && (
+            <a href={project.repo_url} target="_blank" rel="noopener noreferrer">Read the code &#8599;</a>
+          )}
+        </div>
+      )}
+    </header>
+
+    {sections.map((section) => (
+      <section class="case__section">
+        <h2>{section.label}</h2>
+        <p>{section.text}</p>
+      </section>
+    ))}
+
+    {rendered && <div class="case__body" set:html={rendered} />}
+  </article>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .case {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+  }
+
+  .case__header {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .case__back {
+    font-size: var(--text-sm);
+    color: var(--faint);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: var(--space-lg);
+    transition: color 0.3s ease;
+  }
+
+  .case__back:hover {
+    color: var(--paper);
+  }
+
+  .case__title {
+    font-family: var(--font-display);
+    font-size: clamp(var(--text-2xl), 5vw, var(--text-4xl));
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: var(--space-md);
+  }
+
+  .case__tagline {
+    font-size: var(--text-base);
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .case__links {
+    display: flex;
+    gap: var(--space-lg);
+    font-size: var(--text-sm);
+  }
+
+  .case__links a {
+    color: var(--lamp);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .case__links a:hover {
+    text-decoration-color: var(--lamp);
+  }
+
+  .case__section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .case__section h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-md);
+  }
+
+  .case__section p {
+    font-size: var(--text-base);
+    line-height: 1.8;
+    color: var(--muted);
+    white-space: pre-line;
+  }
+
+  .case__body {
+    font-size: var(--text-base);
+    line-height: 1.8;
+    color: var(--paper);
+    margin-top: var(--space-2xl);
+  }
+
+  .case__body :global(h1) { display: none; }
+
+  .case__body :global(h2),
+  .case__body :global(h3) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-md);
+    line-height: 1.3;
+  }
+
+  .case__body :global(h2) { font-size: var(--text-xl); }
+  .case__body :global(h3) { font-size: var(--text-lg); }
+
+  .case__body :global(p) { margin-bottom: var(--space-lg); }
+
+  .case__body :global(code) {
+    background: var(--raised);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .case__body :global(pre) {
+    background: var(--raised);
+    padding: var(--space-lg);
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: var(--space-xl) 0;
+  }
+
+  .case__body :global(pre code) { background: none; padding: 0; }
+
+  .case__body :global(a) {
+    color: var(--lamp);
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+  }
+
+  .case__body :global(a:hover) {
+    text-decoration-color: var(--lamp);
+  }
+
+  @media (max-width: 480px) {
+    .case {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+  }
+</style>

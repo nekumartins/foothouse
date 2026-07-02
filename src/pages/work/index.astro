@@ -1,9 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import ProjectCard from '../components/ProjectCard.astro';
-import Footer from '../components/Footer.astro';
-import { getProjects } from '../lib/queries';
-import { withGithubStars } from '../lib/github';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Footer from '../../components/Footer.astro';
+import { getProjects } from '../../lib/queries';
+import { withGithubStars } from '../../lib/github';
 
 const projects = await getProjects();
 const projectsWithStars = await withGithubStars(projects);
