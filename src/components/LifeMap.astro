@@ -49,6 +49,16 @@ const { places } = Astro.props;
     const container = document.getElementById('life-map');
     if (!container) return;
 
+    // Frame the pins before the map ever draws, so the first painted frame is
+    // already the life-map view and no world-spanning tiles are fetched.
+    const bounds = places.length > 0 ? new maplibregl.LngLatBounds() : null;
+    if (bounds) for (const p of places) bounds.extend([p.lng, p.lat]);
+
+    // Retina tiles only where the screen can show them.
+    const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
+      ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+      : 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+
     const map = new maplibregl.Map({
       container: 'life-map',
       style: {
@@ -56,9 +66,7 @@ const { places } = Astro.props;
         sources: {
           'carto': {
             type: 'raster',
-            tiles: [
-              'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
-            ],
+            tiles: [tileUrl],
             tileSize: 256,
             attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
           }
@@ -76,8 +84,11 @@ const { places } = Astro.props;
           }
         ]
       },
-      center: [3.3792, 6.5244],
-      zoom: 3,
+      ...(bounds
+        ? { bounds, fitBoundsOptions: { padding: 60, maxZoom: 6 } }
+        : { center: [3.3792, 6.5244] as [number, number], zoom: 10.5 }),
+      minZoom: 2,
+      maxZoom: 15,
       attributionControl: false,
     });
 
@@ -257,11 +268,6 @@ const { places } = Astro.props;
         .addTo(map);
     }
 
-    if (places.length > 0) {
-      const bounds = new maplibregl.LngLatBounds();
-      for (const p of places) bounds.extend([p.lng, p.lat]);
-      map.fitBounds(bounds, { padding: 60, maxZoom: 6 });
-    }
   }
 
   if ('IntersectionObserver' in window) {
