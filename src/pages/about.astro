@@ -1,0 +1,154 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteSettings } from '../lib/queries';
+import { youtubeEmbedUrl } from '../lib/video';
+
+const settings = await getSiteSettings();
+
+const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
+---
+
+<BaseLayout title="About | Neku Akpotohwo" skyMode="receded">
+  <div class="about">
+    <header class="about__header">
+      <h1>About</h1>
+    </header>
+
+    <section class="about__section">
+      <p>
+        I'm Neku Akpotohwo. I study at Babcock University, I build software, and I'm somewhere between an engineer and someone who won't stop asking why. Most of what I do comes down to one idea: intelligence is built, not found. You can build it into software. You can build it into a room full of people. You can build it into yourself, slowly, on purpose.
+      </p>
+      <p>
+        This page is the longer version of that.
+      </p>
+    </section>
+
+    <section class="about__section" id="gdg">
+      <h2>GDG Babcock</h2>
+      <p>
+        For the past year I've helped build GDG Babcock, the Google developer community on my campus. It exists because the people around me wanted to build things together, and it grows because they teach each other.
+      </p>
+      <p>
+        Today it's the largest developer community Babcock has. We've thrown summits, started a publication so people can think in public, and watched a thousand-something people learn things nobody assigned them.
+      </p>
+      <p>
+        The part I care about most is that it runs on structure, not on me. Teams own their tracks, writers own the publication, and the community keeps producing people who go off and start things of their own. That was the point.
+      </p>
+
+      {aboutVideo && (
+        <div class="video-embed">
+          <iframe
+            src={aboutVideo}
+            title="A conversation about GDG Babcock"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+      )}
+    </section>
+
+    <section class="about__section">
+      <h2>What I think about</h2>
+      <p>
+        Away from a keyboard I read cognitive psychology and try to take ideas apart until I hit something that doesn't reduce any further. I care about intellectual culture, the habits that make a group of people smarter than any one of its members. And I think a lot about development in Africa, which to me is the same problem at its largest scale: nurturing minds, deliberately, in numbers.
+      </p>
+    </section>
+
+    <section class="about__section">
+      <h2>How I work on myself</h2>
+      <p>
+        I treat myself as one of the systems I work on. I keep disciplines the way other people keep tools: writing to find out what I actually think, training attention like a muscle, and being honest about ambition instead of embarrassed by it.
+      </p>
+    </section>
+
+    <section class="about__section about__colophon">
+      <h2>How this house is built</h2>
+      <p>
+        This site is Astro with a small Sanity studio behind it, hand-built late at night, mostly. The sky up there follows your clock, not mine. The sun and moon are really moving, just slower than you can notice, which felt right for a site about building things patiently.
+      </p>
+    </section>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .about {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+  }
+
+  .about__header {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .about__header h1 {
+    font-size: var(--text-4xl);
+  }
+
+  .about__section {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .about__section h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    color: var(--paper);
+    margin-bottom: var(--space-lg);
+  }
+
+  .about__section p {
+    color: var(--muted);
+    font-size: var(--text-base);
+    line-height: 1.8;
+    margin-bottom: var(--space-lg);
+  }
+
+  .about__section a {
+    color: var(--lamp);
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+  }
+
+  .about__section a:hover {
+    text-decoration-color: var(--lamp);
+  }
+
+  .about__colophon h2 {
+    font-size: var(--text-sm);
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .about__colophon p {
+    font-size: var(--text-sm);
+  }
+
+  .video-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--raised);
+    margin-top: var(--space-lg);
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  @media (max-width: 480px) {
+    .about {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+  }
+</style>
