@@ -3,28 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Footer from '../components/Footer.astro';
 import { getProjects } from '../lib/queries';
+import { withGithubStars } from '../lib/github';
 
 const projects = await getProjects();
-
-const projectsWithStars = await Promise.all(
-  projects.map(async (project) => {
-    if (!project.github_sync || !project.repo_url) return project;
-    try {
-      const match = project.repo_url.match(/github\.com\/([^/]+)\/([^/]+)/);
-      if (!match) return project;
-      const res = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}`, {
-        headers: import.meta.env.GITHUB_TOKEN
-          ? { Authorization: `token ${import.meta.env.GITHUB_TOKEN}` }
-          : {},
-      });
-      if (!res.ok) return project;
-      const data = await res.json();
-      return { ...project, stars: data.stargazers_count };
-    } catch {
-      return project;
-    }
-  })
-);
+const projectsWithStars = await withGithubStars(projects);
 ---
 
 <BaseLayout title="Work | Neku Akpotohwo" skyMode="receded">

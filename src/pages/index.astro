@@ -5,6 +5,8 @@ import ProjectCard from '../components/ProjectCard.astro';
 import Footer from '../components/Footer.astro';
 import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
+import { withGithubStars } from '../lib/github';
+import { youtubeEmbedUrl } from '../lib/video';
 
 const [now, projects, settings, involvements] = await Promise.all([
   getNow(),
@@ -23,37 +25,9 @@ if (now) {
   if (githubText) now.building_text = githubText;
 }
 
-const projectsWithStars = await Promise.all(
-  projects.map(async (project: any) => {
-    if (!project.github_sync || !project.repo_url) return project;
-    try {
-      const match = project.repo_url.match(/github\.com\/([^/]+)\/([^/]+)/);
-      if (!match) return project;
-      const res = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}`, {
-        headers: import.meta.env.GITHUB_TOKEN
-          ? { Authorization: `token ${import.meta.env.GITHUB_TOKEN}` }
-          : {},
-      });
-      if (!res.ok) return project;
-      const data = await res.json();
-      return { ...project, stars: data.stargazers_count };
-    } catch {
-      return project;
-    }
-  })
-);
+const projectsWithStars = await withGithubStars(projects);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
-
-function youtubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    let videoId: string | null = null;
-    if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
-    else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
-    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : url;
-  } catch { return null; }
-}
 
 const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featured_video_url) : null;
 ---

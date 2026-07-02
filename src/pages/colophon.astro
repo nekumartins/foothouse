@@ -2,18 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 import { getSiteSettings } from '../lib/queries';
+import { youtubeEmbedUrl } from '../lib/video';
 
 const settings = await getSiteSettings();
-
-function youtubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    let videoId: string | null = null;
-    if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
-    else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
-    return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : url;
-  } catch { return null; }
-}
 
 const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
 ---
