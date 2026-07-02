@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
+import { youtubeEmbedUrl } from '../lib/video';
 
 const [now, projects, settings, involvements] = await Promise.all([
   getNow(),
@@ -33,6 +34,8 @@ const featured =
 const otherInvolvements = featured
   ? involvements.filter((i: any) => i.id !== featured.id)
   : [];
+
+const videoEmbed = settings?.featured_video_url ? youtubeEmbedUrl(settings.featured_video_url) : null;
 
 const personLd = {
   '@context': 'https://schema.org',
@@ -119,7 +122,14 @@ const personLd = {
       </section>
     )}
 
-    <!-- featured video: Phase 4 -->
+    <!-- Featured video -->
+    {videoEmbed && (
+      <section class="threshold__video">
+        <div class="video-embed">
+          <iframe src={videoEmbed} title="Featured video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+        </div>
+      </section>
+    )}
 
     <!-- Presence: now-cards -->
     <section class="threshold__presence">
@@ -229,7 +239,7 @@ const personLd = {
     justify-content: center;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
-    animation-delay: 0.9s;
+    animation-delay: 1.0s;
     width: 100%;
   }
 
@@ -377,6 +387,32 @@ const personLd = {
     line-height: 1.5;
   }
 
+  /* ── Video ── */
+
+  .threshold__video {
+    max-width: 560px;
+    width: 100%;
+    margin-bottom: var(--space-3xl);
+    animation: fadeUp 1.2s ease both;
+    animation-delay: 0.8s;
+  }
+
+  .video-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--raised);
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
   /* ── Doors ── */
 
   .threshold__doors {
@@ -384,7 +420,7 @@ const personLd = {
     text-align: center;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
-    animation-delay: 1.1s;
+    animation-delay: 1.2s;
   }
 
   .doors {
@@ -424,6 +460,7 @@ const personLd = {
     .threshold__presence,
     .threshold__projects,
     .threshold__community,
+    .threshold__video,
     .threshold__doors {
       animation: none;
     }

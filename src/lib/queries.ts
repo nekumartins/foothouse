@@ -33,6 +33,7 @@ export async function getSiteSettings() {
     twitter,
     instagram,
     "resume_url": resume.asset->url,
+    featured_video_url,
     about_video_url
   }`);
 }
