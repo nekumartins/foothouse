@@ -160,9 +160,14 @@
   // Default to the collapsed nub; only stay expanded if the user explicitly opened it.
   setMinimized(sessionStorage.getItem(minimizedKey) !== '0');
 
-  // Keep the icon in sync as the sky updates every minute
+  // Keep the icon (and, if open, the slider) in sync as the sky updates,
+  // including while a drag on the sun/moon is moving the hour live.
   window.addEventListener('sky-update', (e: any) => {
     updateIcon(e.detail.hour);
+    if (!panel.hidden) {
+      slider.value = String(Math.round(e.detail.hour));
+      label.textContent = formatHour(Math.round(e.detail.hour));
+    }
   });
 </script>
 

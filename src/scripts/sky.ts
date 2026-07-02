@@ -168,10 +168,18 @@ function update() {
   window.dispatchEvent(new CustomEvent('sky-update', { detail: { hour, state, palette } }));
 }
 
+// Sun/moon arc. The sun is up from RISE→SET, arcing east(left)→west(right) and
+// rising to its peak at solar noon; the moon mirrors it across the night.
+export function hourFromX(xPercent: number, isNight: boolean): number {
+  const p = Math.max(0, Math.min(1, isNight ? (92 - xPercent) / 84 : (xPercent - 8) / 84));
+  if (!isNight) return SUN_RISE + p * (SUN_SET - SUN_RISE);
+  return (SUN_SET + p * (SUN_RISE + 24 - SUN_SET)) % 24;
+}
+
 export function initSky() {
   const saved = sessionStorage.getItem('foothouse-sky-override');
   if (saved !== null) {
-    overrideHour = parseInt(saved, 10);
+    overrideHour = parseFloat(saved);
   }
 
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -1,0 +1,90 @@
+---
+// Invisible drag target for the sun/moon. The visible sun/moon graphic
+// (Sky.astro) lives inside .sky-container, which sits behind <main> in the
+// stacking order so text stays readable; that also means clicks aimed at
+// the sun/moon never reach it, since <main>'s content (even empty spacer
+// sections) intercepts them first. This layer sits above <main> instead,
+// tracks the same --celestial-x/y position, and is invisible: it exists
+// only to catch the drag.
+---
+
+<div class="celestial-grab" aria-hidden="true">
+  <div class="celestial-grab__body celestial-grab__sun"></div>
+  <div class="celestial-grab__body celestial-grab__moon"></div>
+</div>
+
+<style>
+  .celestial-grab {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .celestial-grab__body {
+    position: absolute;
+    left: var(--celestial-x, 50%);
+    top: var(--celestial-y, 20%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+  }
+
+  .celestial-grab__body.is-dragging {
+    cursor: grabbing;
+  }
+
+  .celestial-grab__body::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+</style>
+
+<script>
+  import { setOverrideHour, hourFromX } from '../scripts/sky';
+
+  // Only the currently visible body may be grabbed: the sun and moon
+  // crossfade in place at identical coordinates, and without this gating a
+  // daytime drag on the sun would actually grab the invisible moon
+  // underneath and apply the night-hour mapping.
+  const sun = document.querySelector<HTMLElement>('.celestial-grab__sun');
+  const moon = document.querySelector<HTMLElement>('.celestial-grab__moon');
+  function syncGrabTargets() {
+    const root = getComputedStyle(document.documentElement);
+    const sunVisible = parseFloat(root.getPropertyValue('--sun-opacity') || '0') > 0;
+    if (sun) sun.style.pointerEvents = sunVisible ? 'auto' : 'none';
+    if (moon) moon.style.pointerEvents = sunVisible ? 'none' : 'auto';
+  }
+  window.addEventListener('sky-update', syncGrabTargets);
+  syncGrabTargets();
+
+  const bodies = document.querySelectorAll<HTMLElement>('.celestial-grab__body');
+  let lastTap = 0;
+  for (const body of bodies) {
+    body.addEventListener('pointerdown', (e) => {
+      const now = Date.now();
+      if (now - lastTap < 300) { setOverrideHour(null); lastTap = 0; return; } // double tap resets to real time
+      lastTap = now;
+      body.setPointerCapture(e.pointerId);
+      body.classList.add('is-dragging');
+      const isNight = body.classList.contains('celestial-grab__moon');
+      const move = (ev: PointerEvent) => {
+        const x = (ev.clientX / window.innerWidth) * 100;
+        setOverrideHour(hourFromX(x, isNight));
+      };
+      const up = () => {
+        body.classList.remove('is-dragging');
+        body.removeEventListener('pointermove', move);
+        body.removeEventListener('pointerup', up);
+        body.removeEventListener('pointercancel', up);
+      };
+      body.addEventListener('pointermove', move);
+      body.addEventListener('pointerup', up);
+      body.addEventListener('pointercancel', up);
+    });
+  }
+</script>

@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Sky from '../components/Sky.astro';
 import Starfield from '../components/Starfield.astro';
 import CloudBed from '../components/CloudBed.astro';
+import CelestialGrab from '../components/CelestialGrab.astro';
 import TimeOverride from '../components/TimeOverride.astro';
 import Nav from '../components/Nav.astro';
 
@@ -52,6 +53,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <main>
       <slot />
     </main>
+
+    <CelestialGrab />
 
     <script>
       import { initSky } from '../scripts/sky';
