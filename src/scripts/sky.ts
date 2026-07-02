@@ -22,7 +22,7 @@ function getStateForHour(hour: number): SkyState {
   return 'night';
 }
 
-function lerpColor(a: string, b: string, t: number): string {
+export function lerpColor(a: string, b: string, t: number): string {
   const parse = (hex: string) => {
     const v = parseInt(hex.slice(1), 16);
     return [(v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff];
@@ -35,7 +35,7 @@ function lerpColor(a: string, b: string, t: number): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + blue).toString(16).slice(1)}`;
 }
 
-function getBlendedPalette(hour: number, minute: number): SkyPalette {
+function getBlendedPalette(fractionalHour: number): SkyPalette {
   const transitions: Array<{ start: number; end: number; from: SkyState; to: SkyState }> = [
     { start: 5, end: 7, from: 'night', to: 'dawn' },
     { start: 7, end: 8, from: 'dawn', to: 'day' },
@@ -43,8 +43,6 @@ function getBlendedPalette(hour: number, minute: number): SkyPalette {
     { start: 17, end: 19, from: 'golden', to: 'dusk' },
     { start: 19, end: 21, from: 'dusk', to: 'night' },
   ];
-
-  const fractionalHour = hour + minute / 60;
 
   for (const tr of transitions) {
     if (fractionalHour >= tr.start && fractionalHour < tr.end) {
@@ -59,7 +57,7 @@ function getBlendedPalette(hour: number, minute: number): SkyPalette {
     }
   }
 
-  return SKY_STATES[getStateForHour(hour)];
+  return SKY_STATES[getStateForHour(fractionalHour)];
 }
 
 function applySky(palette: SkyPalette) {
@@ -88,7 +86,7 @@ interface Celestial {
   moon: number; // opacity
 }
 
-function getCelestial(fractionalHour: number): Celestial {
+export function getCelestial(fractionalHour: number): Celestial {
   // Wide, shallow dome (vertical swing kept small — `top` is a % of the tall
   // viewport, so a little goes a long way on a portrait phone).
   const dome = (p: number) => 56 - 30 * Math.sin(p * Math.PI); // 56% horizon → 26% peak
@@ -126,12 +124,15 @@ export function getOverrideHour(): number | null {
   return overrideHour;
 }
 
+let reducedMotion = false;
+let snapNext = false; // one instant (no-transition) update, e.g. after a hidden tab returns
+
 function update() {
   const now = new Date();
-  const hour = overrideHour ?? now.getHours();
-  const minute = overrideHour !== null ? 0 : now.getMinutes();
+  const hour =
+    overrideHour ?? now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
 
-  const palette = getBlendedPalette(hour, minute);
+  const palette = getBlendedPalette(hour);
   applySky(palette);
 
   const state = getStateForHour(hour);
@@ -144,10 +145,15 @@ function update() {
   }
 
   // Sun/moon arc position + fade. While the user is scrubbing the slider
-  // (override active), track it crisply; when live, drift slowly.
-  const celestial = getCelestial(hour + minute / 60);
+  // (override active), track it crisply; when live, each 5s tick starts a
+  // slightly longer linear transition, so consecutive ticks chain into one
+  // continuous drift.
+  const celestial = getCelestial(hour);
   const root = document.documentElement;
-  root.style.setProperty('--sky-ease', overrideHour !== null ? '0.12s' : '2s');
+  const instant = snapNext || reducedMotion;
+  snapNext = false;
+  root.style.setProperty('--sky-ease', overrideHour !== null ? '0.12s' : instant ? '0s' : '6s');
+  root.style.setProperty('--sky-ease-fn', overrideHour !== null ? 'ease' : 'linear');
   root.style.setProperty('--celestial-x', `${celestial.x}%`);
   root.style.setProperty('--celestial-y', `${celestial.y}%`);
   root.style.setProperty('--sun-opacity', String(celestial.sun));
@@ -162,6 +168,22 @@ export function initSky() {
     overrideHour = parseInt(saved, 10);
   }
 
+  reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   update();
-  setInterval(update, 60_000);
+  // The sky really moves: a short tick keeps sun, moon and colors drifting.
+  // Under reduced motion the sky steps quietly once a minute instead.
+  setInterval(() => {
+    if (document.hidden) return;
+    update();
+  }, reducedMotion ? 60_000 : 5_000);
+
+  // A tab that comes back after a while snaps to the current sky instead of
+  // sliding across hours of arc.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      snapNext = true;
+      update();
+    }
+  });
 }

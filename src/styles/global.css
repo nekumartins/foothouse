@@ -87,9 +87,15 @@
 }
 
 html {
-  transition: --sky-top var(--sky-ease, 2s) ease,
-              --sky-mid var(--sky-ease, 2s) ease,
-              --sky-bottom var(--sky-ease, 2s) ease;
+  transition: --sky-top var(--sky-ease, 6s) var(--sky-ease-fn, linear),
+              --sky-mid var(--sky-ease, 6s) var(--sky-ease-fn, linear),
+              --sky-bottom var(--sky-ease, 6s) var(--sky-ease-fn, linear);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
 }
 
 /* ── Palette tokens ── */
