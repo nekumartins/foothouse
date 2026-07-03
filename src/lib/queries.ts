@@ -98,6 +98,21 @@ export async function getAllProjectStorySlugs() {
   ) ?? [];
 }
 
+// ── Experience (Sanity only) ──
+
+export async function getExperience() {
+  if (!sanityConfigured || !sanityClient) return [];
+  return sanityClient.fetch(`*[_type == "experience"] | order(sort asc) {
+    "id": _id,
+    role,
+    company,
+    url,
+    period,
+    bullets,
+    sort
+  }`) ?? [];
+}
+
 // ── Involvements (Sanity only) ──
 
 export async function getInvolvements() {

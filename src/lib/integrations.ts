@@ -139,6 +139,20 @@ export async function getTopGithubRepos(username: string, limit = 4): Promise<Re
   }
 }
 
+// One work list for both the homepage and /work: hand-picked CMS projects when
+// they exist, otherwise the owner's top public repos so the proof section is
+// never empty. `fromGithub` lets callers show a "More on GitHub" affordance.
+export async function getWorkItems(
+  projects: any[],
+  settings: any
+): Promise<{ items: any[]; fromGithub: boolean }> {
+  if (projects.length > 0) return { items: projects, fromGithub: false };
+  const m = (settings?.github || '').match(/github\.com\/([^/]+)/);
+  const username = m ? m[1] : 'nekumartins';
+  const repos = await getTopGithubRepos(username, 4);
+  return repos.length > 0 ? { items: repos, fromGithub: true } : { items: [], fromGithub: false };
+}
+
 // Latest post for the "lately" card, read from an RSS bridge. X killed its free
 // public syndication endpoints (they all 403 now), so the no-cost path is a
 // third-party feed: create one from your profile at rss.app (or point at any
