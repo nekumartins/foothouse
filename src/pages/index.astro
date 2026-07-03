@@ -36,7 +36,7 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
 const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
-const craft = settings?.craft || "I build AI systems, and I run GDG on Campus Babcock, one of Nigeria's premier tech communities.";
+const craft = settings?.craft || "I build AI systems, and I built GDG on Campus Babcock into one of Nigeria's premier tech communities.";
 // [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
 const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations where the hard part is teaching a system to think.';
 const stack: string[] = settings?.stack?.length ? settings.stack : ['TypeScript', 'Python', 'React', 'Node.js', 'Astro'];
@@ -55,7 +55,7 @@ const personLd = {
   name: 'Chukwuneku Akpotohwo',
   alternateName: ['Neku Akpotohwo', 'Neku'],
   jobTitle: 'Software Engineer',
-  description: "AI-focused software engineer and organizer of GDG on Campus Babcock.",
+  description: "AI-focused software engineer who founded and led GDG on Campus Babcock.",
   affiliation: { '@type': 'CollegeOrUniversity', name: 'Babcock University' },
   url: 'https://foothouse-nu.vercel.app',
   email: `mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`,

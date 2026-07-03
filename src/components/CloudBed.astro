@@ -5,9 +5,12 @@
 // continuously with the rest of the sky. No JS in this component.
 //
 // Roundness: each layer SVG is sized `height:100%; width:auto`, so its element
-// aspect ratio always equals its viewBox aspect ratio. That means circles stay
-// perfectly round at any viewport width (the old preserveAspectRatio="none" +
-// width:100% stretched them into ovals). Seamlessness: each layer holds two
+// aspect ratio always equals its viewBox aspect ratio. Circles stay round at
+// any viewport width (the old preserveAspectRatio="none" + width:100% stretched
+// them into ovals). Softness: each layer's silhouette is passed through an SVG
+// feGaussianBlur so the boundary feathers instead of reading as a hard circle
+// arc, and a tall connected base means the circles poke out as gentle billows
+// rather than a stack of defined balls. Seamlessness: each layer holds two
 // identical copies in a flex row and drifts by -50%; circles near the 0 / VBW
 // edges get an auto-generated wrap partner so the bank is continuous across the
 // copy seam.
@@ -28,11 +31,15 @@ function withWraps(circles: Puff[]): Puff[] {
   return out;
 }
 
+// blur = feGaussianBlur stdDeviation in viewBox units; larger = softer edge.
+// Farther layers are softer (atmospheric depth); the front stays legible but
+// is still feathered so it never reads as crisp circles.
 const layers = [
   {
     id: 'cb-back',
     cls: 'cloudbed__layer--back',
-    base: { y: 120, h: 40 },
+    blur: 11,
+    base: { y: 100, h: 60 },
     circles: withWraps([
       { cx: 60, cy: 122, r: 44 }, { cx: 170, cy: 114, r: 56 }, { cx: 300, cy: 122, r: 38 },
       { cx: 410, cy: 110, r: 60 }, { cx: 540, cy: 120, r: 44 }, { cx: 670, cy: 112, r: 54 },
@@ -45,7 +52,8 @@ const layers = [
   {
     id: 'cb-mid',
     cls: 'cloudbed__layer--mid',
-    base: { y: 116, h: 44 },
+    blur: 8,
+    base: { y: 96, h: 64 },
     circles: withWraps([
       { cx: 20, cy: 124, r: 52 }, { cx: 120, cy: 110, r: 68 }, { cx: 240, cy: 120, r: 48 },
       { cx: 340, cy: 104, r: 74 }, { cx: 470, cy: 116, r: 56 }, { cx: 600, cy: 106, r: 70 },
@@ -58,7 +66,8 @@ const layers = [
   {
     id: 'cb-front',
     cls: 'cloudbed__layer--front',
-    base: { y: 114, h: 46 },
+    blur: 5.5,
+    base: { y: 92, h: 68 },
     circles: withWraps([
       { cx: 40, cy: 120, r: 60 }, { cx: 150, cy: 104, r: 84 }, { cx: 280, cy: 118, r: 56 },
       { cx: 380, cy: 98, r: 96 }, { cx: 520, cy: 112, r: 64 }, { cx: 640, cy: 100, r: 88 },
@@ -82,12 +91,17 @@ const layers = [
                 <stop offset="0" style="stop-color: var(--cloud-hi)" />
                 <stop offset="1" style="stop-color: var(--cloud-lo)" />
               </linearGradient>
+              <filter id={`soft-${layer.id}`} x="-5%" y="-80%" width="110%" height="220%">
+                <feGaussianBlur stdDeviation={layer.blur} />
+              </filter>
             </defs>
           )}
-          <rect x="0" y={layer.base.y} width={VBW} height={layer.base.h} fill={`url(#${layer.id})`} />
-          {layer.circles.map((c) => (
-            <circle cx={c.cx} cy={c.cy} r={c.r} fill={`url(#${layer.id})`} />
-          ))}
+          <g filter={`url(#soft-${layer.id})`}>
+            <rect x="0" y={layer.base.y} width={VBW} height={layer.base.h} fill={`url(#${layer.id})`} />
+            {layer.circles.map((c) => (
+              <circle cx={c.cx} cy={c.cy} r={c.r} fill={`url(#${layer.id})`} />
+            ))}
+          </g>
         </svg>
       ))}
     </div>
@@ -99,12 +113,17 @@ const layers = [
         <stop offset="0" style="stop-color: var(--cloud-hi)" />
         <stop offset="1" style="stop-color: var(--cloud-lo)" />
       </linearGradient>
+      <filter id="soft-cb-f1" x="-15%" y="-40%" width="130%" height="180%">
+        <feGaussianBlur stdDeviation="2.6" />
+      </filter>
     </defs>
-    <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f1)" />
-    <circle cx="24" cy="36" r="18" fill="url(#cb-f1)" />
-    <circle cx="52" cy="26" r="24" fill="url(#cb-f1)" />
-    <circle cx="84" cy="32" r="20" fill="url(#cb-f1)" />
-    <circle cx="110" cy="38" r="14" fill="url(#cb-f1)" />
+    <g filter="url(#soft-cb-f1)">
+      <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f1)" />
+      <circle cx="24" cy="36" r="18" fill="url(#cb-f1)" />
+      <circle cx="52" cy="26" r="24" fill="url(#cb-f1)" />
+      <circle cx="84" cy="32" r="20" fill="url(#cb-f1)" />
+      <circle cx="110" cy="38" r="14" fill="url(#cb-f1)" />
+    </g>
   </svg>
 
   <svg class="cloudbed__floater cloudbed__floater--two" viewBox="0 0 140 60">
@@ -113,12 +132,17 @@ const layers = [
         <stop offset="0" style="stop-color: var(--cloud-hi)" />
         <stop offset="1" style="stop-color: var(--cloud-lo)" />
       </linearGradient>
+      <filter id="soft-cb-f2" x="-15%" y="-40%" width="130%" height="180%">
+        <feGaussianBlur stdDeviation="2.6" />
+      </filter>
     </defs>
-    <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f2)" />
-    <circle cx="24" cy="36" r="18" fill="url(#cb-f2)" />
-    <circle cx="52" cy="26" r="24" fill="url(#cb-f2)" />
-    <circle cx="84" cy="32" r="20" fill="url(#cb-f2)" />
-    <circle cx="110" cy="38" r="14" fill="url(#cb-f2)" />
+    <g filter="url(#soft-cb-f2)">
+      <rect x="8" y="36" width="118" height="12" rx="6" fill="url(#cb-f2)" />
+      <circle cx="24" cy="36" r="18" fill="url(#cb-f2)" />
+      <circle cx="52" cy="26" r="24" fill="url(#cb-f2)" />
+      <circle cx="84" cy="32" r="20" fill="url(#cb-f2)" />
+      <circle cx="110" cy="38" r="14" fill="url(#cb-f2)" />
+    </g>
   </svg>
 </div>
 
@@ -147,28 +171,28 @@ const layers = [
   /* The explicit aspect-ratio (matching the viewBox) is what keeps circles
      round everywhere: iOS Safari does not derive an SVG's intrinsic ratio from
      its viewBox for CSS width:auto, so without this the layers stretch back
-     into ovals on phones. */
+     into ovals on phones. Edge softness is handled by the in-SVG feGaussianBlur
+     (see the filters above), not CSS blur, so it scales with the artwork. */
   .cloudbed__layer svg {
     height: 100%;
     width: auto;
     aspect-ratio: 2000 / 160;
     display: block;
+    overflow: visible;
   }
 
   .cloudbed__layer--back {
     opacity: 0.5;
-    filter: blur(2px);
     animation: cb-drift 140s linear infinite;
   }
 
   .cloudbed__layer--mid {
-    opacity: 0.75;
-    filter: blur(1px);
+    opacity: 0.72;
     animation: cb-drift 100s linear infinite reverse;
   }
 
   .cloudbed__layer--front {
-    opacity: 0.95;
+    opacity: 0.92;
     animation: cb-drift 70s linear infinite;
   }
 
@@ -183,6 +207,7 @@ const layers = [
     height: auto;
     aspect-ratio: 140 / 60;
     opacity: 0.5;
+    overflow: visible;
     animation: cb-float linear infinite;
   }
 
