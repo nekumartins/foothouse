@@ -1,0 +1,38 @@
+name: Deploy Sanity Studio
+
+# Rebuilds and redeploys the hosted Sanity Studio so schema changes (new fields,
+# new document types) show up for editors. Run it from the browser: the Actions
+# tab -> "Deploy Sanity Studio" -> "Run workflow". It also runs automatically
+# when the schema or Sanity config changes on main.
+#
+# Requires one repository secret: SANITY_AUTH_TOKEN
+#   Create it at https://www.sanity.io/manage -> project foothouse -> API ->
+#   Tokens -> Add token, with the "Deploy Studio" role. Then add it under
+#   GitHub -> Settings -> Secrets and variables -> Actions.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/sanity/schemas/**'
+      - 'sanity.config.ts'
+      - 'sanity.cli.ts'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy Studio
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+        run: npx sanity deploy
