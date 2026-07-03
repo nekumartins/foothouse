@@ -18,6 +18,8 @@ on:
       - 'src/sanity/schemas/**'
       - 'sanity.config.ts'
       - 'sanity.cli.ts'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   deploy:
