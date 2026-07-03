@@ -75,7 +75,7 @@ const layers = [
   {layers.map((layer) => (
     <div class:list={['cloudbed__layer', layer.cls]}>
       {[0, 1].map((copy) => (
-        <svg viewBox={`0 0 ${VBW} ${VBH}`} preserveAspectRatio="xMidYMax meet" height="100%" width="auto">
+        <svg viewBox={`0 0 ${VBW} ${VBH}`} preserveAspectRatio="xMidYMax meet">
           {copy === 0 && (
             <defs>
               <linearGradient id={layer.id} x1="0" y1="0" x2="0" y2="1">
@@ -144,11 +144,14 @@ const layers = [
     align-items: flex-end;
   }
 
-  /* height:100% + width:auto => element aspect ratio == viewBox aspect ratio,
-     so the circles never distort no matter how wide the screen is. */
+  /* The explicit aspect-ratio (matching the viewBox) is what keeps circles
+     round everywhere: iOS Safari does not derive an SVG's intrinsic ratio from
+     its viewBox for CSS width:auto, so without this the layers stretch back
+     into ovals on phones. */
   .cloudbed__layer svg {
     height: 100%;
     width: auto;
+    aspect-ratio: 2000 / 160;
     display: block;
   }
 
@@ -177,7 +180,8 @@ const layers = [
   .cloudbed__floater {
     position: fixed;
     width: 140px;
-    height: 60px;
+    height: auto;
+    aspect-ratio: 140 / 60;
     opacity: 0.5;
     animation: cb-float linear infinite;
   }
@@ -191,7 +195,6 @@ const layers = [
   .cloudbed__floater--two {
     top: 27%;
     width: 100px;
-    height: 43px;
     opacity: 0.35;
     animation-duration: 220s;
     animation-delay: -130s;
