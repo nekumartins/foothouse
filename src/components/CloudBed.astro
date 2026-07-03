@@ -3,118 +3,95 @@
 // small floaters drifting high in the sky. Colored entirely by the
 // --cloud-hi/--cloud-lo custom properties, which sky.ts already crossfades
 // continuously with the rest of the sky. No JS in this component.
+//
+// Roundness: each layer SVG is sized `height:100%; width:auto`, so its element
+// aspect ratio always equals its viewBox aspect ratio. That means circles stay
+// perfectly round at any viewport width (the old preserveAspectRatio="none" +
+// width:100% stretched them into ovals). Seamlessness: each layer holds two
+// identical copies in a flex row and drifts by -50%; circles near the 0 / VBW
+// edges get an auto-generated wrap partner so the bank is continuous across the
+// copy seam.
+
+const VBW = 2000;
+const VBH = 160;
+const WRAP = 120; // circles within this of an edge get a wrap-partner copy
+
+type Puff = { cx: number; cy: number; r: number };
+
+function withWraps(circles: Puff[]): Puff[] {
+  const out: Puff[] = [];
+  for (const c of circles) {
+    out.push(c);
+    if (c.cx < WRAP) out.push({ ...c, cx: c.cx + VBW });
+    if (c.cx > VBW - WRAP) out.push({ ...c, cx: c.cx - VBW });
+  }
+  return out;
+}
+
+const layers = [
+  {
+    id: 'cb-back',
+    cls: 'cloudbed__layer--back',
+    base: { y: 120, h: 40 },
+    circles: withWraps([
+      { cx: 60, cy: 122, r: 44 }, { cx: 170, cy: 114, r: 56 }, { cx: 300, cy: 122, r: 38 },
+      { cx: 410, cy: 110, r: 60 }, { cx: 540, cy: 120, r: 44 }, { cx: 670, cy: 112, r: 54 },
+      { cx: 800, cy: 122, r: 40 }, { cx: 930, cy: 112, r: 56 }, { cx: 1070, cy: 120, r: 44 },
+      { cx: 1200, cy: 110, r: 58 }, { cx: 1340, cy: 122, r: 40 }, { cx: 1470, cy: 112, r: 54 },
+      { cx: 1600, cy: 122, r: 42 }, { cx: 1730, cy: 112, r: 56 }, { cx: 1860, cy: 120, r: 44 },
+      { cx: 1970, cy: 114, r: 50 },
+    ]),
+  },
+  {
+    id: 'cb-mid',
+    cls: 'cloudbed__layer--mid',
+    base: { y: 116, h: 44 },
+    circles: withWraps([
+      { cx: 20, cy: 124, r: 52 }, { cx: 120, cy: 110, r: 68 }, { cx: 240, cy: 120, r: 48 },
+      { cx: 340, cy: 104, r: 74 }, { cx: 470, cy: 116, r: 56 }, { cx: 600, cy: 106, r: 70 },
+      { cx: 720, cy: 120, r: 48 }, { cx: 840, cy: 108, r: 66 }, { cx: 980, cy: 116, r: 54 },
+      { cx: 1100, cy: 104, r: 72 }, { cx: 1240, cy: 118, r: 50 }, { cx: 1360, cy: 106, r: 68 },
+      { cx: 1500, cy: 118, r: 52 }, { cx: 1620, cy: 106, r: 70 }, { cx: 1760, cy: 120, r: 48 },
+      { cx: 1880, cy: 110, r: 62 },
+    ]),
+  },
+  {
+    id: 'cb-front',
+    cls: 'cloudbed__layer--front',
+    base: { y: 114, h: 46 },
+    circles: withWraps([
+      { cx: 40, cy: 120, r: 60 }, { cx: 150, cy: 104, r: 84 }, { cx: 280, cy: 118, r: 56 },
+      { cx: 380, cy: 98, r: 96 }, { cx: 520, cy: 112, r: 64 }, { cx: 640, cy: 100, r: 88 },
+      { cx: 760, cy: 116, r: 56 }, { cx: 880, cy: 104, r: 78 }, { cx: 1020, cy: 110, r: 66 },
+      { cx: 1140, cy: 98, r: 94 }, { cx: 1290, cy: 114, r: 58 }, { cx: 1400, cy: 102, r: 84 },
+      { cx: 1540, cy: 116, r: 60 }, { cx: 1660, cy: 100, r: 90 }, { cx: 1800, cy: 114, r: 62 },
+      { cx: 1930, cy: 106, r: 78 },
+    ]),
+  },
+];
 ---
 
 <div class="cloudbed" aria-hidden="true">
-  <div class="cloudbed__layer cloudbed__layer--back">
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <defs>
-        <linearGradient id="cb-back" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" style="stop-color: var(--cloud-hi)" />
-          <stop offset="1" style="stop-color: var(--cloud-lo)" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="118" width="800" height="82" fill="url(#cb-back)" />
-      <circle cx="40" cy="120" r="34" fill="url(#cb-back)" />
-      <circle cx="120" cy="112" r="48" fill="url(#cb-back)" />
-      <circle cx="210" cy="120" r="30" fill="url(#cb-back)" />
-      <circle cx="300" cy="108" r="56" fill="url(#cb-back)" />
-      <circle cx="395" cy="118" r="38" fill="url(#cb-back)" />
-      <circle cx="470" cy="104" r="60" fill="url(#cb-back)" />
-      <circle cx="570" cy="116" r="42" fill="url(#cb-back)" />
-      <circle cx="650" cy="108" r="52" fill="url(#cb-back)" />
-      <circle cx="740" cy="118" r="36" fill="url(#cb-back)" />
-      <circle cx="790" cy="112" r="44" fill="url(#cb-back)" />
-      <circle cx="-10" cy="112" r="44" fill="url(#cb-back)" />
-    </svg>
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <rect x="0" y="118" width="800" height="82" fill="url(#cb-back)" />
-      <circle cx="40" cy="120" r="34" fill="url(#cb-back)" />
-      <circle cx="120" cy="112" r="48" fill="url(#cb-back)" />
-      <circle cx="210" cy="120" r="30" fill="url(#cb-back)" />
-      <circle cx="300" cy="108" r="56" fill="url(#cb-back)" />
-      <circle cx="395" cy="118" r="38" fill="url(#cb-back)" />
-      <circle cx="470" cy="104" r="60" fill="url(#cb-back)" />
-      <circle cx="570" cy="116" r="42" fill="url(#cb-back)" />
-      <circle cx="650" cy="108" r="52" fill="url(#cb-back)" />
-      <circle cx="740" cy="118" r="36" fill="url(#cb-back)" />
-      <circle cx="790" cy="112" r="44" fill="url(#cb-back)" />
-      <circle cx="-10" cy="112" r="44" fill="url(#cb-back)" />
-    </svg>
-    <!-- second copy intentionally omits <defs>: SVG ids are document-global -->
-  </div>
-
-  <div class="cloudbed__layer cloudbed__layer--mid">
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <defs>
-        <linearGradient id="cb-mid" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" style="stop-color: var(--cloud-hi)" />
-          <stop offset="1" style="stop-color: var(--cloud-lo)" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="116" width="800" height="84" fill="url(#cb-mid)" />
-      <circle cx="30" cy="124" r="40" fill="url(#cb-mid)" />
-      <circle cx="830" cy="124" r="40" fill="url(#cb-mid)" />
-      <circle cx="130" cy="110" r="58" fill="url(#cb-mid)" />
-      <circle cx="240" cy="120" r="36" fill="url(#cb-mid)" />
-      <circle cx="330" cy="102" r="64" fill="url(#cb-mid)" />
-      <circle cx="430" cy="116" r="44" fill="url(#cb-mid)" />
-      <circle cx="520" cy="100" r="66" fill="url(#cb-mid)" />
-      <circle cx="620" cy="114" r="46" fill="url(#cb-mid)" />
-      <circle cx="710" cy="104" r="58" fill="url(#cb-mid)" />
-      <circle cx="780" cy="120" r="38" fill="url(#cb-mid)" />
-      <circle cx="-20" cy="120" r="38" fill="url(#cb-mid)" />
-    </svg>
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <rect x="0" y="116" width="800" height="84" fill="url(#cb-mid)" />
-      <circle cx="30" cy="124" r="40" fill="url(#cb-mid)" />
-      <circle cx="830" cy="124" r="40" fill="url(#cb-mid)" />
-      <circle cx="130" cy="110" r="58" fill="url(#cb-mid)" />
-      <circle cx="240" cy="120" r="36" fill="url(#cb-mid)" />
-      <circle cx="330" cy="102" r="64" fill="url(#cb-mid)" />
-      <circle cx="430" cy="116" r="44" fill="url(#cb-mid)" />
-      <circle cx="520" cy="100" r="66" fill="url(#cb-mid)" />
-      <circle cx="620" cy="114" r="46" fill="url(#cb-mid)" />
-      <circle cx="710" cy="104" r="58" fill="url(#cb-mid)" />
-      <circle cx="780" cy="120" r="38" fill="url(#cb-mid)" />
-      <circle cx="-20" cy="120" r="38" fill="url(#cb-mid)" />
-    </svg>
-  </div>
-
-  <div class="cloudbed__layer cloudbed__layer--front">
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <defs>
-        <linearGradient id="cb-front" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" style="stop-color: var(--cloud-hi)" />
-          <stop offset="1" style="stop-color: var(--cloud-lo)" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="114" width="800" height="86" fill="url(#cb-front)" />
-      <circle cx="20" cy="126" r="44" fill="url(#cb-front)" />
-      <circle cx="820" cy="126" r="44" fill="url(#cb-front)" />
-      <circle cx="140" cy="108" r="66" fill="url(#cb-front)" />
-      <circle cx="270" cy="118" r="40" fill="url(#cb-front)" />
-      <circle cx="380" cy="98" r="72" fill="url(#cb-front)" />
-      <circle cx="500" cy="112" r="50" fill="url(#cb-front)" />
-      <circle cx="610" cy="96" r="70" fill="url(#cb-front)" />
-      <circle cx="720" cy="110" r="54" fill="url(#cb-front)" />
-      <circle cx="790" cy="122" r="42" fill="url(#cb-front)" />
-      <circle cx="-10" cy="122" r="42" fill="url(#cb-front)" />
-    </svg>
-    <svg viewBox="0 0 800 200" preserveAspectRatio="none" width="100%" height="100%">
-      <rect x="0" y="114" width="800" height="86" fill="url(#cb-front)" />
-      <circle cx="20" cy="126" r="44" fill="url(#cb-front)" />
-      <circle cx="820" cy="126" r="44" fill="url(#cb-front)" />
-      <circle cx="140" cy="108" r="66" fill="url(#cb-front)" />
-      <circle cx="270" cy="118" r="40" fill="url(#cb-front)" />
-      <circle cx="380" cy="98" r="72" fill="url(#cb-front)" />
-      <circle cx="500" cy="112" r="50" fill="url(#cb-front)" />
-      <circle cx="610" cy="96" r="70" fill="url(#cb-front)" />
-      <circle cx="720" cy="110" r="54" fill="url(#cb-front)" />
-      <circle cx="790" cy="122" r="42" fill="url(#cb-front)" />
-      <circle cx="-10" cy="122" r="42" fill="url(#cb-front)" />
-    </svg>
-  </div>
+  {layers.map((layer) => (
+    <div class:list={['cloudbed__layer', layer.cls]}>
+      {[0, 1].map((copy) => (
+        <svg viewBox={`0 0 ${VBW} ${VBH}`} preserveAspectRatio="xMidYMax meet" height="100%" width="auto">
+          {copy === 0 && (
+            <defs>
+              <linearGradient id={layer.id} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" style="stop-color: var(--cloud-hi)" />
+                <stop offset="1" style="stop-color: var(--cloud-lo)" />
+              </linearGradient>
+            </defs>
+          )}
+          <rect x="0" y={layer.base.y} width={VBW} height={layer.base.h} fill={`url(#${layer.id})`} />
+          {layer.circles.map((c) => (
+            <circle cx={c.cx} cy={c.cy} r={c.r} fill={`url(#${layer.id})`} />
+          ))}
+        </svg>
+      ))}
+    </div>
+  ))}
 
   <svg class="cloudbed__floater cloudbed__floater--one" viewBox="0 0 140 60">
     <defs>
@@ -149,21 +126,30 @@
   .cloudbed {
     position: absolute;
     inset: auto 0 0 0;
-    height: clamp(140px, 22vh, 260px);
-    overflow: visible;
+    height: clamp(120px, 18vh, 220px);
+    overflow: hidden;
     pointer-events: none;
   }
 
+  /* Each layer is two identical copies in a row; it drifts by exactly one copy
+     (-50%) so the loop is seamless. width:max-content lets the copies take their
+     intrinsic (aspect-correct) width instead of being stretched to the box. */
   .cloudbed__layer {
     position: absolute;
-    inset: 0;
-    display: flex;
-    width: 200%;
+    bottom: 0;
+    left: 0;
     height: 100%;
+    width: max-content;
+    display: flex;
+    align-items: flex-end;
   }
 
+  /* height:100% + width:auto => element aspect ratio == viewBox aspect ratio,
+     so the circles never distort no matter how wide the screen is. */
   .cloudbed__layer svg {
-    flex: 0 0 50%;
+    height: 100%;
+    width: auto;
+    display: block;
   }
 
   .cloudbed__layer--back {
@@ -225,7 +211,7 @@
 
   @media (max-width: 480px) {
     .cloudbed {
-      height: clamp(110px, 16vh, 180px);
+      height: clamp(96px, 14vh, 150px);
     }
   }
 </style>
