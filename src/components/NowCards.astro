@@ -151,7 +151,28 @@ const hasStatic = Boolean(readingTitle || lately);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 30ch;
+    max-width: 40ch;
+  }
+
+  /* A tweet is the point of the lately fragment: let it wrap instead of
+     chopping it mid-sentence. 52ch x 6 lines holds any single post (280
+     chars); the clamp only guards pathological feed input. */
+  .now-strip__lately {
+    align-items: flex-start;
+  }
+
+  .now-strip__lately .now-strip__glyph {
+    margin-top: 3px;
+  }
+
+  .now-strip__lately .now-strip__text {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    max-width: 52ch;
+    text-align: left;
+    line-height: 1.5;
   }
 
   /* Tiny now-playing equalizer. */
