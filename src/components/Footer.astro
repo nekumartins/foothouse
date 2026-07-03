@@ -1,44 +1,12 @@
 ---
 import { getSiteSettings } from '../lib/queries';
+import SocialLinks from './SocialLinks.astro';
 
 const settings = await getSiteSettings();
-
-const defaults = {
-  linkedin: 'https://linkedin.com/in/nekumartins',
-  github: 'https://github.com/nekumartins',
-  twitter: 'https://twitter.com/nekumartins',
-  instagram: null as string | null,
-  resume_url: null as string | null,
-  contact_email: null as string | null,
-};
-
-const s = { ...defaults, ...Object.fromEntries(Object.entries(settings ?? {}).filter(([_, v]) => v)) };
-
-const links = [
-  { label: 'LinkedIn', href: s.linkedin },
-  { label: 'GitHub', href: s.github },
-  { label: 'Resume', href: s.resume_url },
-  { label: 'Twitter', href: s.twitter },
-  { label: 'Instagram', href: s.instagram },
-].filter(l => l.href);
 ---
 
 <footer class="site-footer">
-  {s.contact_email && (
-    <a href={`mailto:${s.contact_email}`} class="site-footer__email">
-      {s.contact_email}
-    </a>
-  )}
-  {links.length > 0 && (
-    <nav class="site-footer__links" aria-label="Social links">
-      {links.map((link, i) => (
-        <>
-          <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
-          {i < links.length - 1 && <span class="site-footer__dot" aria-hidden="true">&middot;</span>}
-        </>
-      ))}
-    </nav>
-  )}
+  <SocialLinks settings={settings} align="center" />
 </footer>
 
 <style>
@@ -51,40 +19,5 @@ const links = [
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-  }
-
-  .site-footer__email {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .site-footer__email:hover {
-    color: var(--lamp);
-  }
-
-  .site-footer__links {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-  }
-
-  .site-footer__links a {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .site-footer__links a:hover {
-    color: var(--paper);
-  }
-
-  .site-footer__dot {
-    color: var(--faint);
-    font-size: var(--text-xs);
   }
 </style>

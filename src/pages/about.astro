@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
+import SocialLinks from '../components/SocialLinks.astro';
 import { getSiteSettings } from '../lib/queries';
 import { youtubeEmbedUrl } from '../lib/video';
 
 const settings = await getSiteSettings();
+const socialSettings = { ...settings, contact_email: settings?.contact_email || 'akpotohwoo@gmail.com' };
 
 const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
 ---
@@ -42,13 +44,9 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
       <p>Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.</p>
     </section>
 
-    <nav class="about__reach" aria-label="Profiles and contact">
-      <a href={`mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`}>Email</a>
-      <a href={settings?.github || 'https://github.com/nekumartins'} target="_blank" rel="noopener noreferrer">GitHub</a>
-      <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      {settings?.twitter && <a href={settings.twitter} target="_blank" rel="noopener noreferrer">X</a>}
-      {settings?.resume_url && <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Resume</a>}
-    </nav>
+    <div class="about__reach">
+      <SocialLinks settings={socialSettings} align="start" />
+    </div>
   </div>
 
   <Footer />
@@ -102,23 +100,7 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
   }
 
   .about__reach {
-    display: flex;
-    gap: var(--space-lg);
     margin-top: var(--space-2xl);
-  }
-
-  .about__reach a {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: underline;
-    text-decoration-color: rgba(224, 164, 88, 0.3);
-    text-underline-offset: 0.15em;
-    transition: text-decoration-color 0.3s ease, color 0.3s ease;
-  }
-
-  .about__reach a:hover {
-    color: var(--lamp);
-    text-decoration-color: var(--lamp);
   }
 
   .video-embed {
