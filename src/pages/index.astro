@@ -2,8 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import PostRow from '../components/PostRow.astro';
 import Footer from '../components/Footer.astro';
-import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
+import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding, getTopGithubRepos } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
 import { youtubeEmbedUrl } from '../lib/video';
@@ -43,6 +44,9 @@ if (workItems.length === 0) {
   }
 }
 const githubProfile = settings?.github || 'https://github.com/nekumartins';
+
+// Writing teaser (replaces the duplicate-nav doors): surface the latest essays.
+const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
 // [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
@@ -169,14 +173,18 @@ const personLd = {
       </section>
     )}
 
-    <!-- Doors -->
-    <section class="threshold__doors">
-      <nav class="doors" aria-label="Rooms">
-        <a href="/writing" class="doors__link">Writing</a>
-        <a href="/map" class="doors__link">The map</a>
-        <a href="/work" class="doors__link">Work</a>
-      </nav>
-    </section>
+    <!-- Writing teaser (the repurposed doors) -->
+    {latestPosts.length > 0 && (
+      <section class="threshold__writing">
+        <h2 class="section-label">Writing</h2>
+        <div class="writing-teaser">
+          {latestPosts.map((post: any) => (
+            <PostRow post={post} seriesSlug={post.series?.slug} />
+          ))}
+        </div>
+        <a class="writing-teaser__more" href="/writing">More in Writing &#8594;</a>
+      </section>
+    )}
   </div>
 
   <Footer />
@@ -510,35 +518,32 @@ const personLd = {
     border: none;
   }
 
-  /* ── Doors ── */
+  /* ── Writing teaser ── */
 
-  .threshold__doors {
-    max-width: 480px;
-    text-align: center;
+  .threshold__writing {
+    max-width: 560px;
+    width: 100%;
     margin-bottom: var(--space-3xl);
     animation: fadeUp 1.2s ease both;
     animation-delay: 1.2s;
   }
 
-  .doors {
+  .writing-teaser {
     display: flex;
-    justify-content: center;
-    gap: var(--space-2xl);
+    flex-direction: column;
   }
 
-  .doors__link {
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    color: var(--paper);
+  .writing-teaser__more {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--muted);
     text-decoration: none;
-    border-bottom: 1px solid rgba(224, 164, 88, 0.25);
-    padding-bottom: 2px;
-    transition: color 0.3s ease, border-color 0.3s ease;
+    transition: color 0.3s ease;
   }
 
-  .doors__link:hover {
+  .writing-teaser__more:hover {
     color: var(--lamp);
-    border-color: var(--lamp);
   }
 
   @keyframes fadeUp {
@@ -558,7 +563,7 @@ const personLd = {
     .threshold__projects,
     .threshold__community,
     .threshold__video,
-    .threshold__doors {
+    .threshold__writing {
       animation: none;
     }
   }
@@ -575,10 +580,6 @@ const personLd = {
 
     .threshold__name {
       font-size: var(--text-3xl);
-    }
-
-    .doors {
-      gap: var(--space-lg);
     }
   }
 </style>
