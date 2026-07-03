@@ -37,6 +37,10 @@ const unfiledPosts = await getUnfiledPosts();
       </section>
     ))}
 
+    {seriesWithPosts.length === 0 && unfiledPosts.length === 0 && (
+      <p class="writing__empty">Nothing published yet. The first essays are on their way.</p>
+    )}
+
     {unfiledPosts.length > 0 && (
       <section class="writing__shelf">
         <div class="shelf__header">
@@ -75,6 +79,11 @@ const unfiledPosts = await getUnfiledPosts();
     color: var(--muted);
     font-size: var(--text-base);
     line-height: 1.6;
+  }
+
+  .writing__empty {
+    color: var(--faint);
+    font-size: var(--text-sm);
   }
 
   .writing__shelf {

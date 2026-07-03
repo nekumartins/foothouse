@@ -1,8 +1,14 @@
 ---
+// Pages that already fetched settings pass them down; the fetch here only
+// covers pages that never needed settings themselves.
 import { getSiteSettings } from '../lib/queries';
 import SocialLinks from './SocialLinks.astro';
 
-const settings = await getSiteSettings();
+interface Props {
+  settings?: Record<string, any> | null;
+}
+
+const settings = Astro.props.settings !== undefined ? Astro.props.settings : await getSiteSettings();
 ---
 
 <footer class="site-footer">
