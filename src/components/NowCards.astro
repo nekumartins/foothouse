@@ -85,15 +85,29 @@ const hasStatic = Boolean(readingTitle || lately);
     if (document.visibilityState === 'visible') refreshSpotify();
   });
 
-  // "Lately" upgrades to the latest tweet when available; hand-edited line stays otherwise.
-  const latelyEl = document.getElementById('now-lately');
+  // "Lately" upgrades to the latest tweet when available; hand-edited line stays
+  // otherwise. When the tweet's URL is known, the text becomes a link to the post.
   (async () => {
+    let latelyEl = document.getElementById('now-lately');
     if (!latelyEl) return;
     try {
       const res = await fetch('/api/lately', { cache: 'no-store' });
       if (!res.ok) return;
-      const { text } = await res.json();
+      const { text, url } = await res.json();
       if (text && text !== latelyEl.textContent) latelyEl.textContent = text;
+      if (url) {
+        if (latelyEl.tagName !== 'A') {
+          const anchor = document.createElement('a');
+          anchor.id = latelyEl.id;
+          anchor.className = latelyEl.className;
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer';
+          anchor.textContent = latelyEl.textContent;
+          latelyEl.replaceWith(anchor);
+          latelyEl = anchor;
+        }
+        (latelyEl as HTMLAnchorElement).href = url;
+      }
     } catch {
       // keep the server line
     }
@@ -173,6 +187,16 @@ const hasStatic = Boolean(readingTitle || lately);
     max-width: 52ch;
     text-align: left;
     line-height: 1.5;
+  }
+
+  /* When the lately text is the tweet itself, it links to the post. */
+  a.now-strip__text {
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a.now-strip__text:hover {
+    color: var(--lamp);
   }
 
   /* Tiny now-playing equalizer. */

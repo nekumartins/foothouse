@@ -7,9 +7,9 @@ import { getLatestTweet } from '../../lib/integrations';
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-  const text = await getLatestTweet();
+  const tweet = await getLatestTweet();
 
-  return new Response(JSON.stringify({ text }), {
+  return new Response(JSON.stringify({ text: tweet?.text ?? null, url: tweet?.url ?? null }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',

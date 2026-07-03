@@ -175,7 +175,7 @@ function cleanTweet(text: string): string {
     .trim();
 }
 
-export async function getLatestTweet(): Promise<string | null> {
+export async function getLatestTweet(): Promise<{ text: string; url: string | null } | null> {
   const feedUrl = import.meta.env.LATELY_RSS_URL;
   if (!feedUrl) return null;
 
@@ -202,7 +202,12 @@ export async function getLatestTweet(): Promise<string | null> {
 
     // Prefer the title (rss.app puts the post text here); fall back to the body.
     const text = cleanTweet(pick('title') || pick('description'));
-    return text || null;
+    if (!text) return null;
+
+    // The item's <link> is the post itself; CDATA-wrapped in some bridges.
+    const rawLink = pick('link').replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+    const url = /^https?:\/\//i.test(rawLink) ? rawLink : null;
+    return { text, url };
   } catch {
     // fall through
   }
