@@ -26,6 +26,16 @@ const aboutInterests = settings?.about_interests || "Off the clock I read cognit
     </header>
 
     <section class="about__section">
+      {settings?.portrait_url && (
+        <img
+          class="about__portrait"
+          src={`${settings.portrait_url}?w=640&auto=format`}
+          alt="Chukwuneku 'Neku' Akpotohwo"
+          width="200"
+          height="240"
+          loading="lazy"
+        />
+      )}
       <p>{aboutIntro}</p>
       <p>{aboutGdg}</p>
     </section>
@@ -73,6 +83,24 @@ const aboutInterests = settings?.about_interests || "Off the clock I read cognit
 
   .about__section {
     margin-bottom: var(--space-2xl);
+  }
+
+  .about__portrait {
+    float: right;
+    width: 200px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 0 0 var(--space-lg) var(--space-lg);
+    border: 1px solid rgba(236, 227, 214, 0.08);
+  }
+
+  @media (max-width: 560px) {
+    .about__portrait {
+      float: none;
+      display: block;
+      margin: 0 0 var(--space-lg) 0;
+    }
   }
 
   .about__section h2 {

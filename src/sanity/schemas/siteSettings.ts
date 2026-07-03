@@ -13,6 +13,7 @@ export default {
     { name: 'twitter', title: 'Twitter / X URL', type: 'url' },
     { name: 'instagram', title: 'Instagram URL', type: 'url' },
     { name: 'resume', title: 'Resume (PDF)', type: 'file' },
+    { name: 'portrait', title: 'Portrait', type: 'image', description: 'A real photo of you, shown on the About page. The site hides it until one is set.' },
     { name: 'featured_video_url', title: 'Featured video URL', type: 'url', description: 'YouTube video featured on the homepage. Leave empty; the section only renders once set.' },
     { name: 'about_video_url', title: 'About page video URL', type: 'url', description: 'YouTube video shown on the About page' },
     { name: 'about_intro', title: 'About: intro paragraph', type: 'text', rows: 4, description: 'First paragraph on the About page (who you are)' },

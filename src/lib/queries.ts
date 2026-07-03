@@ -36,6 +36,7 @@ export async function getSiteSettings() {
     twitter,
     instagram,
     "resume_url": resume.asset->url,
+    "portrait_url": portrait.asset->url,
     featured_video_url,
     about_video_url,
     about_intro,
