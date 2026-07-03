@@ -1,4 +1,6 @@
 ---
+import { postPath } from '../lib/posts';
+
 interface Props {
   post: {
     slug: string;
@@ -13,12 +15,7 @@ interface Props {
 }
 
 const { post, seriesSlug } = Astro.props;
-const isLinkOut = post.canonical === 'medium' && post.medium_url;
-const href = isLinkOut
-  ? post.medium_url
-  : seriesSlug
-    ? `/writing/${seriesSlug}/${post.slug}`
-    : `/writing/${post.slug}`;
+const { href, external: isLinkOut } = postPath(post, seriesSlug);
 ---
 
 <a
