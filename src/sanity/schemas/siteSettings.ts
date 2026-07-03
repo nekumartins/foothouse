@@ -4,6 +4,8 @@ export default {
   type: 'document',
   fields: [
     { name: 'bio', title: 'Bio', type: 'text', rows: 3, description: 'One-liner shown under your name' },
+    { name: 'looking_for', title: 'Looking for', type: 'string', description: 'One quiet line on what you are open to (roles, collaborations). Not a "Hire me" badge.' },
+    { name: 'stack', title: 'Tech stack', type: 'array', of: [{ type: 'string' }], options: { layout: 'tags' }, description: 'The languages/tools you actually work in, shown as a small row on the homepage.' },
     { name: 'contact_email', title: 'Contact email', type: 'string' },
     { name: 'linkedin', title: 'LinkedIn URL', type: 'url' },
     { name: 'github', title: 'GitHub URL', type: 'url' },

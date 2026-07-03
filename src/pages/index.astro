@@ -28,6 +28,9 @@ if (now) {
 const projectsWithStars = await withGithubStars(projects);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
+// [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
+const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations where the hard part is teaching a system to think.';
+const stack: string[] = settings?.stack?.length ? settings.stack : ['TypeScript', 'Python', 'React', 'Node.js', 'Astro'];
 
 const featured =
   involvements.find((i: any) => i.featured && i.story) ?? involvements[0] ?? null;
@@ -66,8 +69,16 @@ const personLd = {
       <h1 class="threshold__name">Neku Akpotohwo</h1>
       <p class="threshold__tagline">{bio}</p>
       <p class="threshold__craft">I build AI systems, and I run GDG on Campus Babcock, one of Nigeria's premier tech communities.</p>
+      {lookingFor && <p class="threshold__looking">{lookingFor}</p>}
+      {stack.length > 0 && (
+        <ul class="threshold__stack" aria-label="Tech stack">
+          {stack.map((tool: string) => <li>{tool}</li>)}
+        </ul>
+      )}
       <nav class="threshold__reach" aria-label="Profiles and contact">
-        {settings?.resume_url && <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Resume</a>}
+        {settings?.resume_url && (
+          <a class="threshold__resume" href={settings.resume_url} target="_blank" rel="noopener noreferrer">Résumé</a>
+        )}
         <a href={settings?.github || 'https://github.com/nekumartins'} target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
         <a href={`mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`}>Email</a>
@@ -211,8 +222,39 @@ const personLd = {
     line-height: 1.6;
   }
 
+  .threshold__looking {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    max-width: 480px;
+    margin: var(--space-md) auto 0;
+    line-height: 1.6;
+  }
+
+  .threshold__stack {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+    max-width: 480px;
+    margin: var(--space-md) auto 0;
+  }
+
+  .threshold__stack li {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(30, 24, 19, 0.35);
+    white-space: nowrap;
+  }
+
   .threshold__reach {
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: var(--space-lg);
     margin-top: var(--space-lg);
@@ -230,6 +272,21 @@ const personLd = {
   .threshold__reach a:hover {
     color: var(--lamp);
     text-decoration-color: var(--lamp);
+  }
+
+  /* Résumé gets a stronger affordance than the plain reach links. */
+  .threshold__reach a.threshold__resume {
+    color: var(--lamp);
+    text-decoration: none;
+    padding: 5px 14px;
+    border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
+    border-radius: 999px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .threshold__reach a.threshold__resume:hover {
+    background: color-mix(in srgb, var(--lamp) 14%, transparent);
+    border-color: var(--lamp);
   }
 
   /* ── Presence ── */

@@ -27,6 +27,8 @@ export async function getSiteSettings() {
   if (!sanityConfigured || !sanityClient) return null;
   return sanityClient.fetch(`*[_type == "siteSettings"][0]{
     bio,
+    looking_for,
+    stack,
     contact_email,
     linkedin,
     github,
