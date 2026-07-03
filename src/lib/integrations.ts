@@ -99,6 +99,46 @@ export async function getGitHubBuilding(repo?: string): Promise<string | null> {
   }
 }
 
+// Fallback for the homepage "Selected work" section: when no projects are
+// hand-picked in the CMS, show the owner's most-starred public repos so the
+// proof section is never empty. Shaped to match what ProjectCard expects.
+export interface RepoCard {
+  name: string;
+  tagline: string;
+  repo_url: string;
+  live_url?: string;
+  github_sync: true;
+  stars: number;
+}
+
+export async function getTopGithubRepos(username: string, limit = 4): Promise<RepoCard[]> {
+  if (!username) return [];
+  try {
+    const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, {
+      headers: import.meta.env.GITHUB_TOKEN
+        ? { Authorization: `token ${import.meta.env.GITHUB_TOKEN}` }
+        : {},
+    });
+    if (!res.ok) return [];
+    const repos = await res.json();
+    if (!Array.isArray(repos)) return [];
+    return repos
+      .filter((r: any) => !r.fork && !r.archived && r.description)
+      .sort((a: any, b: any) => (b.stargazers_count ?? 0) - (a.stargazers_count ?? 0))
+      .slice(0, limit)
+      .map((r: any) => ({
+        name: r.name,
+        tagline: r.description || '',
+        repo_url: r.html_url,
+        live_url: r.homepage || undefined,
+        github_sync: true as const,
+        stars: r.stargazers_count ?? 0,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 // Latest post for the "lately" card, read from an RSS bridge. X killed its free
 // public syndication endpoints (they all 403 now), so the no-cost path is a
 // third-party feed: create one from your profile at rss.app (or point at any

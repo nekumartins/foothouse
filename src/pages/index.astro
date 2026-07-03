@@ -4,7 +4,7 @@ import NowCards from '../components/NowCards.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Footer from '../components/Footer.astro';
 import { getNow, getProjects, getSiteSettings, getInvolvements } from '../lib/queries';
-import { getSpotifyListening, getGitHubBuilding } from '../lib/integrations';
+import { getSpotifyListening, getGitHubBuilding, getTopGithubRepos } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
 import { youtubeEmbedUrl } from '../lib/video';
 
@@ -26,6 +26,23 @@ if (now) {
 }
 
 const projectsWithStars = await withGithubStars(projects);
+
+// Never leave the proof section empty: fall back to the owner's top public
+// repos when no projects are hand-picked in the CMS.
+function ghUsername(url?: string): string {
+  const m = (url || '').match(/github\.com\/([^/]+)/);
+  return m ? m[1] : 'nekumartins';
+}
+let workItems: any[] = projectsWithStars;
+let workFromGithub = false;
+if (workItems.length === 0) {
+  const repos = await getTopGithubRepos(ghUsername(settings?.github), 4);
+  if (repos.length > 0) {
+    workItems = repos;
+    workFromGithub = true;
+  }
+}
+const githubProfile = settings?.github || 'https://github.com/nekumartins';
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
 // [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
@@ -90,15 +107,20 @@ const personLd = {
       <NowCards now={now} />
     </section>
 
-    <!-- Projects -->
-    {projectsWithStars.length > 0 && (
+    <!-- Selected work (hand-picked in CMS, or top GitHub repos as a fallback) -->
+    {workItems.length > 0 && (
       <section class="threshold__projects">
         <h2 class="section-label">Selected work</h2>
         <div class="projects-grid">
-          {projectsWithStars.map((project: any) => (
+          {workItems.map((project: any) => (
             <ProjectCard project={project} />
           ))}
         </div>
+        {workFromGithub && (
+          <a class="projects-more" href={githubProfile} target="_blank" rel="noopener noreferrer">
+            More on GitHub &#8599;
+          </a>
+        )}
       </section>
     )}
 
@@ -330,6 +352,19 @@ const personLd = {
   .projects-grid {
     display: flex;
     flex-direction: column;
+  }
+
+  .projects-more {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .projects-more:hover {
+    color: var(--lamp);
   }
 
   /* ── Community ── */
