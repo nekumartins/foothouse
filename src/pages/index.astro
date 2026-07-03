@@ -130,12 +130,20 @@ const personLd = {
             >
               <span class="exp-row__main">
                 <span class="exp-row__role">{job.role}</span>
-                <span class="exp-row__company">{job.company}</span>
+                <span class="exp-row__company">
+                  {job.company}
+                  {job.url && (
+                    <svg class="exp-row__arrow" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M3.5 10.5L10.5 3.5M10.5 3.5H5M10.5 3.5V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  )}
+                </span>
               </span>
               {job.period && <span class="exp-row__period">{job.period}</span>}
             </a>
           ))}
         </div>
+        <a class="exp-more" href="/work">Full history &#8594;</a>
       </section>
     )}
 
@@ -450,6 +458,33 @@ const personLd = {
     text-transform: uppercase;
     letter-spacing: 0.06em;
     white-space: nowrap;
+  }
+
+  .exp-row__arrow {
+    color: var(--faint);
+    margin-left: 2px;
+    vertical-align: baseline;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .exp-row:hover .exp-row__arrow {
+    opacity: 1;
+    color: var(--lamp);
+    transform: translate(1px, -1px);
+  }
+
+  .exp-more {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .exp-more:hover {
+    color: var(--lamp);
   }
 
   /* ── Community ── */
