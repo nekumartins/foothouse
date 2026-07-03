@@ -11,12 +11,13 @@ interface Props {
   title: string;
   description?: string;
   skyMode?: 'full' | 'receded';
+  ogImage?: string;
 }
 
 const DEFAULT_DESCRIPTION =
-  "Chukwuneku 'Neku' Akpotohwo is an AI-focused software engineer at Babcock University. He builds intelligent systems and organizes GDG on Campus Babcock.";
+  "Chukwuneku 'Neku' Akpotohwo is an AI-focused software engineer at Babcock University. He builds intelligent systems and founded GDG on Campus Babcock.";
 
-const { title, description = DEFAULT_DESCRIPTION, skyMode = 'full' } = Astro.props;
+const { title, description = DEFAULT_DESCRIPTION, skyMode = 'full', ogImage = '/og.png' } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -31,8 +32,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={new URL('/avatar.png', Astro.site)} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
