@@ -9,6 +9,10 @@ const settings = await getSiteSettings();
 const socialSettings = { ...settings, contact_email: settings?.contact_email || 'akpotohwoo@gmail.com' };
 
 const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
+
+const aboutIntro = settings?.about_intro || "I'm Chukwuneku Akpotohwo. Most people call me Neku. I'm a software engineer focused on AI, studying at Babcock University, and most of what I believe fits in one line: intelligence is built, not found.";
+const aboutGdg = settings?.about_gdg || "Since 2024 I've organized GDG on Campus Babcock, one of Nigeria's premier tech communities and the largest developer community on campus. We run summits, a publication, and a room where a thousand-something people teach each other things nobody assigned them.";
+const aboutInterests = settings?.about_interests || "Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.";
 ---
 
 <BaseLayout
@@ -22,8 +26,8 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
     </header>
 
     <section class="about__section">
-      <p>I'm Chukwuneku Akpotohwo. Most people call me Neku. I'm a software engineer focused on AI, studying at Babcock University, and most of what I believe fits in one line: intelligence is built, not found.</p>
-      <p>Since 2024 I've organized GDG on Campus Babcock, one of Nigeria's premier tech communities and the largest developer community on campus. We run summits, a publication, and a room where a thousand-something people teach each other things nobody assigned them.</p>
+      <p>{aboutIntro}</p>
+      <p>{aboutGdg}</p>
     </section>
 
     {aboutVideo && (
@@ -41,7 +45,7 @@ const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_vi
     )}
 
     <section class="about__section">
-      <p>Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.</p>
+      <p>{aboutInterests}</p>
     </section>
 
     <div class="about__reach">

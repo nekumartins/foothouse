@@ -27,6 +27,7 @@ export async function getSiteSettings() {
   if (!sanityConfigured || !sanityClient) return null;
   return sanityClient.fetch(`*[_type == "siteSettings"][0]{
     bio,
+    craft,
     looking_for,
     stack,
     contact_email,
@@ -36,7 +37,10 @@ export async function getSiteSettings() {
     instagram,
     "resume_url": resume.asset->url,
     featured_video_url,
-    about_video_url
+    about_video_url,
+    about_intro,
+    about_gdg,
+    about_interests
   }`);
 }
 

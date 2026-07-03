@@ -4,6 +4,7 @@ export default {
   type: 'document',
   fields: [
     { name: 'bio', title: 'Bio', type: 'text', rows: 3, description: 'One-liner shown under your name' },
+    { name: 'craft', title: 'Craft line', type: 'string', description: 'The "what I do" line under the bio on the homepage' },
     { name: 'looking_for', title: 'Looking for', type: 'string', description: 'One quiet line on what you are open to (roles, collaborations). Not a "Hire me" badge.' },
     { name: 'stack', title: 'Tech stack', type: 'array', of: [{ type: 'string' }], options: { layout: 'tags' }, description: 'The languages/tools you actually work in, shown as a small row on the homepage.' },
     { name: 'contact_email', title: 'Contact email', type: 'string' },
@@ -14,5 +15,8 @@ export default {
     { name: 'resume', title: 'Resume (PDF)', type: 'file' },
     { name: 'featured_video_url', title: 'Featured video URL', type: 'url', description: 'YouTube video featured on the homepage. Leave empty; the section only renders once set.' },
     { name: 'about_video_url', title: 'About page video URL', type: 'url', description: 'YouTube video shown on the About page' },
+    { name: 'about_intro', title: 'About: intro paragraph', type: 'text', rows: 4, description: 'First paragraph on the About page (who you are)' },
+    { name: 'about_gdg', title: 'About: community paragraph', type: 'text', rows: 4, description: 'Second paragraph on the About page (GDG / community)' },
+    { name: 'about_interests', title: 'About: interests paragraph', type: 'text', rows: 4, description: 'Closing paragraph on the About page (off the clock)' },
   ],
 };

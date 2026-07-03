@@ -36,6 +36,7 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
 const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
 const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
+const craft = settings?.craft || "I build AI systems, and I run GDG on Campus Babcock, one of Nigeria's premier tech communities.";
 // [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
 const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations where the hard part is teaching a system to think.';
 const stack: string[] = settings?.stack?.length ? settings.stack : ['TypeScript', 'Python', 'React', 'Node.js', 'Astro'];
@@ -76,7 +77,7 @@ const personLd = {
     <section class="threshold__person">
       <h1 class="threshold__name">Neku Akpotohwo</h1>
       <p class="threshold__tagline">{bio}</p>
-      <p class="threshold__craft">I build AI systems, and I run GDG on Campus Babcock, one of Nigeria's premier tech communities.</p>
+      <p class="threshold__craft">{craft}</p>
       {lookingFor && <p class="threshold__looking">{lookingFor}</p>}
       {stack.length > 0 && (
         <ul class="threshold__stack" aria-label="Tech stack">
