@@ -86,12 +86,12 @@ const personLd = {
         </ul>
       )}
       <nav class="threshold__reach" aria-label="Profiles and contact">
+        <a class="threshold__contact" href={`mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}?subject=Hi Neku`}>Get in touch</a>
         {settings?.resume_url && (
           <a class="threshold__resume" href={settings.resume_url} target="_blank" rel="noopener noreferrer">Résumé</a>
         )}
         <a href={settings?.github || 'https://github.com/nekumartins'} target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href={`mailto:${settings?.contact_email || 'akpotohwoo@gmail.com'}`}>Email</a>
       </nav>
     </section>
 
@@ -305,7 +305,8 @@ const personLd = {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md) var(--space-lg);
     margin-top: var(--space-lg);
   }
 
@@ -323,7 +324,26 @@ const personLd = {
     text-decoration-color: var(--lamp);
   }
 
-  /* Résumé gets a stronger affordance than the plain reach links. */
+  /* Get in touch is the page's primary action: filled, the strongest chip. */
+  .threshold__reach a.threshold__contact {
+    color: var(--bg);
+    background: var(--lamp);
+    text-decoration: none;
+    padding: 6px 16px;
+    border: 1px solid var(--lamp);
+    border-radius: 999px;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  }
+
+  .threshold__reach a.threshold__contact:hover {
+    color: var(--bg);
+    background: color-mix(in srgb, var(--lamp) 82%, white);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--lamp) 70%, transparent);
+  }
+
+  /* Résumé is the secondary chip: outline, a step below the primary. */
   .threshold__reach a.threshold__resume {
     color: var(--lamp);
     text-decoration: none;
