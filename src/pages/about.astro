@@ -10,14 +10,14 @@ const socialSettings = { ...settings, contact_email: settings?.contact_email || 
 
 const aboutVideo = settings?.about_video_url ? youtubeEmbedUrl(settings.about_video_url) : null;
 
-const aboutIntro = settings?.about_intro || "I'm Chukwuneku Akpotohwo. Most people call me Neku. I'm a software engineer focused on AI, studying at Babcock University, and most of what I believe fits in one line: intelligence is built, not found.";
-const aboutGdg = settings?.about_gdg || "Since 2024 I built GDG on Campus Babcock into one of Nigeria's premier tech communities and the largest developer community on campus. Summits, a publication, and a room where a thousand-something people teach each other things nobody assigned them. I'm handing it to the next set of hands now, which was always the point of building something that outlasts you.";
-const aboutInterests = settings?.about_interests || "Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.";
+const aboutIntro = settings?.about_intro || "I'm Chukwuneku Akpotohwo. Most people call me Neku. I'm a software engineer in Nigeria, a computer science graduate of Babcock University (class of 2026), and most of what I believe fits in one line: intelligence is built, not found. Days, I'm CTO at an early-stage fintech. Nights, I build Dysseo, a fitness app that adapts your calorie target to what your body actually does.";
+const aboutGdg = settings?.about_gdg || 'From 2024 I built GDG on Campus Babcock into the largest developer community on campus: 1,500+ members, five shipped products, a summit that drew over five hundred people and a career fair that drew a thousand more. In 2026 I handed it to the next set of hands, which was always the point of building something that outlasts you.';
+const aboutInterests = settings?.about_interests || 'Off the clock I read cognitive psychology and take ideas apart until they stop reducing. I care about what grows minds, mine included, and what that looks like at the scale of a person, a community, a continent.';
 ---
 
 <BaseLayout
   title="About | Neku Akpotohwo"
-  description="Who Chukwuneku 'Neku' Akpotohwo is: AI-focused software engineer, organizer of GDG on Campus Babcock, writer."
+  description="Who Neku Akpotohwo is: software engineer in Nigeria, founder of GDG on Campus Babcock, builder of Dysseo."
   skyMode="receded"
 >
   <div class="about">
