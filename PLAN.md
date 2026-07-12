@@ -2,9 +2,10 @@
 
 Approved plan for the site revamp. Executed phase by phase by a smaller model in
 later sessions. **One phase = one session = one commit to `main`.** Read
-`CLAUDE.md` before every phase. This plan supersedes the product direction in
-`foothouse-build-spec.md` and `SPEC-2.md` (their design system and sky rules
-still stand; their "do not optimize for recruiters / no CTAs" stance does not).
+`CLAUDE.md` before every phase. This plan supersedes the product direction of
+the old build specs (deleted; see "Carried over from the old build specs"
+below for the one thing from them not yet built). The design system and sky
+rules they described live on in `CLAUDE.md`.
 
 **All copy the site needs is written in this file.** Do not invent, improve, or
 paraphrase copy. Copy marked VERBATIM is used character for character.
@@ -529,6 +530,27 @@ After P5: Site Settings — `about_intro`, `about_gdg`, `about_interests`.
 After P9: nothing (testimonials stay empty until real quotes exist).
 Any time: delete the `now` document's reading fields' values (P6 stops
 rendering them regardless).
+
+## Carried over from the old build specs (not yet built)
+
+`foothouse-build-spec.md` and `SPEC-2.md` are deleted (superseded by this
+file and `CLAUDE.md`); everything in them has since shipped except one
+thing, preserved here so the idea isn't lost:
+
+**Real computed-refraction glass on the now-strip.** `src/scripts/glass.ts`
+already implements the technique (Snell's-law refraction through a modeled
+squircle dome, written to an SVG `feDisplacementMap`) but nothing calls its
+`initGlass()` export yet — no component has the `[data-glass]` /
+`.glass-refraction` / `.glass-sky-copy` / `.glass-highlight` markup it
+expects. Notes from the old spec, still good if this gets built: apply to
+the now-strip only, not everything else; load the displacement map as a
+`blob:` URL, not a `data:` URI (Safari refuses those in `feImage`); give the
+filter a fresh `id` on each rebuild (Safari caches by id); clip the
+refraction source to the card's own box (Safari caps source size); run a
+single displacement pass on Safari (skip the chromatic-fringe second pass)
+to hold frame rate; default to the full effect on all devices, only fall
+back to a cheap frosted approximation on measured runtime jank or
+`prefers-reduced-transparency`.
 
 ## Open questions (non-blocking; answer whenever)
 

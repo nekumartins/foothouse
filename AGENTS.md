@@ -2,10 +2,8 @@
 
 Conventions for the executor. Read every session, then execute exactly one
 phase from `PLAN.md`. PLAN.md is the single source of copy and scope — do not
-design, do not invent copy, do not build ahead. Where anything conflicts with
-the older `foothouse-build-spec.md` / `SPEC-2.md`, **PLAN.md wins** (their
-design system and sky rules still apply; their anti-recruiter/anti-CTA product
-stance is superseded).
+design, do not invent copy, do not build ahead. The design system and sky
+rules below are locked regardless of phase.
 
 ## What this site is
 
