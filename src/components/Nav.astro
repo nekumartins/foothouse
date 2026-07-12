@@ -28,34 +28,28 @@ const links = [
 </nav>
 
 <style>
+  /* A floating frosted-glass pill instead of a full-width bar, so the
+     living sky stays visible around it. Background alpha is driven by
+     --scrim-alpha (src/scripts/scrim.ts), computed from the live sky
+     palette, so it stays subtle at night and only opaque enough to hold
+     AA text contrast when the day sky is bright. */
   .nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: var(--space-md);
+    left: var(--space-md);
+    right: var(--space-md);
     z-index: 50;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-md) var(--space-xl);
+    padding: var(--space-sm) var(--space-lg);
+    background: rgb(21 17 13 / var(--scrim-alpha, 0.55));
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
     font-family: var(--font-body);
     font-size: var(--text-sm);
-  }
-
-  /* Soft scrim so scrolling text reads cleanly under the fixed nav,
-     without becoming a solid bar — the living sky still shows through. */
-  .nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    bottom: -16px;
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(21, 17, 13, 0.6), rgba(21, 17, 13, 0));
-    -webkit-backdrop-filter: blur(3px);
-    backdrop-filter: blur(3px);
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 
   .nav__home {

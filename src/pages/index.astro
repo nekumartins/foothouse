@@ -259,26 +259,31 @@ const personLd = {
 
   /* ── Person ── */
 
-  /* Text over the living sky needs a guaranteed-dark backdrop: the day sky
-     peaks near white (cloudHi #FFFFFF over a #5184B0 base), which the
-     text-shadow halo alone can't bring to AA. This scrim keeps the
-     effective background dark regardless of sky state. */
+  /* Frosted glass, not a slab: a translucent dark fill + blur + a hairline
+     border. The fill's alpha is driven by --scrim-alpha (set at runtime
+     from the live sky palette, see the script below) so the card stays
+     barely-there at night and only opaque enough to hold AA contrast when
+     the day sky is bright behind it — never a flat opaque box. */
   .threshold__person {
-    text-align: center;
+    text-align: left;
     margin-bottom: var(--space-3xl);
-    padding: var(--space-xl) var(--space-lg);
-    background: rgba(21, 17, 13, 0.88);
+    padding: var(--space-2xl) var(--space-xl);
+    background: rgb(21 17 13 / var(--scrim-alpha, 0.55));
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 24px;
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.2s;
   }
 
   .threshold__name {
+    text-align: center;
     font-family: var(--font-display);
     font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl));
     font-weight: 300;
     color: var(--paper);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-xl);
     letter-spacing: -0.01em;
   }
 
@@ -286,8 +291,7 @@ const personLd = {
     font-size: var(--text-lg);
     color: var(--muted);
     max-width: 480px;
-    margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.75;
   }
 
   .threshold__craft {
@@ -295,8 +299,8 @@ const personLd = {
     font-size: var(--text-base);
     color: var(--paper);
     max-width: 480px;
-    margin: var(--space-md) auto 0;
-    line-height: 1.6;
+    margin-top: var(--space-xl);
+    line-height: 1.75;
   }
 
   .threshold__looking {
@@ -305,18 +309,18 @@ const personLd = {
     font-size: var(--text-sm);
     color: var(--muted);
     max-width: 480px;
-    margin: var(--space-md) auto 0;
-    line-height: 1.6;
+    margin-top: var(--space-xl);
+    line-height: 1.7;
   }
 
   .threshold__stack {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--space-sm);
     max-width: 480px;
-    margin: var(--space-md) auto 0;
+    margin-top: var(--space-xl);
   }
 
   .threshold__stack li {
@@ -332,10 +336,10 @@ const personLd = {
   .threshold__reach {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--space-md) var(--space-lg);
-    margin-top: var(--space-lg);
+    margin-top: var(--space-2xl);
   }
 
   .threshold__reach a {
@@ -352,7 +356,10 @@ const personLd = {
     text-decoration-color: var(--lamp);
   }
 
-  /* WhatsApp is the page's primary action: filled, the strongest chip. */
+  /* WhatsApp is the page's primary action: flat vibrant fill, no drop
+     shadow. The shared text-shadow halo (for text floating on bare sky)
+     doesn't belong on a button with its own opaque fill, so it's reset
+     here; hover gets a soft inset rim-light instead of a dark glow. */
   .threshold__reach a.threshold__contact {
     display: inline-flex;
     align-items: center;
@@ -362,6 +369,7 @@ const personLd = {
     color: var(--bg);
     background: var(--lamp);
     text-decoration: none;
+    text-shadow: none;
     padding: 6px 20px;
     border: 1px solid var(--lamp);
     border-radius: 999px;
@@ -371,9 +379,9 @@ const personLd = {
 
   .threshold__reach a.threshold__contact:hover {
     color: var(--bg);
-    background: color-mix(in srgb, var(--lamp) 82%, white);
+    background: color-mix(in srgb, var(--lamp) 88%, white);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--lamp) 70%, transparent);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   }
 
   .threshold__contact-icon {
@@ -390,6 +398,7 @@ const personLd = {
     min-height: 44px;
     color: var(--lamp);
     text-decoration: none;
+    text-shadow: none;
     padding: 5px 18px;
     border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
     border-radius: 999px;
@@ -404,16 +413,16 @@ const personLd = {
   .threshold__reply {
     font-size: var(--text-sm);
     color: var(--muted);
-    margin-top: var(--space-sm);
+    margin-top: var(--space-md);
   }
 
   .threshold__router {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--space-md) var(--space-lg);
-    margin-top: var(--space-lg);
+    margin-top: var(--space-xl);
   }
 
   .threshold__router a {
@@ -437,7 +446,10 @@ const personLd = {
     justify-content: center;
     margin-bottom: var(--space-3xl);
     padding: var(--space-sm) var(--space-lg);
-    background: rgba(21, 17, 13, 0.85);
+    background: rgb(21 17 13 / var(--scrim-alpha, 0.55));
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.4s;
@@ -449,6 +461,9 @@ const personLd = {
     margin-bottom: 0;
     padding: 0;
     background: none;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   /* ── Section label ── */
@@ -788,9 +803,19 @@ const personLd = {
       min-height: 32px;
     }
 
+    .threshold__person {
+      padding: var(--space-md);
+    }
+
     .threshold__name {
       font-size: var(--text-3xl);
       margin-bottom: var(--space-sm);
+    }
+
+    .threshold__tagline,
+    .threshold__craft,
+    .threshold__looking {
+      line-height: 1.5;
     }
 
     .threshold__craft,
