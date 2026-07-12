@@ -163,6 +163,7 @@ html {
   --w-text: 640px;   /* hero panel + interior text columns */
   --w-deck: 760px;   /* the below-fold sheet */
   --w-nav: 680px;
+  --chrome-clearance: 88px; /* reserved space above fixed bottom-right chrome */
   /* motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --t-fast: 150ms;
@@ -248,7 +249,10 @@ a:hover {
   text-decoration-color: var(--lamp);
 }
 
-a:focus-visible {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--ink-accent, var(--lamp));
   outline-offset: 3px;
   border-radius: 2px;

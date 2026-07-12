@@ -174,8 +174,8 @@
 <style>
   .time-override {
     position: fixed;
-    bottom: var(--space-lg);
-    right: var(--space-lg);
+    bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+    right: max(var(--space-lg), env(safe-area-inset-right));
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -195,34 +195,35 @@
 
   .time-override__toggle,
   .time-override__minimize {
-    border: 1px solid var(--line);
+    border: 1px solid var(--glass-edge);
     border-radius: 50%;
-    background: rgba(30, 24, 19, 0.6);
+    background: var(--glass);
     backdrop-filter: blur(8px);
-    color: var(--muted);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--ink-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: color 0.3s ease, border-color 0.3s ease;
+    transition: color var(--t-fast) ease, border-color var(--t-fast) ease;
   }
 
   .time-override__toggle {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
 
   .time-override__minimize {
     width: 26px;
     height: 26px;
-    color: var(--faint);
+    color: var(--ink-faint);
   }
 
   .time-override__toggle:hover,
   .time-override__minimize:hover {
-    color: var(--lamp);
-    border-color: var(--lamp);
+    color: var(--ink-accent);
+    border-color: var(--ink-accent);
   }
 
   .time-override__icon {
@@ -240,10 +241,11 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
-    background: rgba(30, 24, 19, 0.8);
+    background: var(--glass);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--line);
-    border-radius: 20px;
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-md);
     animation: fadeIn 0.3s ease;
   }
 
@@ -254,13 +256,13 @@
 
   .time-override__slider {
     width: 120px;
-    accent-color: var(--lamp);
+    accent-color: var(--ink-accent);
     cursor: pointer;
   }
 
   .time-override__label {
     font-size: var(--text-xs);
-    color: var(--muted);
+    color: var(--ink-muted);
     min-width: 65px;
     text-align: center;
     font-variant-numeric: tabular-nums;
@@ -269,50 +271,50 @@
   .time-override__reset {
     font-family: var(--font-body);
     font-size: var(--text-xs);
-    color: var(--faint);
+    color: var(--ink-muted);
     background: none;
     border: none;
     cursor: pointer;
     padding: var(--space-xs) var(--space-sm);
     border-radius: 4px;
-    transition: color 0.2s ease;
+    transition: color var(--t-fast) ease;
   }
 
   .time-override__reset:hover {
-    color: var(--paper);
+    color: var(--ink);
   }
 
   .time-override__restore {
     position: fixed;
-    bottom: var(--space-lg);
-    right: var(--space-lg);
+    bottom: max(var(--space-lg), env(safe-area-inset-bottom));
+    right: max(var(--space-lg), env(safe-area-inset-right));
     z-index: 100;
-    width: 32px;
-    height: 32px;
-    border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
+    width: 28px;
+    height: 28px;
+    border: 1px solid color-mix(in srgb, var(--ink-accent) 45%, transparent);
     border-radius: 50%;
-    background: rgba(30, 24, 19, 0.55);
-    color: var(--lamp);
+    background: var(--glass);
+    color: var(--ink-accent);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     opacity: 0.85;
-    box-shadow: 0 0 10px color-mix(in srgb, var(--lamp) 40%, transparent),
-                0 0 22px color-mix(in srgb, var(--lamp) 18%, transparent);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--ink-accent) 40%, transparent),
+                0 0 11px color-mix(in srgb, var(--ink-accent) 18%, transparent);
     animation: nub-pulse 3s ease-in-out infinite;
-    transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: opacity var(--t-med) ease, color var(--t-fast) ease, border-color var(--t-fast) ease, box-shadow var(--t-med) ease;
   }
 
   @keyframes nub-pulse {
     0%, 100% {
-      box-shadow: 0 0 8px color-mix(in srgb, var(--lamp) 30%, transparent),
-                  0 0 16px color-mix(in srgb, var(--lamp) 12%, transparent);
+      box-shadow: 0 0 4px color-mix(in srgb, var(--ink-accent) 30%, transparent),
+                  0 0 8px color-mix(in srgb, var(--ink-accent) 12%, transparent);
     }
     50% {
-      box-shadow: 0 0 14px color-mix(in srgb, var(--lamp) 55%, transparent),
-                  0 0 30px color-mix(in srgb, var(--lamp) 28%, transparent);
+      box-shadow: 0 0 7px color-mix(in srgb, var(--ink-accent) 55%, transparent),
+                  0 0 14px color-mix(in srgb, var(--ink-accent) 28%, transparent);
     }
   }
 
@@ -322,8 +324,8 @@
 
   .time-override__restore:hover {
     opacity: 1;
-    color: var(--lamp);
-    border-color: var(--lamp);
+    color: var(--ink-accent);
+    border-color: var(--ink-accent);
   }
 
   @media (prefers-reduced-motion: reduce) {

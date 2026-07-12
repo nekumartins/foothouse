@@ -258,9 +258,9 @@ const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBA
 
   .work-project {
     padding: var(--space-xl);
-    background: rgba(30, 24, 19, 0.25);
-    border: 1px solid rgba(236, 227, 214, 0.06);
-    border-radius: 12px;
+    background: var(--tint);
+    border: 1px solid var(--tint-edge);
+    border-radius: var(--r-md);
   }
 
   .work-project__name {
