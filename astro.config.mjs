@@ -10,5 +10,6 @@ export default defineConfig({
   integrations: [sitemap()],
   redirects: {
     '/colophon': '/about',
+    '/business': '/services',
   },
 });
