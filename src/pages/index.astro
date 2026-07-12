@@ -90,22 +90,25 @@ const personLd = {
           {stack.map((tool: string) => <li>{tool}</li>)}
         </ul>
       )}
-      <nav class="threshold__reach" aria-label="Profiles and contact">
-        <a class="threshold__contact" href={WA_DEFAULT} target="_blank" rel="noopener noreferrer" data-goatcounter-click="whatsapp-hero">
-          <svg class="threshold__contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.85.5 3.58 1.36 5.07L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.78 14.06c-.24.68-1.4 1.32-1.93 1.4-.53.08-1.06.31-3.54-.74-2.98-1.26-4.88-4.29-5.03-4.5-.14-.2-1.2-1.6-1.2-3.05 0-1.45.76-2.16 1.03-2.46.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.24.58.83 2.01.9 2.16.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.24.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.13.07.75-.17 1.43z"/></svg>
-          Message me on WhatsApp
-        </a>
-        <a class="threshold__resume" href={`mailto:${CONTACT_EMAIL}?subject=Hi Neku`}>or email me</a>
+      <div class="threshold__actions">
+        <nav class="threshold__reach" aria-label="Contact">
+          <a class="threshold__contact" href={WA_DEFAULT} target="_blank" rel="noopener noreferrer" data-goatcounter-click="whatsapp-hero">
+            <svg class="threshold__contact-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.85.5 3.58 1.36 5.07L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.78 14.06c-.24.68-1.4 1.32-1.93 1.4-.53.08-1.06.31-3.54-.74-2.98-1.26-4.88-4.29-5.03-4.5-.14-.2-1.2-1.6-1.2-3.05 0-1.45.76-2.16 1.03-2.46.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.24.58.83 2.01.9 2.16.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.24.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.13.07.75-.17 1.43z"/></svg>
+            Message me on WhatsApp
+          </a>
+          <a class="threshold__resume" href={`mailto:${CONTACT_EMAIL}?subject=Hi Neku`}>Email me</a>
+        </nav>
+        <p class="threshold__reply">I reply within a day.</p>
+      </div>
+      <hr class="threshold__divider" />
+      <nav class="threshold__meta" aria-label="Jump to, and profiles">
+        <a href="#services">For your business &#8595;</a>
+        <a href="/work">Engineer? The work page has receipts &#8594;</a>
         {settings?.resume_url && (
           <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Résumé</a>
         )}
         <a href={settings?.github || 'https://github.com/nekumartins'} target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      </nav>
-      <p class="threshold__reply">I reply within a day.</p>
-      <nav class="threshold__router" aria-label="Jump to">
-        <a href="#services">For your business &#8595;</a>
-        <a href="/work">Engineer? The work page has receipts &#8594;</a>
       </nav>
     </section>
 
@@ -252,65 +255,79 @@ const personLd = {
   }
 
   .threshold__mood {
-    height: 30vh;
-    min-height: 180px;
+    height: clamp(96px, 18vh, 30vh);
     flex-shrink: 0;
+  }
+
+  @media (min-width: 768px) {
+    .threshold__mood {
+      height: 30vh;
+    }
   }
 
   /* ── Person ── */
 
-  /* Frosted glass, not a slab: a translucent dark fill + blur + a hairline
-     border. The fill's alpha is driven by --scrim-alpha (set at runtime
-     from the live sky palette, see the script below) so the card stays
-     barely-there at night and only opaque enough to hold AA contrast when
-     the day sky is bright behind it — never a flat opaque box. */
+  /* Thin translucent glass, not a slab: fixed alpha, the ink token flips
+     with the sky instead of the fill darkening to hold contrast. Stays
+     readable — and stays glass — at noon and at midnight alike. */
   .threshold__person {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
     text-align: left;
+    max-width: var(--w-text);
     margin-bottom: var(--space-3xl);
-    padding: var(--space-2xl) var(--space-xl);
-    background: rgb(21 17 13 / var(--scrim-alpha, 0.55));
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
+    padding: clamp(var(--space-xl), 5vw, var(--space-2xl));
+    background: var(--glass);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-lg);
+    box-shadow: inset 0 1px 0 var(--glass-rim);
+    transition: background-color 800ms ease, border-color 800ms ease;
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.2s;
   }
 
   .threshold__name {
-    text-align: center;
+    text-align: left;
     font-family: var(--font-display);
-    font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl));
-    font-weight: 300;
-    color: var(--paper);
-    margin-bottom: var(--space-xl);
-    letter-spacing: -0.01em;
+    font-size: clamp(2.25rem, 5.5vw, 3.25rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    text-wrap: balance;
+    max-width: 58ch;
+    transition: color var(--t-med) ease;
   }
 
   .threshold__tagline {
     font-size: var(--text-lg);
-    color: var(--muted);
-    max-width: 480px;
+    color: var(--ink);
+    max-width: 58ch;
     line-height: 1.75;
+    transition: color var(--t-med) ease;
   }
 
   .threshold__craft {
     font-family: var(--font-body);
     font-size: var(--text-base);
-    color: var(--paper);
-    max-width: 480px;
-    margin-top: var(--space-xl);
-    line-height: 1.75;
+    color: var(--ink-muted);
+    max-width: 58ch;
+    line-height: 1.7;
+    text-wrap: pretty;
+    transition: color var(--t-med) ease;
   }
 
   .threshold__looking {
     font-family: var(--font-display);
     font-style: italic;
     font-size: var(--text-sm);
-    color: var(--muted);
-    max-width: 480px;
-    margin-top: var(--space-xl);
+    color: var(--ink-muted);
+    max-width: 58ch;
     line-height: 1.7;
+    transition: color var(--t-med) ease;
   }
 
   .threshold__stack {
@@ -319,18 +336,23 @@ const personLd = {
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: var(--space-sm);
-    max-width: 480px;
-    margin-top: var(--space-xl);
   }
 
   .threshold__stack li {
-    font-size: var(--text-xs);
-    color: var(--muted);
-    padding: 3px 10px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgba(30, 24, 19, 0.35);
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+    padding: 4px 12px;
+    border: 1px solid var(--tint-edge);
+    border-radius: var(--r-pill);
+    background: var(--tint);
     white-space: nowrap;
+    transition: color var(--t-med) ease, background-color var(--t-med) ease, border-color var(--t-med) ease;
+  }
+
+  .threshold__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
   }
 
   .threshold__reach {
@@ -338,50 +360,35 @@ const personLd = {
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: var(--space-md) var(--space-lg);
-    margin-top: var(--space-2xl);
-  }
-
-  .threshold__reach a {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    text-decoration: underline;
-    text-decoration-color: rgba(224, 164, 88, 0.3);
-    text-underline-offset: 0.15em;
-    transition: text-decoration-color 0.3s ease, color 0.3s ease;
-  }
-
-  .threshold__reach a:hover {
-    color: var(--lamp);
-    text-decoration-color: var(--lamp);
+    gap: var(--space-md);
   }
 
   /* WhatsApp is the page's primary action: flat vibrant fill, no drop
-     shadow. The shared text-shadow halo (for text floating on bare sky)
-     doesn't belong on a button with its own opaque fill, so it's reset
-     here; hover gets a soft inset rim-light instead of a dark glow. */
+     shadow, no text-shadow, ever. Depth comes only from the material
+     around it, not from this button. */
   .threshold__reach a.threshold__contact {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 44px;
+    min-height: 48px;
     color: var(--bg);
     background: var(--lamp);
     text-decoration: none;
-    text-shadow: none;
     padding: 6px 20px;
     border: 1px solid var(--lamp);
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     font-weight: 500;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
   }
 
   .threshold__reach a.threshold__contact:hover {
-    color: var(--bg);
     background: color-mix(in srgb, var(--lamp) 88%, white);
     transform: translateY(-1px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  }
+
+  .threshold__reach a.threshold__contact:active {
+    transform: translateY(1px);
   }
 
   .threshold__contact-icon {
@@ -395,48 +402,53 @@ const personLd = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    color: var(--lamp);
+    min-height: 48px;
+    color: var(--ink);
     text-decoration: none;
-    text-shadow: none;
     padding: 5px 18px;
-    border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
-    border-radius: 999px;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-pill);
+    transition: background-color var(--t-fast) var(--ease-out), color var(--t-med) ease, border-color var(--t-med) ease;
   }
 
   .threshold__reach a.threshold__resume:hover {
-    background: color-mix(in srgb, var(--lamp) 14%, transparent);
-    border-color: var(--lamp);
+    background: var(--tint);
   }
 
   .threshold__reply {
     font-size: var(--text-sm);
-    color: var(--muted);
-    margin-top: var(--space-md);
+    color: var(--ink-muted);
+    transition: color var(--t-med) ease;
   }
 
-  .threshold__router {
+  .threshold__divider {
+    border: none;
+    height: 1px;
+    background: var(--tint-edge);
+    width: 100%;
+    transition: background-color var(--t-med) ease;
+  }
+
+  .threshold__meta {
     display: flex;
     align-items: center;
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--space-md) var(--space-lg);
-    margin-top: var(--space-xl);
   }
 
-  .threshold__router a {
+  .threshold__meta a {
     font-size: var(--text-sm);
-    color: var(--muted);
+    color: var(--ink-muted);
     text-decoration: underline;
-    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-decoration-color: color-mix(in srgb, var(--ink-accent) 40%, transparent);
     text-underline-offset: 0.15em;
-    transition: text-decoration-color 0.3s ease, color 0.3s ease;
+    transition: text-decoration-color var(--t-fast) ease, color var(--t-fast) ease;
   }
 
-  .threshold__router a:hover {
-    color: var(--lamp);
-    text-decoration-color: var(--lamp);
+  .threshold__meta a:hover {
+    color: var(--ink-accent);
+    text-decoration-color: var(--ink-accent);
   }
 
   /* ── Presence ── */
@@ -446,22 +458,25 @@ const personLd = {
     justify-content: center;
     margin-bottom: var(--space-3xl);
     padding: var(--space-sm) var(--space-lg);
-    background: rgb(21 17 13 / var(--scrim-alpha, 0.55));
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
+    background: var(--glass);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-pill);
+    box-shadow: inset 0 1px 0 var(--glass-rim);
+    transition: background-color 800ms ease, border-color 800ms ease;
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.4s;
     width: 100%;
   }
 
-  /* Collapse the spacing (and scrim) this section reserves when the strip has nothing to show. */
+  /* Collapse the spacing (and glass) this section reserves when the strip has nothing to show. */
   .threshold__presence:has(.now-strip[hidden]) {
     margin-bottom: 0;
     padding: 0;
     background: none;
     border: none;
+    box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
@@ -798,42 +813,18 @@ const personLd = {
       padding: 0 var(--space-md);
     }
 
-    .threshold__mood {
-      height: 6vh;
-      min-height: 32px;
-    }
-
     .threshold__person {
-      padding: var(--space-md);
-    }
-
-    .threshold__name {
-      font-size: var(--text-3xl);
-      margin-bottom: var(--space-sm);
-    }
-
-    .threshold__tagline,
-    .threshold__craft,
-    .threshold__looking {
-      line-height: 1.5;
-    }
-
-    .threshold__craft,
-    .threshold__looking,
-    .threshold__stack {
-      margin-top: var(--space-xs);
+      gap: var(--space-md);
     }
 
     .threshold__reach {
-      margin-top: var(--space-sm);
+      flex-direction: column;
+      align-items: stretch;
     }
 
-    .threshold__reply {
-      margin-top: var(--space-xs);
-    }
-
-    .threshold__router {
-      margin-top: var(--space-sm);
+    .threshold__reach a.threshold__contact,
+    .threshold__reach a.threshold__resume {
+      width: 100%;
     }
   }
 </style>

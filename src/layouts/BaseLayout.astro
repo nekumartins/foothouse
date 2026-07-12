@@ -68,11 +68,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
     <script>
       import { initSky } from '../scripts/sky';
-      import { initScrim } from '../scripts/scrim';
       import { initSurface } from '../scripts/surface';
-      // Listeners register before initSky() dispatches its first sky-update,
-      // so both scrim and ink land the correct value on first paint.
-      initScrim();
+      // The listener registers before initSky() dispatches its first
+      // sky-update, so the ink lands the correct value on first paint.
       initSurface();
       initSky();
     </script>

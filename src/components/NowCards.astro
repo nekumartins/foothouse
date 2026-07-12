@@ -107,12 +107,13 @@ const hasStatic = Boolean(lately);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--space-md) var(--space-lg);
     max-width: 560px;
     width: 100%;
     font-size: var(--text-sm);
-    color: var(--muted);
+    color: var(--ink-muted);
+    transition: color var(--t-med) ease;
   }
 
   .now-strip[hidden] {
@@ -134,15 +135,15 @@ const hasStatic = Boolean(lately);
     width: 15px;
     height: 15px;
     flex-shrink: 0;
-    color: var(--faint);
+    color: var(--ink-faint);
   }
 
   .now-strip__spotify .now-strip__glyph {
-    color: var(--lamp);
+    color: var(--ink-accent);
   }
 
   .now-strip__text {
-    color: var(--muted);
+    color: var(--ink-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -177,7 +178,7 @@ const hasStatic = Boolean(lately);
   }
 
   a.now-strip__text:hover {
-    color: var(--lamp);
+    color: var(--ink-accent);
   }
 
   /* Tiny now-playing equalizer. */
@@ -190,7 +191,7 @@ const hasStatic = Boolean(lately);
 
   .now-strip__eq i {
     width: 2px;
-    background: var(--lamp);
+    background: var(--ink-accent);
     border-radius: 1px;
     animation: eq 900ms ease-in-out infinite;
   }
