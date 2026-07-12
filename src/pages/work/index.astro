@@ -1,19 +1,18 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
 import Footer from '../../components/Footer.astro';
 import { getProjects, getExperience, getSiteSettings } from '../../lib/queries';
 import { withGithubStars } from '../../lib/github';
-import { getWorkItems } from '../../lib/integrations';
+import { FALLBACK_PROJECTS } from '../../data/projects';
 
 const [projects, experience, settings] = await Promise.all([
   getProjects(),
   getExperience(),
   getSiteSettings(),
 ]);
-const projectsWithStars = await withGithubStars(projects);
-const { items: workItems, fromGithub } = await getWorkItems(projectsWithStars, settings);
-const githubProfile = settings?.github || 'https://github.com/nekumartins';
+// Curated hard: three named projects, problem/built/outcome inline, no
+// unrelated GitHub-repo padding.
+const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBACK_PROJECTS;
 ---
 
 <BaseLayout
@@ -25,7 +24,7 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
     <header class="work__header">
       <h1>Work</h1>
       <p class="work__intro">
-        Where I have worked and a few things I have built. Not everything, just the ones worth showing.
+        Where I've worked and what I've built. Not everything, just the ones worth showing.
       </p>
     </header>
 
@@ -68,14 +67,40 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
         <h2 class="work__label">Projects</h2>
         <div class="work__list">
           {workItems.map((project: any) => (
-            <ProjectCard project={project} />
+            <article class="work-project">
+              <h3 class="work-project__name">{project.name}</h3>
+              {project.tagline && <p class="work-project__tagline">{project.tagline}</p>}
+              {project.problem && (
+                <div class="work-project__field">
+                  <h4 class="work-project__field-label">The problem</h4>
+                  <p>{project.problem}</p>
+                </div>
+              )}
+              {project.approach && (
+                <div class="work-project__field">
+                  <h4 class="work-project__field-label">What I built</h4>
+                  <p>{project.approach}</p>
+                </div>
+              )}
+              {project.outcome && (
+                <div class="work-project__field">
+                  <h4 class="work-project__field-label">Outcome</h4>
+                  <p>{project.outcome}</p>
+                </div>
+              )}
+              {(project.live_url || project.repo_url) && (
+                <div class="work-project__links">
+                  {project.live_url && (
+                    <a href={project.live_url} target="_blank" rel="noopener noreferrer">See it live &#8599;</a>
+                  )}
+                  {project.repo_url && (
+                    <a href={project.repo_url} target="_blank" rel="noopener noreferrer">Read the code &#8599;</a>
+                  )}
+                </div>
+              )}
+            </article>
           ))}
         </div>
-        {fromGithub && (
-          <a class="work__more" href={githubProfile} target="_blank" rel="noopener noreferrer">
-            More on GitHub &#8599;
-          </a>
-        )}
       </section>
     )}
 
@@ -228,19 +253,73 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
   .work__list {
     display: flex;
     flex-direction: column;
+    gap: var(--space-lg);
   }
 
-  .work__more {
-    display: inline-block;
-    margin-top: var(--space-md);
+  .work-project {
+    padding: var(--space-xl);
+    background: rgba(30, 24, 19, 0.25);
+    border: 1px solid rgba(236, 227, 214, 0.06);
+    border-radius: 12px;
+  }
+
+  .work-project__name {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 400;
+    color: var(--paper);
+    line-height: 1.3;
+    margin-bottom: var(--space-xs);
+  }
+
+  .work-project__tagline {
+    font-size: var(--text-base);
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: var(--space-lg);
+  }
+
+  .work-project__field {
+    margin-bottom: var(--space-md);
+  }
+
+  .work-project__field:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .work-project__field-label {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-xs);
+  }
+
+  .work-project__field p {
     font-size: var(--text-sm);
     color: var(--muted);
-    text-decoration: none;
-    transition: color 0.3s ease;
+    line-height: 1.7;
   }
 
-  .work__more:hover {
+  .work-project__links {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+  }
+
+  .work-project__links a {
     color: var(--lamp);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .work-project__links a:hover {
+    text-decoration-color: var(--lamp);
   }
 
   .work__empty {
