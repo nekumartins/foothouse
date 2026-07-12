@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OG</title>
+<style>
+  @font-face {
+    font-family: 'Fraunces';
+    font-weight: 100 900;
+    font-style: normal;
+    src: url('../../public/fonts/fraunces-latin-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-weight: 100 1000;
+    font-style: normal;
+    src: url('../../public/fonts/dm-sans-latin-normal.woff2') format('woff2');
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+
+  body {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    background: linear-gradient(180deg, #0B0D1A 0%, #141833 55%, #1A1530 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+  }
+
+  .stars span {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #ECE3D6;
+  }
+
+  .content {
+    position: relative;
+    text-align: center;
+    padding: 0 80px;
+  }
+
+  .name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 300;
+    font-size: 76px;
+    color: #ECE3D6;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .line2 {
+    margin-top: 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 30px;
+    color: #B6A892;
+  }
+
+  .line3 {
+    margin-top: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #E0A458;
+  }
+</style>
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="stars" id="stars"></div>
+  <div class="content">
+    <div class="name">Neku Akpotohwo</div>
+    <div class="line2">Websites, business automation, and AI systems.</div>
+    <div class="line3">nekumartins.dev</div>
+  </div>
+  <script>
+    const stars = document.getElementById('stars');
+    const positions = [
+      [80,60],[180,140],[260,40],[340,180],[120,260],[1020,70],[1080,160],
+      [960,220],[1120,90],[1140,240],[60,340],[1000,340],[200,540],[1000,520],
+      [400,80],[820,60],[500,560],[720,580],[900,470],[300,470],[150,440]
+    ];
+    for (const [x, y] of positions) {
+      const s = document.createElement('span');
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      stars.appendChild(s);
+    }
+  </script>
+</body>
+</html>
