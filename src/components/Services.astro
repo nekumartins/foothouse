@@ -1,0 +1,146 @@
+---
+import { waLink } from '../lib/site';
+
+const cards = [
+  {
+    heading: 'A website your customers can find on Google',
+    body: 'A fast site that opens quickly on any phone, shows what you sell, and has a WhatsApp button so customers can message you straight away. I set it up on Google so people searching for your business actually find it.',
+    meta: 'Usually ready in 1–2 weeks. Fixed quote before we start.',
+    linkLabel: 'Ask about a website',
+    link: waLink('Hi Neku, I need a website for my business.'),
+  },
+  {
+    heading: 'Orders, receipts and invoices, automated end to end',
+    body: 'Customers order through a form or WhatsApp. Receipts and invoices are generated and sent automatically, payments are collected with Paystack or Flutterwave, and every order lands in one tidy record you can check any time.',
+    meta: 'Usually ready in 2–4 weeks. Fixed quote before we start.',
+    linkLabel: 'Ask about order automation',
+    link: waLink('Hi Neku, I want to automate my orders and receipts.'),
+  },
+  {
+    heading: 'Your spreadsheet busywork, automated',
+    body: 'The copying, totalling and reporting you do by hand every week happens by itself, on the Google Sheets you already use. Daily or weekly summaries can come straight to your WhatsApp or email.',
+    meta: 'Usually ready in about a week. Fixed quote before we start.',
+    linkLabel: 'Ask about spreadsheet automation',
+    link: waLink('Hi Neku, I want to automate my spreadsheet work.'),
+  },
+];
+---
+
+<section class="services" id="services">
+  <h2 class="section-label">For your business</h2>
+  <p class="services-intro">I build tools for small businesses in Nigeria. You tell me the problem on WhatsApp, I give you a fixed quote before we start, and you pay only what we agreed.</p>
+  <div class="services-grid">
+    {cards.map((card) => (
+      <article class="service-card">
+        <h3 class="service-card__heading">{card.heading}</h3>
+        <p class="service-card__body">{card.body}</p>
+        <p class="service-card__meta">{card.meta}</p>
+        <a class="service-card__link" href={card.link} target="_blank" rel="noopener noreferrer">{card.linkLabel}</a>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .services {
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto var(--space-3xl);
+    animation: fadeUp 1.2s ease both;
+    animation-delay: 0.5s;
+  }
+
+  .section-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-md);
+  }
+
+  .services-intro {
+    font-size: var(--text-base);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: var(--space-xl);
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .service-card {
+    padding: var(--space-xl);
+    background: rgba(30, 24, 19, 0.25);
+    border: 1px solid rgba(236, 227, 214, 0.06);
+    border-radius: 12px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .service-card:hover {
+    background: rgba(30, 24, 19, 0.45);
+    border-color: rgba(236, 227, 214, 0.12);
+  }
+
+  .service-card__heading {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 400;
+    color: var(--paper);
+    line-height: 1.3;
+    margin-bottom: var(--space-md);
+  }
+
+  .service-card__body {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: var(--space-md);
+  }
+
+  .service-card__meta {
+    font-size: var(--text-xs);
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-lg);
+  }
+
+  .service-card__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--text-sm);
+    color: var(--lamp);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .service-card__link:hover {
+    text-decoration-color: var(--lamp);
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .services {
+      animation: none;
+    }
+  }
+</style>
