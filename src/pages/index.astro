@@ -3,21 +3,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
 import Services from '../components/Services.astro';
 import ContactForm from '../components/ContactForm.astro';
+import Testimonials from '../components/Testimonials.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import PostRow from '../components/PostRow.astro';
 import Footer from '../components/Footer.astro';
-import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience } from '../lib/queries';
+import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience, getTestimonials } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding, getWorkItems } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
 import { youtubeEmbedUrl } from '../lib/video';
 import { WA_DEFAULT, CONTACT_EMAIL } from '../lib/site';
+import { SHOW_TESTIMONIALS } from '../lib/flags';
 
-const [now, projects, settings, involvements, experience] = await Promise.all([
+const [now, projects, settings, involvements, experience, testimonials] = await Promise.all([
   getNow(),
   getProjects(),
   getSiteSettings(),
   getInvolvements(),
   getExperience(),
+  SHOW_TESTIMONIALS ? getTestimonials() : Promise.resolve([]),
 ]);
 
 const [spotifyText, githubText] = await Promise.all([
@@ -112,6 +115,10 @@ const personLd = {
     </section>
 
     <Services />
+
+    {SHOW_TESTIMONIALS && testimonials.length > 0 && (
+      <Testimonials testimonials={testimonials} />
+    )}
 
     <!-- Selected work (hand-picked in CMS, or top GitHub repos as a fallback) -->
     {workItems.length > 0 && (

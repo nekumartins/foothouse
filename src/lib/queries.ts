@@ -137,6 +137,19 @@ export async function getInvolvements() {
   }`) ?? [];
 }
 
+// ── Testimonials (Sanity only; ships empty behind SHOW_TESTIMONIALS) ──
+
+export async function getTestimonials() {
+  if (!sanityConfigured || !sanityClient) return [];
+  return sanityClient.fetch(`*[_type == "testimonial" && permission == true] | order(sort asc) {
+    "id": _id,
+    quote,
+    name,
+    business,
+    sort
+  }`) ?? [];
+}
+
 // ── Writing: series + posts ──
 
 export async function getSeriesWithPosts() {
