@@ -23,7 +23,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ink="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -69,8 +69,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <script>
       import { initSky } from '../scripts/sky';
       import { initScrim } from '../scripts/scrim';
-      initSky();
+      import { initSurface } from '../scripts/surface';
+      // Listeners register before initSky() dispatches its first sky-update,
+      // so both scrim and ink land the correct value on first paint.
       initScrim();
+      initSurface();
+      initSky();
     </script>
   </body>
 </html>

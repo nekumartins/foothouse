@@ -154,6 +154,57 @@ html {
   --space-3xl: 5rem;
 }
 
+/* ── Surface system: one material, two inks ── */
+:root {
+  /* geometry */
+  --r-lg: 24px;
+  --r-md: 16px;
+  --r-pill: 999px;
+  --w-text: 640px;   /* hero panel + interior text columns */
+  --w-deck: 760px;   /* the below-fold sheet */
+  --w-nav: 680px;
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 150ms;
+  --t-med: 300ms;
+
+  /* night material + ink (SSR default; matches the default night palette) */
+  --glass: rgb(21 17 13 / 0.60);
+  --glass-edge: rgb(236 227 214 / 0.14);
+  --glass-rim: rgb(255 255 255 / 0.08);
+  --ink: #ECE3D6;
+  --ink-muted: #C9BBA4;
+  --ink-faint: #A5967D;
+  --ink-accent: #E8B06A;
+  --tint: rgb(236 227 214 / 0.05);
+  --tint-edge: rgb(236 227 214 / 0.10);
+}
+
+html[data-ink='light'] {
+  --glass: rgb(236 227 214 / 0.72);
+  --glass-edge: rgb(21 17 13 / 0.16);
+  --glass-rim: rgb(255 255 255 / 0.45);
+  --ink: #221B12;
+  --ink-muted: #3F3422;
+  --ink-faint: #5C4F3B;
+  --ink-accent: #5C3608;
+  --tint: rgb(21 17 13 / 0.05);
+  --tint-edge: rgb(21 17 13 / 0.12);
+}
+
+/* Without real translucency the glass has nothing to blend with, so both
+   fallbacks raise it near-opaque instead of leaving it a thin, low-contrast
+   film. */
+@supports not (backdrop-filter: blur(1px)) {
+  :root { --glass: rgb(21 17 13 / 0.92); }
+  html[data-ink='light'] { --glass: rgb(236 227 214 / 0.92); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass: rgb(21 17 13 / 0.92); }
+  html[data-ink='light'] { --glass: rgb(236 227 214 / 0.92); }
+}
+
 /* ── Reset ── */
 
 *,
@@ -198,7 +249,7 @@ a:hover {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--lamp);
+  outline: 2px solid var(--ink-accent, var(--lamp));
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -236,21 +287,6 @@ body::after {
   html {
     transition: none;
   }
-}
-
-/* ── Sky readability ──
-   Text that floats directly over the living sky needs a dark halo so it stays
-   legible against bright daytime states. Harmless over the darker night/inner
-   states, and invisible on text that already sits on a glass surface. */
-
-.nav,
-.threshold__person,
-.threshold__presence,
-.threshold__projects,
-.threshold__community,
-.threshold__doors,
-.site-footer {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.75), 0 0 24px rgba(0, 0, 0, 0.55);
 }
 
 /* ── Utility classes ── */
