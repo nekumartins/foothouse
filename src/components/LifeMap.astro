@@ -49,11 +49,8 @@ const { places } = Astro.props;
     const container = document.getElementById('life-map');
     if (!container) return;
 
-    // Open on home, the way Snapchat opens on you, not on the whole world.
-    // The map never reframes itself after this; a visitor reaches other
-    // continents by panning and zooming out, not by an auto-fit.
-    const byDate = [...places].sort((a: any, b: any) => String(b.arrived_on ?? '').localeCompare(String(a.arrived_on ?? '')));
-    const home = places.find((p: any) => p.kind === 'home') ?? byDate[0] ?? null;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
     // Retina tiles only where the screen can show them.
     const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
@@ -85,14 +82,46 @@ const { places } = Astro.props;
           }
         ]
       },
-      center: (home ? [home.lng, home.lat] : [3.3792, 6.5244]) as [number, number],
-      zoom: 10,
-      minZoom: 2,
+      // A small rotatable globe, Snapchat-style: opens on the whole sphere
+      // with Nigeria facing forward, not zoomed into a single place. A
+      // one-finger drag pans across the sphere, which reads as spinning it.
+      projection: 'globe',
+      center: [8.6753, 9.0820] as [number, number],
+      zoom: 1.6,
+      minZoom: 1.2,
       maxZoom: 15,
       attributionControl: false,
     });
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+    // Scroll-wheel/trackpad zoom fights with page scroll on touch devices;
+    // pinch-zoom (touchZoomRotate, on by default) stays enabled either way.
+    if (isTouch) map.scrollZoom.disable();
+
+    // Slow idle spin, paused the moment a visitor touches the globe. Static
+    // under prefers-reduced-motion.
+    if (!reducedMotion) {
+      let userInteracting = false;
+      const degPerSecond = 4;
+      let lastFrame = 0;
+
+      const pause = () => { userInteracting = true; };
+      const resume = () => { userInteracting = false; };
+      ['mousedown', 'touchstart', 'wheel', 'dragstart'].forEach((evt) => map.on(evt, pause));
+      ['mouseup', 'touchend', 'dragend'].forEach((evt) => map.on(evt, resume));
+
+      const spin = (now: number) => {
+        const dt = lastFrame ? (now - lastFrame) / 1000 : 0;
+        lastFrame = now;
+        if (!userInteracting) {
+          const c = map.getCenter();
+          map.setCenter([c.lng - degPerSecond * dt, c.lat]);
+        }
+        requestAnimationFrame(spin);
+      };
+      requestAnimationFrame(spin);
+    }
 
     const kindColors: Record<string, string> = {
       home: '#E0A458',
