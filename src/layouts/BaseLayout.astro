@@ -6,6 +6,7 @@ import CloudBed from '../components/CloudBed.astro';
 import CelestialGrab from '../components/CelestialGrab.astro';
 import TimeOverride from '../components/TimeOverride.astro';
 import Nav from '../components/Nav.astro';
+import { GOATCOUNTER_CODE } from '../lib/site';
 
 interface Props {
   title: string;
@@ -43,6 +44,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="preload" href="/fonts/fraunces-latin-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/dm-sans-latin-normal.woff2" as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
+    <script
+      data-goatcounter={`https://${GOATCOUNTER_CODE}.goatcounter.com/count`}
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
   </head>
   <body data-sky-mode={skyMode}>
     <div class="sky-container" aria-hidden="true">

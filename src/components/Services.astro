@@ -8,6 +8,7 @@ const cards = [
     meta: 'Usually ready in 1–2 weeks. Fixed quote before we start.',
     linkLabel: 'Ask about a website',
     link: waLink('Hi Neku, I need a website for my business.'),
+    event: 'whatsapp-services-website',
   },
   {
     heading: 'Orders, receipts and invoices, automated end to end',
@@ -15,6 +16,7 @@ const cards = [
     meta: 'Usually ready in 2–4 weeks. Fixed quote before we start.',
     linkLabel: 'Ask about order automation',
     link: waLink('Hi Neku, I want to automate my orders and receipts.'),
+    event: 'whatsapp-services-orders',
   },
   {
     heading: 'Your spreadsheet busywork, automated',
@@ -22,6 +24,7 @@ const cards = [
     meta: 'Usually ready in about a week. Fixed quote before we start.',
     linkLabel: 'Ask about spreadsheet automation',
     link: waLink('Hi Neku, I want to automate my spreadsheet work.'),
+    event: 'whatsapp-services-sheets',
   },
 ];
 ---
@@ -35,7 +38,7 @@ const cards = [
         <h3 class="service-card__heading">{card.heading}</h3>
         <p class="service-card__body">{card.body}</p>
         <p class="service-card__meta">{card.meta}</p>
-        <a class="service-card__link" href={card.link} target="_blank" rel="noopener noreferrer">{card.linkLabel}</a>
+        <a class="service-card__link" href={card.link} target="_blank" rel="noopener noreferrer" data-goatcounter-click={card.event}>{card.linkLabel}</a>
       </article>
     ))}
   </div>
