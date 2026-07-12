@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-07-12):** product direction now lives in `PLAN.md` (+ `CLAUDE.md`). Design system and sky rules here still apply where PLAN.md does not contradict them.
+
 # SPEC-2: Foothouse corrective rebuild
 
 Validated by dry-run (Phase 1 executed literally against the repo and passed build + guards) and line-by-line trace (Phases 2-8) on 2026-07-02; corrections v2.1 applied (drag-target gating, cloud seam wraps, JSON-LD is:inline, builder preflight).

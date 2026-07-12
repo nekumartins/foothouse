@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-07-12):** product direction now lives in `PLAN.md` (+ `CLAUDE.md`). Design system and sky rules here still apply where PLAN.md does not contradict them.
+
 # Foothouse — Build Specification
 
 A personal site for **Neku Akpotohwo**. This document is the single source of truth for the build. Read the whole thing before writing any code. Build in the numbered phases. Do not skip ahead, do not add features not listed here, and do not "improve" the aesthetic direction — every choice below is deliberate and was decided with the owner.
