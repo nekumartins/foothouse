@@ -37,11 +37,10 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
 // Writing teaser (replaces the duplicate-nav doors): surface the latest essays.
 const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
-const bio = settings?.bio || "I'm Neku, somewhere between an engineer and someone who won't stop asking why.";
-const craft = settings?.craft || "I build AI systems, and I built GDG on Campus Babcock into one of Nigeria's premier tech communities.";
-// [VERIFY with owner] fallbacks — edit these in Sanity (Site Settings).
-const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations where the hard part is teaching a system to think.';
-const stack: string[] = settings?.stack?.length ? settings.stack : ['TypeScript', 'Python', 'React', 'Node.js', 'Astro'];
+const bio = settings?.bio || 'Software engineer in Nigeria. I build websites, business automation, and AI systems.';
+const craft = settings?.craft || "Right now I'm building Dysseo, a fitness app whose calorie engine adapts to your real rate of loss. Before it: a real-time AI voice debate coach running on Azure, and GDG on Campus Babcock, grown to 1,500+ members.";
+const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations. The evidence is on the work page.';
+const stack: string[] = settings?.stack?.length ? settings.stack : ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Azure', 'TypeScript', 'React', 'Astro', 'Google Apps Script', 'Java/Spring Boot (learning)'];
 
 const featured =
   involvements.find((i: any) => i.featured && i.story) ?? involvements[0] ?? null;
@@ -57,8 +56,8 @@ const personLd = {
   name: 'Chukwuneku Akpotohwo',
   alternateName: ['Neku Akpotohwo', 'Neku'],
   jobTitle: 'Software Engineer',
-  description: "AI-focused software engineer who founded and led GDG on Campus Babcock.",
-  affiliation: { '@type': 'CollegeOrUniversity', name: 'Babcock University' },
+  description: 'Software engineer in Nigeria. Builds websites and automation for small businesses, and AI systems. Founded GDG on Campus Babcock.',
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Babcock University' },
   url: 'https://foothouse-nu.vercel.app',
   image: settings?.portrait_url || 'https://foothouse-nu.vercel.app/avatar.png',
   email: `mailto:${settings?.contact_email || CONTACT_EMAIL}`,
@@ -100,6 +99,10 @@ const personLd = {
         <a href={settings?.linkedin || 'https://linkedin.com/in/nekumartins'} target="_blank" rel="noopener noreferrer">LinkedIn</a>
       </nav>
       <p class="threshold__reply">I reply within a day.</p>
+      <nav class="threshold__router" aria-label="Jump to">
+        <a href="#services">For your business &#8595;</a>
+        <a href="/work">Engineer? The work page has receipts &#8594;</a>
+      </nav>
     </section>
 
     <!-- Currently: slim presence strip, right under the hero -->
@@ -386,6 +389,29 @@ const personLd = {
     font-size: var(--text-sm);
     color: var(--muted);
     margin-top: var(--space-sm);
+  }
+
+  .threshold__router {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-md) var(--space-lg);
+    margin-top: var(--space-lg);
+  }
+
+  .threshold__router a {
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-color: rgba(224, 164, 88, 0.3);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color 0.3s ease, color 0.3s ease;
+  }
+
+  .threshold__router a:hover {
+    color: var(--lamp);
+    text-decoration-color: var(--lamp);
   }
 
   /* ── Presence ── */
@@ -737,12 +763,31 @@ const personLd = {
     }
 
     .threshold__mood {
-      height: 25vh;
-      min-height: 140px;
+      height: 6vh;
+      min-height: 32px;
     }
 
     .threshold__name {
       font-size: var(--text-3xl);
+      margin-bottom: var(--space-sm);
+    }
+
+    .threshold__craft,
+    .threshold__looking,
+    .threshold__stack {
+      margin-top: var(--space-xs);
+    }
+
+    .threshold__reach {
+      margin-top: var(--space-sm);
+    }
+
+    .threshold__reply {
+      margin-top: var(--space-xs);
+    }
+
+    .threshold__router {
+      margin-top: var(--space-sm);
     }
   }
 </style>
