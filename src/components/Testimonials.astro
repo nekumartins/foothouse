@@ -21,16 +21,14 @@ const { testimonials } = Astro.props;
 
 <style>
   .testimonials {
-    max-width: 720px;
     width: 100%;
-    margin: 0 auto var(--space-3xl);
   }
 
   .section-label {
     font-family: var(--font-display);
     font-size: var(--text-sm);
     font-weight: 400;
-    color: var(--faint);
+    color: var(--ink-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: var(--space-lg);
@@ -44,21 +42,21 @@ const { testimonials } = Astro.props;
 
   .testimonial {
     padding: var(--space-xl);
-    background: rgba(30, 24, 19, 0.25);
-    border: 1px solid rgba(236, 227, 214, 0.06);
-    border-radius: 12px;
+    background: var(--tint);
+    border: 1px solid var(--tint-edge);
+    border-radius: var(--r-md);
   }
 
   .testimonial__quote {
     font-size: var(--text-base);
-    color: var(--paper);
+    color: var(--ink);
     line-height: 1.7;
     margin-bottom: var(--space-md);
   }
 
   .testimonial__attribution {
     font-size: var(--text-sm);
-    color: var(--muted);
+    color: var(--ink-muted);
     font-style: normal;
   }
 </style>

@@ -42,16 +42,14 @@ const redirectUrl = new URL('/?sent=1', Astro.site).toString();
 
 <style>
   .contact-form {
-    max-width: 560px;
     width: 100%;
-    margin-bottom: var(--space-3xl);
   }
 
   .section-label {
     font-family: var(--font-display);
     font-size: var(--text-sm);
     font-weight: 400;
-    color: var(--faint);
+    color: var(--ink-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: var(--space-lg);
@@ -59,7 +57,7 @@ const redirectUrl = new URL('/?sent=1', Astro.site).toString();
 
   .contact-form__sent {
     font-size: var(--text-sm);
-    color: var(--lamp);
+    color: var(--ink-accent);
     margin-bottom: var(--space-lg);
   }
 
@@ -84,24 +82,24 @@ const redirectUrl = new URL('/?sent=1', Astro.site).toString();
     flex-direction: column;
     gap: var(--space-xs);
     font-size: var(--text-sm);
-    color: var(--muted);
+    color: var(--ink-muted);
   }
 
   .contact-form__field input,
   .contact-form__field textarea {
     font-family: var(--font-body);
     font-size: var(--text-base);
-    color: var(--paper);
-    background: rgba(30, 24, 19, 0.35);
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    color: var(--ink);
+    background: var(--tint);
+    border: 1px solid var(--tint-edge);
+    border-radius: var(--r-md);
     padding: var(--space-sm) var(--space-md);
     resize: vertical;
   }
 
   .contact-form__field input:focus,
   .contact-form__field textarea:focus {
-    outline: 2px solid var(--lamp);
+    outline: 2px solid var(--ink-accent);
     outline-offset: 1px;
   }
 
@@ -112,16 +110,15 @@ const redirectUrl = new URL('/?sent=1', Astro.site).toString();
     font-family: var(--font-body);
     font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--lamp);
+    color: var(--ink);
     background: none;
-    border: 1px solid color-mix(in srgb, var(--lamp) 45%, transparent);
-    border-radius: 999px;
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-pill);
     cursor: pointer;
-    transition: background 0.3s ease, border-color 0.3s ease;
+    transition: background-color var(--t-fast) var(--ease-out);
   }
 
   .contact-form__submit:hover {
-    background: color-mix(in srgb, var(--lamp) 14%, transparent);
-    border-color: var(--lamp);
+    background: var(--tint);
   }
 </style>
