@@ -1,37 +1,101 @@
 ---
+import { WA_DEFAULT } from '../lib/site';
+
 const currentPath = Astro.url.pathname;
 const links = [
+  { href: '/', label: 'Home' },
+  { href: '/business', label: 'Business' },
+  { href: '/work', label: 'Work' },
   { href: '/writing', label: 'Writing' },
   { href: '/map', label: 'Map' },
-  { href: '/work', label: 'Work' },
   { href: '/about', label: 'About' },
 ];
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
 ---
 
-<nav class="nav" aria-label="Main navigation">
-  <a href="/" class="nav__home" aria-label="Home">
-    <img src="/avatar.png" alt="Neku" class="nav__avatar" width="32" height="32" />
-  </a>
-  <ul class="nav__links" role="list">
-    {links.map(link => (
-      <li>
-        <a
-          href={link.href}
-          class:list={['nav__link', { 'nav__link--active': currentPath.startsWith(link.href) }]}
-          aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}
-        >
-          {link.label}
-        </a>
-      </li>
-    ))}
-  </ul>
-</nav>
+<div class="nav-shell">
+  <div class="nav">
+    <a href="/" class="nav__home" aria-label="Home">
+      <img src="/avatar.png" alt="Neku" class="nav__avatar" width="32" height="32" />
+    </a>
+    <button
+      class="nav__toggle"
+      id="nav-toggle"
+      aria-expanded="false"
+      aria-controls="nav-menu"
+      aria-label="Open menu"
+    >
+      <svg class="nav__icon nav__icon--open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="8" x2="20" y2="8" />
+        <line x1="4" y1="16" x2="20" y2="16" />
+      </svg>
+      <svg class="nav__icon nav__icon--close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="18" y1="6" x2="6" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="nav-menu" id="nav-menu" aria-label="Main navigation" hidden>
+    <ul class="nav-menu__links" role="list">
+      {links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class:list={['nav-menu__link', { 'nav-menu__link--active': isActive(link.href) }]}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a
+      class="nav-menu__cta"
+      href={WA_DEFAULT}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-goatcounter-click="whatsapp-nav"
+    >
+      <svg class="nav-menu__cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.85.5 3.58 1.36 5.07L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.78 14.06c-.24.68-1.4 1.32-1.93 1.4-.53.08-1.06.31-3.54-.74-2.98-1.26-4.88-4.29-5.03-4.5-.14-.2-1.2-1.6-1.2-3.05 0-1.45.76-2.16 1.03-2.46.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.24.58.83 2.01.9 2.16.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.24.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.13.07.75-.17 1.43z"/></svg>
+      Message me on WhatsApp
+    </a>
+  </nav>
+</div>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('nav-menu');
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menu.hidden = !open;
+    };
+    toggle.addEventListener('click', () => setOpen(menu.hidden));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        setOpen(false);
+        (toggle as HTMLElement).focus();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (menu.hidden) return;
+      const target = e.target as Node;
+      if (!menu.contains(target) && !toggle.contains(target)) setOpen(false);
+    });
+    menu.querySelectorAll('a').forEach((a) =>
+      a.addEventListener('click', () => setOpen(false))
+    );
+  }
+</script>
 
 <style>
-  /* A detached floating pill, centered, never glued edge-to-edge to
-     whatever sits below it. One material with the rest of the site: the
-     glass recipe, ink-relative, no scrim/opacity gymnastics. */
-  .nav {
+  /* Fixed floating container holding the compact pill and, below it, the
+     menu panel that opens from the hamburger. Same glass material as the
+     rest of the site, ink-aware. */
+  .nav-shell {
     position: fixed;
     top: max(var(--space-md), env(safe-area-inset-top));
     left: 50%;
@@ -39,9 +103,15 @@ const links = [
     width: min(var(--w-nav), calc(100vw - 2 * var(--space-md)));
     z-index: 50;
     display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .nav {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 10px 6px 6px;
+    padding: 6px 6px 6px 6px;
     background: var(--glass);
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
@@ -49,7 +119,6 @@ const links = [
     border-radius: var(--r-pill);
     box-shadow: inset 0 1px 0 var(--glass-rim);
     font-family: var(--font-body);
-    font-size: var(--text-sm);
     transition: background-color 800ms ease, border-color 800ms ease;
   }
 
@@ -57,7 +126,7 @@ const links = [
     display: flex;
     align-items: center;
     opacity: 0.7;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--t-med) ease;
   }
 
   .nav__home:hover {
@@ -72,42 +141,119 @@ const links = [
     object-position: top;
   }
 
-  .nav__links {
-    display: flex;
-    gap: var(--space-xs);
-    list-style: none;
-  }
-
-  .nav__link {
+  .nav__toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    padding: 10px 14px;
-    color: var(--ink-muted);
-    text-decoration: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
     border-radius: var(--r-pill);
-    letter-spacing: 0.02em;
+    color: var(--ink-muted);
+    cursor: pointer;
     transition: color var(--t-fast) ease, background-color var(--t-fast) ease;
   }
 
-  .nav__link:hover {
+  .nav__toggle:hover {
     color: var(--ink);
     background: var(--tint);
   }
 
-  .nav__link--active {
+  .nav__icon--close { display: none; }
+  .nav__toggle[aria-expanded='true'] .nav__icon--open { display: none; }
+  .nav__toggle[aria-expanded='true'] .nav__icon--close { display: block; }
+
+  /* ── Menu panel ── */
+
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--glass);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid var(--glass-edge);
+    border-radius: var(--r-lg);
+    box-shadow: inset 0 1px 0 var(--glass-rim);
+    transition: background-color 800ms ease, border-color 800ms ease;
+    animation: navMenuIn var(--t-fast) var(--ease-out) both;
+  }
+
+  .nav-menu[hidden] {
+    display: none;
+  }
+
+  @keyframes navMenuIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-menu { animation: none; }
+  }
+
+  .nav-menu__links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-menu__link {
+    display: block;
+    padding: 12px 14px;
+    font-size: var(--text-base);
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-radius: var(--r-md);
+    transition: color var(--t-fast) ease, background-color var(--t-fast) ease;
+  }
+
+  .nav-menu__link:hover {
+    color: var(--ink);
+    background: var(--tint);
+  }
+
+  .nav-menu__link--active {
     color: var(--ink);
     background: color-mix(in srgb, var(--ink) 10%, transparent);
   }
 
-  @media (max-width: 480px) {
-    .nav__links {
-      gap: 2px;
-    }
+  /* WhatsApp CTA pinned at the bottom of the menu — flat lamp fill, no
+     shadow, full width. Same treatment as the hero's primary action. */
+  .nav-menu__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    color: var(--bg);
+    background: var(--lamp);
+    text-decoration: none;
+    padding: 6px 20px;
+    border: 1px solid var(--lamp);
+    border-radius: var(--r-pill);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  }
 
-    .nav__link {
-      padding: 10px 10px;
-    }
+  .nav-menu__cta:hover {
+    background: color-mix(in srgb, var(--lamp) 88%, white);
+    transform: translateY(-1px);
+  }
+
+  .nav-menu__cta:active {
+    transform: translateY(1px);
+  }
+
+  .nav-menu__cta-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
   }
 </style>

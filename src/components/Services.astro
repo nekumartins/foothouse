@@ -1,6 +1,13 @@
 ---
 import { waLink } from '../lib/site';
 
+interface Props {
+  // When false, the caller supplies its own heading (e.g. a page <h1>) and
+  // this section renders just the intro + cards, no duplicate label.
+  showLabel?: boolean;
+}
+const { showLabel = true } = Astro.props;
+
 const cards = [
   {
     heading: 'A website your customers can find on Google',
@@ -30,7 +37,7 @@ const cards = [
 ---
 
 <section class="services" id="services">
-  <h2 class="section-label">For your business</h2>
+  {showLabel && <h2 class="section-label">For your business</h2>}
   <p class="services-intro">I build tools for small businesses in Nigeria. You tell me the problem on WhatsApp, I give you a fixed quote before we start, and you pay only what we agreed.</p>
   <div class="services-grid">
     {cards.map((card) => (

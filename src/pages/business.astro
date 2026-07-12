@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Services from '../components/Services.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteSettings, getTestimonials } from '../lib/queries';
+import { SHOW_TESTIMONIALS } from '../lib/flags';
+import { WA_DEFAULT } from '../lib/site';
+
+const settings = await getSiteSettings();
+const testimonials = SHOW_TESTIMONIALS ? await getTestimonials() : [];
+---
+
+<BaseLayout
+  title="For your business — Neku Akpotohwo"
+  description="Websites and automation for small businesses in Nigeria: a site customers find on Google, orders and receipts automated, and spreadsheet busywork automated. Fixed quote before we start."
+  skyMode="receded"
+>
+  <div class="business">
+    <header class="business__header">
+      <h1>For your business</h1>
+    </header>
+
+    <Services showLabel={false} />
+
+    {SHOW_TESTIMONIALS && testimonials.length > 0 && (
+      <Testimonials testimonials={testimonials} />
+    )}
+
+    <section class="business__cta">
+      <p class="business__cta-line">Not sure which one you need? Tell me the problem, I'll point you the right way.</p>
+      <a class="business__cta-button" href={WA_DEFAULT} target="_blank" rel="noopener noreferrer" data-goatcounter-click="whatsapp-business">
+        <svg class="business__cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.85.5 3.58 1.36 5.07L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.78 14.06c-.24.68-1.4 1.32-1.93 1.4-.53.08-1.06.31-3.54-.74-2.98-1.26-4.88-4.29-5.03-4.5-.14-.2-1.2-1.6-1.2-3.05 0-1.45.76-2.16 1.03-2.46.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.24.58.83 2.01.9 2.16.07.15.12.33.02.53-.1.2-.15.32-.29.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.24.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.13.07.75-.17 1.43z"/></svg>
+        Message me on WhatsApp
+      </a>
+      <p class="business__cta-reply">I reply within a day.</p>
+    </section>
+  </div>
+
+  <Footer settings={settings} />
+</BaseLayout>
+
+<style>
+  .business {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  .business__header h1 {
+    font-size: var(--text-4xl);
+    color: var(--ink);
+  }
+
+  /* ── Closing CTA ── */
+
+  .business__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .business__cta-line {
+    font-size: var(--text-base);
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 58ch;
+  }
+
+  .business__cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    color: var(--bg);
+    background: var(--lamp);
+    text-decoration: none;
+    padding: 6px 20px;
+    border: 1px solid var(--lamp);
+    border-radius: var(--r-pill);
+    font-weight: 500;
+    margin-top: var(--space-xs);
+    transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  }
+
+  .business__cta-button:hover {
+    background: color-mix(in srgb, var(--lamp) 88%, white);
+    transform: translateY(-1px);
+  }
+
+  .business__cta-button:active {
+    transform: translateY(1px);
+  }
+
+  .business__cta-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .business__cta-reply {
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 480px) {
+    .business {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+    }
+
+    .business__cta-button {
+      width: 100%;
+    }
+  }
+</style>

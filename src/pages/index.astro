@@ -1,26 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NowCards from '../components/NowCards.astro';
-import Services from '../components/Services.astro';
 import ContactForm from '../components/ContactForm.astro';
-import Testimonials from '../components/Testimonials.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import PostRow from '../components/PostRow.astro';
 import Footer from '../components/Footer.astro';
-import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience, getTestimonials } from '../lib/queries';
+import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience } from '../lib/queries';
 import { getSpotifyListening, getGitHubBuilding, getWorkItems } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
 import { youtubeEmbedUrl } from '../lib/video';
 import { WA_DEFAULT, CONTACT_EMAIL } from '../lib/site';
-import { SHOW_TESTIMONIALS } from '../lib/flags';
 
-const [now, projects, settings, involvements, experience, testimonials] = await Promise.all([
+const [now, projects, settings, involvements, experience] = await Promise.all([
   getNow(),
   getProjects(),
   getSiteSettings(),
   getInvolvements(),
   getExperience(),
-  SHOW_TESTIMONIALS ? getTestimonials() : Promise.resolve([]),
 ]);
 
 const [spotifyText, githubText] = await Promise.all([
@@ -102,7 +98,7 @@ const personLd = {
       </div>
       <hr class="threshold__divider" />
       <nav class="threshold__meta" aria-label="Jump to, and profiles">
-        <a href="#services">For your business &#8595;</a>
+        <a href="/business">For your business &#8594;</a>
         <a href="/work">Engineer? The work page has receipts &#8594;</a>
         {settings?.resume_url && (
           <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Résumé</a>
@@ -118,12 +114,6 @@ const personLd = {
     </section>
 
     <div class="deck">
-    <Services />
-
-    {SHOW_TESTIMONIALS && testimonials.length > 0 && (
-      <Testimonials testimonials={testimonials} />
-    )}
-
     <!-- Selected work (hand-picked in CMS, or top GitHub repos as a fallback) -->
     {workItems.length > 0 && (
       <section class="threshold__projects">
@@ -245,7 +235,7 @@ const personLd = {
   }
 
   .threshold__mood {
-    height: clamp(96px, 18vh, 30vh);
+    height: clamp(72px, 11vh, 22vh);
     flex-shrink: 0;
   }
 
@@ -266,7 +256,7 @@ const personLd = {
     gap: var(--space-lg);
     text-align: left;
     max-width: var(--w-text);
-    margin-bottom: var(--space-3xl);
+    margin-bottom: var(--space-2xl);
     padding: clamp(var(--space-xl), 5vw, var(--space-2xl));
     background: var(--glass);
     backdrop-filter: blur(24px) saturate(140%);
@@ -443,10 +433,14 @@ const personLd = {
 
   /* ── Presence ── */
 
+  /* A snug chip that hugs its content and centers, rather than a full-width
+     stadium with the status text stranded against its left end. */
   .threshold__presence {
     display: flex;
     justify-content: center;
-    margin-bottom: var(--space-3xl);
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: var(--space-2xl);
     padding: var(--space-sm) var(--space-lg);
     background: var(--glass);
     backdrop-filter: blur(24px) saturate(140%);
@@ -457,7 +451,6 @@ const personLd = {
     transition: background-color 800ms ease, border-color 800ms ease;
     animation: fadeUp 1.2s ease both;
     animation-delay: 0.4s;
-    width: 100%;
   }
 
   /* Collapse the spacing (and glass) this section reserves when the strip has nothing to show. */
@@ -488,7 +481,7 @@ const personLd = {
     transition: background-color 800ms ease, border-color 800ms ease;
     display: flex;
     flex-direction: column;
-    gap: var(--space-3xl);
+    gap: var(--space-2xl);
     margin-bottom: var(--space-3xl);
     animation: fadeUp 0.5s ease both;
     animation-delay: 0.5s;
