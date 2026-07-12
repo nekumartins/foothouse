@@ -1,26 +1,21 @@
 ---
-// A slim one-line "currently" strip: what I'm listening to (live from Spotify),
-// optionally what I'm reading and my latest post. Every fragment hides when its
-// data is idle/empty — no "Not listening to anything" filler. Listening-first.
+// A slim one-line "currently" strip: what I'm listening to (live from Spotify)
+// and my latest post. Every fragment hides when its data is idle/empty — no
+// "Not listening to anything" filler. Listening-first.
 interface Props {
   now?: {
     listening_text?: string;
-    reading_title?: string;
-    reading_author?: string;
-    reading_note?: string;
     status_line?: string;
   };
 }
 
 const { now } = Astro.props;
 
-const readingTitle = now?.reading_title || null;
-const readingAuthor = now?.reading_author || null;
 const lately = now?.status_line || null;
 
 // Any server-known content means the strip is visible on first paint; the
 // Spotify fragment reveals itself when a live track arrives.
-const hasStatic = Boolean(readingTitle || lately);
+const hasStatic = Boolean(lately);
 ---
 
 <div class="now-strip" id="now-strip" hidden={!hasStatic}>
@@ -31,13 +26,6 @@ const hasStatic = Boolean(readingTitle || lately);
     <span class="now-strip__eq" aria-hidden="true"><i></i><i></i><i></i></span>
     <span class="now-strip__text" id="now-track"></span>
   </span>
-
-  {readingTitle && (
-    <span class="now-strip__item">
-      <span class="now-strip__label">reading</span>
-      <span class="now-strip__text">{readingTitle}{readingAuthor ? ` · ${readingAuthor}` : ''}</span>
-    </span>
-  )}
 
   {lately && (
     <span class="now-strip__item now-strip__lately">
@@ -151,13 +139,6 @@ const hasStatic = Boolean(readingTitle || lately);
 
   .now-strip__spotify .now-strip__glyph {
     color: var(--lamp);
-  }
-
-  .now-strip__label {
-    font-size: var(--text-xs);
-    color: var(--faint);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
 
   .now-strip__text {
