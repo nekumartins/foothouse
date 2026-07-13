@@ -39,7 +39,6 @@ const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
 const bio = settings?.bio || 'Software engineer in Nigeria. I build websites, business automation, and AI systems.';
 const craft = settings?.craft || "Right now I'm building Dysseo, a fitness app whose calorie engine adapts to your real rate of loss. Before it: a real-time AI voice debate coach running on Azure, and GDG on Campus Babcock, grown to 1,500+ members.";
-const lookingFor = settings?.looking_for || 'Open to engineering roles and collaborations. The evidence is on the work page.';
 const stack: string[] = settings?.stack?.length ? settings.stack : ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Azure', 'TypeScript', 'React', 'Astro', 'Google Apps Script', 'Java/Spring Boot (learning)'];
 
 const featured =
@@ -80,7 +79,6 @@ const personLd = {
       <h1 class="threshold__name">Neku Akpotohwo</h1>
       <p class="threshold__tagline">{bio}</p>
       <p class="threshold__craft">{craft}</p>
-      {lookingFor && <p class="threshold__looking">{lookingFor}</p>}
       {stack.length > 0 && (
         <ul class="threshold__stack" aria-label="Tech stack">
           {stack.map((tool: string) => <li>{tool}</li>)}
@@ -300,16 +298,6 @@ const personLd = {
     transition: color var(--t-med) ease;
   }
 
-  .threshold__looking {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--text-sm);
-    color: var(--ink-muted);
-    max-width: 58ch;
-    line-height: 1.7;
-    transition: color var(--t-med) ease;
-  }
-
   .threshold__stack {
     list-style: none;
     display: flex;
@@ -319,6 +307,8 @@ const personLd = {
   }
 
   .threshold__stack li {
+    font-family: var(--font-display);
+    font-style: italic;
     font-size: var(--text-sm);
     color: var(--ink-muted);
     padding: 4px 12px;
