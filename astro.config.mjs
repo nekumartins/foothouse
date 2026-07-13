@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://foothouse-nu.vercel.app', // TODO: change to the custom domain when there is one
+  site: 'https://nekumartins.me',
   adapter: vercel(),
   integrations: [sitemap()],
   redirects: {
