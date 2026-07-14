@@ -184,6 +184,11 @@ export function initSky() {
 
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // The very first paint of a page is the static HTML's hardcoded night
+  // default (see global.css); every navigation is a full page load, so
+  // without this the 6s live-drift transition would visibly crossfade
+  // from that default up to the real sky state on every single page.
+  snapNext = true;
   update();
   // The sky really moves: a short tick keeps sun, moon and colors drifting.
   // Under reduced motion the sky steps quietly once a minute instead.
