@@ -76,15 +76,15 @@ const stars = Array.from({ length: 130 }, () => ({
     const container = document.getElementById('life-map');
     if (!container) return;
 
-    // Retina tiles only where the screen can show them. Country/city labels
-    // ON: turns out those are what actually reads as "a globe of Earth" at a
-    // glance (see any reference — Snapchat's map included) — a label-free
-    // tile just looks like an abstract dark blob no matter how it's tuned.
-    // Dark style so the ocean stays near-black and merges with the
-    // surrounding starfield, with land contrasted by white borders/labels.
+    // Retina tiles only where the screen can show them. Label-free: CARTO's
+    // free raster tiles have no language switch, and dark_all's baked-in
+    // labels default to the local name per region (e.g. "AMÉRICA" for South
+    // America) — no way to force English without a different tile provider.
+    // No labels sidesteps the language problem entirely; land vs. near-black
+    // ocean still contrasts enough against the starfield without them.
     const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
-      ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
-      : 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+      ? 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}@2x.png'
+      : 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
 
     // The container itself is sized in CSS to the globe's footprint (see
     // .life-map__canvas) — everything outside it is plain starfield div, not
@@ -144,6 +144,10 @@ const stars = Array.from({ length: 130 }, () => ({
       attributionControl: false,
     });
 
+    // CARTO's free tier requires attribution to stay visible — dropping it
+    // outright would violate their terms — but the default control renders
+    // as an opaque white pill that clashes hard with the space scene. The
+    // CSS below shrinks it to small, low-contrast text that blends in.
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
     // Scroll-wheel/trackpad zoom fights with page scroll on touch devices;
@@ -565,6 +569,22 @@ const stars = Array.from({ length: 130 }, () => ({
 
   .life-map__canvas :global(.maplibregl-popup-tip) {
     border-top-color: rgba(30, 24, 19, 0.9);
+  }
+
+  /* Required CARTO attribution, styled to blend into the space scene instead
+     of sitting on it as an opaque white pill. */
+  .life-map__canvas :global(.maplibregl-ctrl-attrib) {
+    background: transparent;
+    padding: 0 4px;
+  }
+
+  .life-map__canvas :global(.maplibregl-ctrl-attrib a) {
+    color: rgba(236, 227, 214, 0.35);
+    font-size: 10px;
+  }
+
+  .life-map__canvas :global(.maplibregl-ctrl-attrib-button) {
+    background-color: rgba(21, 17, 13, 0.4);
   }
 
   .life-map__lightbox {
