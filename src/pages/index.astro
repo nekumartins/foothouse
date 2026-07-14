@@ -429,14 +429,16 @@ const personLd = {
      single short line; once the tweet fragment wraps to multiple lines the
      box gets tall and that radius eats into the corner text, so this uses
      a fixed radius instead (still fully pill-shaped at one-line height,
-     since border-radius auto-clamps to half the box height). */
+     since border-radius auto-clamps to half the box height). Padding is
+     uniform and matches the radius on every side, so a row sitting right
+     at the top or right edge never lands inside the corner's arc. */
   .threshold__presence {
     display: flex;
     justify-content: center;
     width: fit-content;
     max-width: 100%;
     margin-bottom: var(--space-2xl);
-    padding: var(--space-sm) var(--space-lg);
+    padding: var(--space-lg);
     background: var(--glass);
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
