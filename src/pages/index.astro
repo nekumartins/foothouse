@@ -5,29 +5,18 @@ import ContactForm from '../components/ContactForm.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import PostRow from '../components/PostRow.astro';
 import Footer from '../components/Footer.astro';
-import { getNow, getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience } from '../lib/queries';
-import { getSpotifyListening, getGitHubBuilding, getWorkItems } from '../lib/integrations';
+import { getProjects, getSiteSettings, getInvolvements, getAllPublishedPosts, getExperience } from '../lib/queries';
+import { getWorkItems } from '../lib/integrations';
 import { withGithubStars } from '../lib/github';
 import { youtubeEmbedUrl } from '../lib/video';
 import { WA_DEFAULT, CONTACT_EMAIL } from '../lib/site';
 
-const [now, projects, settings, involvements, experience] = await Promise.all([
-  getNow(),
+const [projects, settings, involvements, experience] = await Promise.all([
   getProjects(),
   getSiteSettings(),
   getInvolvements(),
   getExperience(),
 ]);
-
-const [spotifyText, githubText] = await Promise.all([
-  getSpotifyListening(),
-  getGitHubBuilding(),
-]);
-
-if (now) {
-  if (spotifyText) now.listening_text = spotifyText;
-  if (githubText) now.building_text = githubText;
-}
 
 const projectsWithStars = await withGithubStars(projects);
 
@@ -113,7 +102,7 @@ const personLd = {
 
     <!-- Currently: slim presence strip, right under the hero -->
     <section class="threshold__presence">
-      <NowCards now={now} />
+      <NowCards />
     </section>
 
     <div class="deck">

@@ -76,8 +76,6 @@ const stars = Array.from({ length: 130 }, () => ({
     const container = document.getElementById('life-map');
     if (!container) return;
 
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
     // Retina tiles only where the screen can show them. Label-free variant:
     // labels break the planet-from-space look.
     const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
@@ -112,8 +110,8 @@ const stars = Array.from({ length: 130 }, () => ({
             source: 'carto',
             paint: {
               'raster-saturation': -0.2,
-              'raster-brightness-max': 0.35,
-              'raster-contrast': 0.15
+              'raster-brightness-max': 0.6,
+              'raster-contrast': 0.2
             }
           }
         ],
@@ -134,13 +132,14 @@ const stars = Array.from({ length: 130 }, () => ({
       minZoom: fitZoom,
       maxZoom: 15,
       attributionControl: false,
+      // A one-finger drag over a viewport-height globe otherwise steals every
+      // vertical swipe from page scroll. This requires two fingers to pan/spin
+      // on touch and Ctrl/Cmd+scroll to zoom on desktop, so a plain swipe or
+      // trackpad scroll passes straight through to the page.
+      cooperativeGestures: true,
     });
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
-
-    // Scroll-wheel/trackpad zoom fights with page scroll on touch devices;
-    // pinch-zoom (touchZoomRotate, on by default) stays enabled either way.
-    if (isTouch) map.scrollZoom.disable();
 
     const kindColors: Record<string, string> = {
       home: '#E0A458',
