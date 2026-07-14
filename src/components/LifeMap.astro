@@ -77,14 +77,20 @@ const stars = Array.from({ length: 130 }, () => ({
     if (!container) return;
 
     // Retina tiles only where the screen can show them. Label-free variant:
-    // labels break the planet-from-space look.
+    // labels break the planet-from-space look. Voyager (not the dark style) —
+    // it keeps blue ocean and tan/green land so the sphere still reads as
+    // Earth; the dark style was so monochrome it disappeared into the
+    // surrounding starfield.
     const tileUrl = (window.devicePixelRatio ?? 1) > 1.5
-      ? 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}@2x.png'
-      : 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
+      ? 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}@2x.png'
+      : 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png';
 
-    // Size the sphere to ~65% of the smaller canvas dimension so it floats in
-    // space like Snapchat's Earth instead of overflowing the screen. Globe
-    // screen diameter ≈ 512 * 2^zoom / π.
+    // The container itself is sized in CSS to the globe's footprint (see
+    // .life-map__canvas) — everything outside it is plain starfield div, not
+    // canvas, so a swipe there scrolls the page normally with no JS gesture
+    // hacks needed; only a touch that starts on the globe reaches MapLibre.
+    // 65% of that box leaves room for the atmosphere glow to bleed without
+    // getting clipped at the canvas edge. Globe screen diameter ≈ 512 * 2^zoom / π.
     const rect = container.getBoundingClientRect();
     const fitZoom = Math.min(
       2,
@@ -109,9 +115,12 @@ const stars = Array.from({ length: 130 }, () => ({
             type: 'raster',
             source: 'carto',
             paint: {
-              'raster-saturation': -0.2,
-              'raster-brightness-max': 0.6,
-              'raster-contrast': 0.2
+              // Dim voyager for the space setting without crushing it to a
+              // monochrome blob: a touch of saturation keeps ocean blue and
+              // land green/tan visible instead of flattening everything.
+              'raster-saturation': 0.1,
+              'raster-brightness-max': 0.5,
+              'raster-contrast': 0.25
             }
           }
         ],
@@ -132,14 +141,14 @@ const stars = Array.from({ length: 130 }, () => ({
       minZoom: fitZoom,
       maxZoom: 15,
       attributionControl: false,
-      // A one-finger drag over a viewport-height globe otherwise steals every
-      // vertical swipe from page scroll. This requires two fingers to pan/spin
-      // on touch and Ctrl/Cmd+scroll to zoom on desktop, so a plain swipe or
-      // trackpad scroll passes straight through to the page.
-      cooperativeGestures: true,
     });
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+    // Scroll-wheel/trackpad zoom fights with page scroll on touch devices;
+    // pinch-zoom (touchZoomRotate, on by default) stays enabled either way.
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch) map.scrollZoom.disable();
 
     const kindColors: Record<string, string> = {
       home: '#E0A458',
@@ -280,7 +289,7 @@ const stars = Array.from({ length: 130 }, () => ({
       });
     }
 
-    for (const place of places) {
+    function createPlaceMarker(place: any) {
       const color = kindColors[place.kind] || '#9A8C7B';
       const media = place.place_media ?? [];
       const hasMedia = media.length > 0;
@@ -317,11 +326,71 @@ const stars = Array.from({ length: 130 }, () => ({
       el.addEventListener('mouseleave', () => { el.style.zIndex = ''; });
       el.addEventListener('click', () => openPlace(place));
 
-      new maplibregl.Marker({ element: el, anchor: hasMedia ? 'bottom' : 'center' })
-        .setLngLat([place.lng, place.lat])
-        .addTo(map);
+      return new maplibregl.Marker({ element: el, anchor: hasMedia ? 'bottom' : 'center' })
+        .setLngLat([place.lng, place.lat]);
     }
 
+    function createClusterMarker(lng: number, lat: number, count: number) {
+      const el = document.createElement('div');
+      el.className = 'map-pin';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'map-pin__cluster';
+      bubble.textContent = String(count);
+      el.appendChild(bubble);
+
+      // Tapping a cluster zooms toward it, which spreads its pins apart —
+      // the next `moveend` re-clusters and it splits, Snapchat-style.
+      el.addEventListener('click', () => {
+        map.easeTo({ center: [lng, lat], zoom: Math.min(15, map.getZoom() + 2.5), duration: 500 });
+      });
+
+      return new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lng, lat]);
+    }
+
+    // Groups places by on-screen proximity at the current camera position, not
+    // by real-world distance — the same two cities are one bubble zoomed out
+    // and two pins once you've zoomed in far enough to tell them apart. A
+    // personal map with tens of pins doesn't need a clustering library for
+    // this; re-running an O(n²) grouping on every camera move is plenty fast.
+    const CLUSTER_RADIUS_PX = 50;
+
+    function groupByProximity() {
+      const groups: any[][] = [];
+      for (const place of places) {
+        const pt = map.project([place.lng, place.lat]);
+        const group = groups.find((g) => {
+          const anchor = map.project([g[0].lng, g[0].lat]);
+          return Math.hypot(pt.x - anchor.x, pt.y - anchor.y) < CLUSTER_RADIUS_PX;
+        });
+        if (group) group.push(place);
+        else groups.push([place]);
+      }
+      return groups;
+    }
+
+    let activeMarkers: any[] = [];
+    function renderMarkers() {
+      activeMarkers.forEach((m) => m.remove());
+      activeMarkers = [];
+
+      for (const group of groupByProximity()) {
+        if (group.length === 1) {
+          activeMarkers.push(createPlaceMarker(group[0]).addTo(map));
+          continue;
+        }
+        const lng = group.reduce((sum: number, p: any) => sum + p.lng, 0) / group.length;
+        const lat = group.reduce((sum: number, p: any) => sum + p.lat, 0) / group.length;
+        // "Number of photos" is the point of the badge; if a cluster happens
+        // to hold only photo-less places, fall back to the place count so it
+        // never reads as an empty "0".
+        const photoCount = group.reduce((sum: number, p: any) => sum + (p.place_media?.length ?? 0), 0);
+        activeMarkers.push(createClusterMarker(lng, lat, photoCount || group.length).addTo(map));
+      }
+    }
+
+    renderMarkers();
+    map.on('moveend', renderMarkers);
   }
 
   if ('IntersectionObserver' in window) {
@@ -361,10 +430,19 @@ const stars = Array.from({ length: 130 }, () => ({
     pointer-events: none;
   }
 
+  /* Sized to the globe's own footprint, not the full section: MapLibre sets
+     touch-action: none on its canvas so it can handle drags itself, which
+     blocks native scroll for any touch landing on it. Keeping the canvas
+     this small means only a touch that actually starts on the globe is
+     affected — the starfield around it is a plain div with default
+     touch-action, so a swipe there scrolls the page like anything else. */
   .life-map__canvas {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(200px, 60vmin, 480px);
+    height: clamp(200px, 60vmin, 480px);
     border-radius: 0;
   }
 
@@ -452,6 +530,33 @@ const stars = Array.from({ length: 130 }, () => ({
     transform: scale(1.3);
     box-shadow: 0 0 12px color-mix(in srgb, var(--pin-color, #9A8C7B) 55%, transparent),
                 0 0 24px color-mix(in srgb, var(--pin-color, #9A8C7B) 35%, transparent);
+  }
+
+  /* Region bubble: aggregate photo count, splits into individual pins on tap/zoom. */
+  .life-map__canvas :global(.map-pin__cluster) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(224, 164, 88, 0.22);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 2px solid var(--lamp, #E0A458);
+    color: #ECE3D6;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(21, 17, 13, 0.5), 0 0 18px rgba(224, 164, 88, 0.35),
+                0 2px 10px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .life-map__canvas :global(.map-pin__cluster:hover) {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 2px rgba(21, 17, 13, 0.5), 0 0 26px rgba(224, 164, 88, 0.5),
+                0 4px 14px rgba(0, 0, 0, 0.5);
   }
 
   .life-map__canvas :global(.maplibregl-popup-content) {
