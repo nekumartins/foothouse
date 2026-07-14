@@ -34,6 +34,7 @@ export async function getSiteSettings() {
     linkedin,
     github,
     twitter,
+    medium,
     instagram,
     "resume_url": resume.asset->url,
     "portrait_url": portrait.asset->url,
@@ -117,6 +118,7 @@ export async function getExperience() {
     url,
     period,
     bullets,
+    skills,
     sort
   }`) ?? [];
 }

@@ -14,6 +14,14 @@ export default {
       of: [{ type: 'string' }],
       description: 'One line per bullet: what you built/owned and what it changed',
     },
+    {
+      name: 'skills',
+      title: 'Skills',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+      description: 'Shown as small pills under the bullets on /work, e.g. "FastAPI", "PostgreSQL"',
+    },
     { name: 'sort', title: 'Sort order', type: 'number', initialValue: 0, description: 'Lower shows first; put the most recent role at the top' },
   ],
   preview: {

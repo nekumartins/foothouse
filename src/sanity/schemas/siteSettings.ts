@@ -11,6 +11,7 @@ export default {
     { name: 'linkedin', title: 'LinkedIn URL', type: 'url' },
     { name: 'github', title: 'GitHub URL', type: 'url' },
     { name: 'twitter', title: 'Twitter / X URL', type: 'url' },
+    { name: 'medium', title: 'Medium URL', type: 'url' },
     { name: 'instagram', title: 'Instagram URL', type: 'url' },
     { name: 'resume', title: 'Resume (PDF)', type: 'file' },
     { name: 'portrait', title: 'Portrait', type: 'image', description: 'A real photo of you, shown on the About page. The site hides it until one is set.' },

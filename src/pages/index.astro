@@ -37,8 +37,8 @@ const githubProfile = settings?.github || 'https://github.com/nekumartins';
 // Writing teaser (replaces the duplicate-nav doors): surface the latest essays.
 const latestPosts = (await getAllPublishedPosts()).slice(0, 2);
 
-const bio = settings?.bio || 'Software engineer in Nigeria. I build websites, business automation, and AI systems.';
-const craft = settings?.craft || "Right now I'm building Dysseo, a fitness app whose calorie engine adapts to your real rate of loss. Before it: a real-time AI voice debate coach running on Azure, and GDG on Campus Babcock, grown to 1,500+ members.";
+const bio = settings?.bio || 'Software engineer and systems architect.';
+const craft = settings?.craft || 'I own the backend architecture at an early-stage fintech. Before that, EY. Alongside it I build Dysseo and a real-time AI debate coach, and I led GDG on Campus Babcock for two years.';
 const stack: string[] = settings?.stack?.length ? settings.stack : ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Azure', 'TypeScript', 'React', 'Astro', 'Google Apps Script', 'Java/Spring Boot (learning)'];
 
 const featured =
@@ -55,7 +55,7 @@ const personLd = {
   name: 'Chukwuneku Akpotohwo',
   alternateName: ['Neku Akpotohwo', 'Neku'],
   jobTitle: 'Software Engineer',
-  description: 'Software engineer in Nigeria. Builds websites and automation for small businesses, and AI systems. Founded GDG on Campus Babcock.',
+  description: 'Software engineer in Nigeria. Systems architect at an early-stage fintech; builder of Dysseo and a real-time AI debate coach. Led GDG on Campus Babcock to 1,500+ members; founded RADAR and Babcock 100.',
   alumniOf: { '@type': 'CollegeOrUniversity', name: 'Babcock University' },
   url: 'https://nekumartins.me',
   image: settings?.portrait_url || 'https://nekumartins.me/avatar.png',
@@ -64,11 +64,16 @@ const personLd = {
     settings?.github || 'https://github.com/nekumartins',
     settings?.linkedin || 'https://linkedin.com/in/nekumartins',
     settings?.twitter,
+    settings?.medium || 'https://medium.com/@nekumartins',
   ].filter(Boolean),
 };
 ---
 
-<BaseLayout title="Neku Akpotohwo – websites, automation, AI systems" skyMode="full">
+<BaseLayout
+  title="Neku Akpotohwo – Software engineer & systems architect"
+  description="Software engineer in Nigeria. Systems architect at an early-stage fintech; builder of Dysseo and a real-time AI debate coach. Led GDG on Campus Babcock to 1,500+ members; founded RADAR and Babcock 100."
+  skyMode="full"
+>
   <script type="application/ld+json" set:html={JSON.stringify(personLd)} is:inline />
   <div class="home">
   <div class="threshold">
@@ -96,8 +101,8 @@ const personLd = {
       </div>
       <hr class="threshold__divider" />
       <nav class="threshold__meta" aria-label="Jump to, and profiles">
-        <a href="/services">For your business &#8594;</a>
-        <a href="/work">Engineer? The work page has receipts &#8594;</a>
+        <a href="/services">Running a business? Start here &#8594;</a>
+        <a href="/work">Engineer or hiring? The work page has receipts &#8594;</a>
         {settings?.resume_url && (
           <a href={settings.resume_url} target="_blank" rel="noopener noreferrer">Résumé</a>
         )}
@@ -163,7 +168,7 @@ const personLd = {
     {featured && (
       <section class="threshold__community">
         <h2 class="section-label">Community</h2>
-        <a href="/about" class="community-feature">
+        <a href="/work#gdg" class="community-feature">
           <h3 class="community-feature__title">{featured.title}</h3>
           {featured.role && <span class="community-feature__role">{featured.role}</span>}
           {(featured.story || featured.blurb) && (

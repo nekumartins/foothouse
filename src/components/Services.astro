@@ -39,6 +39,7 @@ const cards = [
 <section class="services" id="services">
   {showLabel && <h2 class="section-label">For your business</h2>}
   <p class="services-intro">I build tools for small businesses in Nigeria. You tell me the problem on WhatsApp, I give you a fixed quote before we start, and you pay only what we agreed.</p>
+  <p class="services-proof">I've shipped for EY and run systems for a 1,500-member community. The receipts are on <a href="/work">the work page</a>, but you don't need them; you need the problem gone.</p>
   <div class="services-grid">
     {cards.map((card) => (
       <article class="service-card">
@@ -71,7 +72,27 @@ const cards = [
     color: var(--ink-muted);
     max-width: 58ch;
     line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .services-proof {
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+    max-width: 58ch;
+    line-height: 1.6;
     margin-bottom: var(--space-xl);
+  }
+
+  .services-proof a {
+    color: var(--ink-accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--ink-accent) 30%, transparent);
+    text-underline-offset: 0.15em;
+    transition: text-decoration-color var(--t-fast) ease;
+  }
+
+  .services-proof a:hover {
+    text-decoration-color: var(--ink-accent);
   }
 
   .services-grid {

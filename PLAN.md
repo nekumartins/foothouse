@@ -10,12 +10,13 @@ rules they described live on in `CLAUDE.md`.
 **All copy the site needs is written in this file.** Do not invent, improve, or
 paraphrase copy. Copy marked VERBATIM is used character for character.
 
-**Status (2026-07-12):** Phases 1–9 and 11 have shipped. Phase 10 (domain
-switch) waits on DNS access. **Current work: Phases 12–15, the design
-overhaul** (see "The design overhaul" below). They supersede Phase 6's
-scrim-alpha approach and the hero presentation shipped in `a969358`. Execute
-them strictly in order — each phase leaves the site shippable and AA-compliant
-on its own.
+**Status (2026-07-14):** Phases 1–9 and 11–15 have shipped. Phase 10 (domain
+switch) waits on DNS access, though canonical URLs, robots, and the sitemap
+already point at `nekumartins.me`. **Current work: Phase 16, the copy
+correction pass** (see below) — it fixes the founder-of-GDG misstatement,
+downgrades the day-role title to Systems Architect, and gives `/work` real
+receipts. It supersedes copy from Phases 3–5 and the facts allowlist below
+wherever they conflict.
 
 ---
 
@@ -40,9 +41,12 @@ Never jargon-wall A. Never dumb down for B.
 - Chukwuneku "Neku" Akpotohwo. Software engineer, Nigeria.
 - CS **graduate**, Babcock University, **July 2026**. (The site currently says
   "studying" — that is wrong everywhere it appears. He has graduated.)
-- Built GDG on Campus Babcock: **1,500+ members**, **five shipped products**
-  (RADAR publication, ORBIT summit — **500+ conference attendees**, **1,000+
-  career fair** — Babcock 100, BabcockVotes, apply portal). Handed over
+- **Third lead** (not founder) of GDG on Campus Babcock, organizer
+  2024 – 2026. Grew it to **1,500+ members** and **five shipped products**
+  (RADAR publication, ORBIT summit: **500+ conference attendees**, **1,000+
+  career fair**, headlined by Moniepoint; Babcock 100; BabcockVotes; apply
+  portal). He **founded** RADAR, Babcock 100 (400+ nominations in its
+  founding cycle), and BabcockVotes personally during that run. Handed over
   leadership **2026**.
 - Currently building: **Dysseo**, a nutrition-first fitness app with an
   adaptive TDEE engine that re-targets calorie recommendations when the real
@@ -50,8 +54,11 @@ Never jargon-wall A. Never dumb down for B.
   as "building now", never as shipped.
 - Shipped: a **real-time full-duplex AI voice debate coach** (FastAPI,
   WebSockets, STT→LLM→TTS, Docker, Azure); **paper submitted to a journal**.
-- Day role: **CTO at an early-stage Nigerian fintech**. Exactly that vague — no
-  company name, no product details.
+- Day role: **Systems Architect at an early-stage Nigerian fintech**
+  (downgraded from CTO — the work speaks for itself, the title doesn't need
+  to). Exactly that vague: no company name, no product details. Before it:
+  **EY (Ernst & Young)**, Technology Intern, Team Lead on Project Grey; before
+  that, an internship at **Guaranty Trust Bank**.
 - Stack: Python, FastAPI, PostgreSQL, Docker, Azure, TypeScript, React, Astro,
   Google Apps Script. Learning Java/Spring Boot. **Nothing else** may be listed
   (remove Kubernetes, Node.js, or anything not on this list wherever found).
@@ -901,6 +908,106 @@ diff contains only `<style>` changes.
 **On-phone checklist:** scroll to the bottom of `/` and `/about` — the nub
 floats in clear space; double-tap the sun at noon and the moon at midnight —
 drag still works exactly as before.
+
+---
+
+## Phase 16 — Copy correction: honesty pass, Systems Architect, receipts refresh
+
+**Goal:** fix the false "founder of GDG on Campus Babcock" claim wherever it
+appears (he was its third lead; he did found RADAR, Babcock 100, and
+BabcockVotes), downgrade the day-role title from CTO to Systems Architect,
+add the Systems Architect / EY / GTBank experience entries, rewrite the
+`/work` project case studies with real detail, and fix the two stray em
+dashes left in shipped copy (`/services` page title, the contact-form sent
+message) — no other copy on the site used one.
+
+**Shipped in code (fallbacks + meta; correct even with Sanity empty):**
+- Metas: `/` title + description, `/about` title + description, `/work`
+  title + description, `/writing` description.
+- JSON-LD `Person` on `/`: `sameAs` now includes Medium; `description`
+  matches the home meta.
+- Hero (`bio`/`craft` fallbacks): `Software engineer and systems architect.`
+  / `I own the backend architecture at an early-stage fintech. Before that,
+  EY. Alongside it I build Dysseo and a real-time AI debate coach, and I led
+  GDG on Campus Babcock for two years.`
+- Two-door links: `Running a business? Start here →` (`/services`),
+  `Engineer or hiring? The work page has receipts →` (`/work`).
+- Homepage Community card now links to `/work#gdg` instead of `/about`.
+- About (`about_intro`/`about_gdg` fallbacks): the "I didn't found GDG, I was
+  its third lead" honesty framing, matching `src/pages/about.astro`.
+- `/work` intro line: `A few things I've built, with enough detail to be
+  useful. Problem, what I did, what happened.`
+- `FALLBACK_PROJECTS` (`src/data/projects.ts`): Dysseo, Debate Coach, and GDG
+  on Campus Babcock case studies rewritten with problem / what I built /
+  outcome, matching the paste block below.
+- `SocialLinks.astro`: Medium added (fallback `medium.com/@nekumartins`;
+  `siteSettings.medium` overrides it).
+- `experience` schema: new `skills` field (tag array), rendered as pills
+  under each role's bullets on `/work`. **Requires a Studio redeploy** (see
+  `STUDIO.md`) before it's usable in Sanity.
+- `/services`: added a proof line under the intro (`I've shipped for EY and
+  run systems for a 1,500-member community…`).
+
+**Owner — paste into Sanity (nothing renders correctly until these are set;
+Experience and Involvement have no code fallback):**
+
+Site Settings — `bio`, `craft`, `about_intro`, `about_gdg` exactly as the
+fallbacks above (or leave empty to use the fallbacks); `medium` →
+`https://medium.com/@nekumartins` if the handle differs.
+
+Experience docs, in this order (`sort` ascending):
+1. `role`: `Systems Architect` · `company`: `Early-stage fintech` · `period`:
+   `2025 – Present` · `bullets`: `Own the architecture for a card-linked
+   credit marketplace: routing engine, lender integration contracts, cache
+   invalidation, technology selection.` / `Designed cache-first transaction
+   routing so authorization-critical reads do not wait on the database.` /
+   `Designed atomic allocation across lender capacity operations to remove
+   race conditions under concurrent multi-party writes.` / `Authored the
+   authorization-lifecycle state machine covering orphaned transactions and
+   partial failures.`
+2. `role`: `Technology Intern — Team Lead, Project Grey` · `company`: `EY
+   (Ernst & Young)` · `period`: `Feb 2025 – Jul 2025` · `bullets`: `Led a
+   team designing and delivering an inventory management system on Microsoft
+   Power Apps and Azure, from requirements through production handoff.` /
+   `Implemented real-time tracking, data-validation workflows, and
+   role-based access control under enterprise cloud governance.`
+3. `role`: `Intern` · `company`: `Guaranty Trust Bank` · `period`: `Jan 2025
+   – Feb 2025` · `bullets`: **owner to supply one real line** on what he
+   actually did there — do not invent this one, even "rotated through X"
+   beats a bare date range.
+
+Involvement doc (GDG on Campus Babcock, `featured: true`):
+`title`: `Google Developer Group on Campus, Babcock University` · `role`:
+`Organizer · 2024 – 2026` · `story`: `Third lead of the chapter. Grew it into
+the largest developer community on campus, 1,500+ members and five products
+in production, and founded RADAR, Babcock 100, and BabcockVotes along the
+way.` (link the four URLs — gdgbabcock.com, radar.gdgbabcock.com,
+babcock100.com, babcockvotes.com — from the story text once the schema
+supports inline links; plain text for now.)
+
+Project docs (`FALLBACK_PROJECTS` mirrors these; unfeature anything else):
+Dysseo, Debate Coach, GDG on Campus Babcock — copy exactly as shipped in
+`src/data/projects.ts`.
+
+**Open questions (do not invent; ask the owner):**
+1. The GTBank internship bullet — no real line was given, so `/work` will
+   show the role with no bullets until one is supplied.
+2. Are the Dysseo and Debate Coach repos/live URLs public? If so they go
+   into `repo_url`/`live_url` on the project docs.
+3. Mapping `debate.nekumartins.me` (and optionally `dysseo.nekumartins.me`)
+   to the raw Azure hostname is a DNS/Vercel task, not code — do it
+   alongside Phase 10's domain work, then set `live_url` to the clean
+   subdomain.
+4. Sanity-check every public number before it goes live in Sanity: 1,500+,
+   500+, 1,000+, 400+ nominations, ~1.4s latency. They're transcribed here
+   from the brief as given, not independently verified by the executor.
+5. Whether `/services` gets a fourth card for individual freelance clients
+   (not just SMBs) — no copy was supplied for this, so it isn't built. Needs
+   exact copy from the owner before it can ship (no invented copy).
+
+**Acceptance:** build passes; grep of `src/` finds no `Founder of GDG`, no
+bare `CTO`, no em dash outside code comments and Sanity Studio field labels;
+`/work#gdg` anchors to the GDG project card.
 
 ---
 

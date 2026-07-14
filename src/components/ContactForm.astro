@@ -10,7 +10,7 @@ const redirectUrl = new URL('/?sent=1', Astro.site).toString();
 <section class="contact-form" id="contact">
   <h2 class="section-label">Prefer to write instead?</h2>
 
-  <p class="contact-form__sent" id="contact-form-sent" hidden>Thanks — I've got your message and will reply within a day.</p>
+  <p class="contact-form__sent" id="contact-form-sent" hidden>Thanks. I've got your message and will reply within a day.</p>
 
   <form class="contact-form__form" action="https://api.web3forms.com/submit" method="POST">
     <input type="hidden" name="access_key" value={WEB3FORMS_ACCESS_KEY} />

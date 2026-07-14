@@ -17,14 +17,14 @@ const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBA
 
 <BaseLayout
   title="Work – Neku Akpotohwo"
-  description="Dysseo, a real-time AI voice debate coach, and GDG on Campus Babcock. Problem, what I built, outcome."
+  description="Receipts: fintech architecture, a full-duplex AI debate coach at ~1.4s voice-to-voice latency, Dysseo's adaptive calorie engine, and the five products of GDG on Campus Babcock."
   skyMode="receded"
 >
   <div class="work">
     <header class="work__header">
       <h1>Work</h1>
       <p class="work__intro">
-        Where I've worked and what I've built. Not everything, just the ones worth showing.
+        A few things I've built, with enough detail to be useful. Problem, what I did, what happened.
       </p>
     </header>
 
@@ -56,6 +56,11 @@ const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBA
                   {job.bullets.map((b: string) => <li>{b}</li>)}
                 </ul>
               )}
+              {job.skills?.length > 0 && (
+                <ul class="experience__skills" aria-label="Skills">
+                  {job.skills.map((skill: string) => <li>{skill}</li>)}
+                </ul>
+              )}
             </article>
           ))}
         </div>
@@ -67,7 +72,7 @@ const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBA
         <h2 class="work__label">Projects</h2>
         <div class="work__list">
           {workItems.map((project: any) => (
-            <article class="work-project">
+            <article class="work-project" id={/gdg/i.test(project.name) ? 'gdg' : undefined}>
               <h3 class="work-project__name">{project.name}</h3>
               {project.tagline && <p class="work-project__tagline">{project.tagline}</p>}
               {project.problem && (
@@ -246,6 +251,26 @@ const workItems = projects.length > 0 ? await withGithubStars(projects) : FALLBA
     height: 2px;
     border-radius: 1px;
     background: color-mix(in srgb, var(--lamp) 60%, transparent);
+  }
+
+  .experience__skills {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+  }
+
+  .experience__skills li {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-xs);
+    color: var(--muted);
+    padding: 3px 10px;
+    border: 1px solid var(--tint-edge);
+    border-radius: var(--r-pill);
+    background: var(--tint);
+    white-space: nowrap;
   }
 
   /* ── Projects ── */
